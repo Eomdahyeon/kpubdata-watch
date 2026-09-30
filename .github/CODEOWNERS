@@ -1,0 +1,11 @@
+# R3 paths — changes here require CODEOWNER review, as in kpubdata (#520 there)
+/.github/                         @yeongseon
+/docs/decisions/                  @yeongseon
+# Credentials and outbound requests: the probe runtime and secret redaction (SECURITY.md)
+/src/kpubdata_watch/probes/       @yeongseon
+# The gates themselves
+/scripts/check_independence.py    @yeongseon
+/scripts/check_english_comments.py @yeongseon
+# Dependencies
+/pyproject.toml                   @yeongseon
+/uv.lock                          @yeongseon

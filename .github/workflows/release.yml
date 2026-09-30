@@ -1,0 +1,281 @@
+# Release under branch protection, the series pattern (kpubdata#586, builder#718).
+#
+# Three ways in, none of which writes to `main`.
+#
+#   workflow_dispatch, mode=prepare         opens a release pull request
+#   workflow_dispatch, mode=release         gates what is declared now, then tags
+#   pull_request closed on `release/*`      the same, for the pull request path
+#
+# `mode=release` exists because a first release is not a bump: pyproject.toml already
+# declares the version the CHANGELOG is preparing. The version is read from the file,
+# never typed.
+#
+# The release window uses the `monthly` policy until the owner decides Watch's
+# cadence (on demand like kpubdata, or monthly like Builder and Studio). That decision
+# is tracked in an issue; changing it is one input below, in both jobs.
+#
+# A pull request opened with GITHUB_TOKEN does not trigger `pull_request` workflows,
+# so a release pull request arrives without CI. Correctness does not depend on it: the
+# gates run below, before anything is tagged.
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "prepare = open a release pull request; release = tag what is declared now"
+        required: true
+        type: choice
+        options:
+          - prepare
+          - release
+        default: prepare
+      bump:
+        description: "Which part of the version to raise (mode=prepare only)"
+        required: false
+        type: choice
+        options:
+          - patch
+          - minor
+        default: patch
+      critical_patch:
+        description: "Release outside the window as a critical patch (security or release-blocking fix)"
+        required: false
+        type: boolean
+        default: false
+      critical_issue:
+        description: "The issue the critical patch fixes, e.g. #123 (required with critical_patch)"
+        required: false
+        type: string
+        default: ""
+
+  pull_request:
+    types: [closed]
+
+permissions:
+  contents: read
+
+jobs:
+  prepare:
+    name: Open the release pull request
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && inputs.mode == 'prepare'
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      # First, before a version is worked out or a branch exists (kpubdata#685).
+      # Provisionally monthly: the week holding the month's last Thursday (KST); outside
+      # it only a critical patch that names its issue.
+      - name: Release window
+        uses: yeongseon/kpubdata/.github/actions/release-window@main
+        with:
+          policy: monthly
+          critical_patch: ${{ inputs.critical_patch }}
+          critical_issue: ${{ inputs.critical_issue }}
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      # One implementation, referenced rather than copied. The first draft of this
+      # step was an inline shell heredoc — the thing kpubdata#588 pulled out of that
+      # repository for being impossible to run without dispatching a real release.
+      - name: Work out the new version
+        id: bump
+        uses: yeongseon/kpubdata/.github/actions/next-version@main
+        with:
+          bump: ${{ inputs.bump }}
+          file: pyproject.toml
+
+      # Not just pyproject.toml. `uv.lock` repeats the project's own version and
+      # `uv lock --check` in CI compares them (kpubdata-builder#744).
+      - name: Write the version
+        uses: yeongseon/kpubdata/.github/actions/set-version@main
+        with:
+          version: ${{ steps.bump.outputs.new_version }}
+
+      # The release pull request carries its own CHANGELOG change: `[Unreleased]` becomes
+      # this version, dated. An empty `[Unreleased]` stops here, before a branch exists.
+      - name: Date the CHANGELOG section
+        uses: yeongseon/kpubdata/.github/actions/release-notes@main
+        with:
+          command: promote
+          version: ${{ steps.bump.outputs.new_version }}
+
+      - name: Show what changed
+        run: git --no-pager diff --stat
+
+      - name: Open the pull request
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.bump.outputs.tag }}
+          CRITICAL_ISSUE: ${{ inputs.critical_patch && inputs.critical_issue || '' }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b "release/${TAG}"
+          git add -A
+          git commit -m "chore: release ${TAG}"
+          git push origin "release/${TAG}"
+          printf '%s\n' \
+            "\`${TAG}\` 릴리스 준비." \
+            "" \
+            "병합되면 게이트가 돌고, **통과한 뒤에** 태그와 릴리스가 이어진다." \
+            "실패하면 남는 것이 없다. 다시 눌러도 된다." \
+            > /tmp/release-body.md
+          # The merge path has no inputs, so a critical patch travels in the body: the
+          # release job reads this line back (kpubdata#685).
+          if [ -n "${CRITICAL_ISSUE}" ]; then
+            printf '\nCritical-Patch: %s\n' "${CRITICAL_ISSUE}" >> /tmp/release-body.md
+          fi
+          gh pr create --base main --head "release/${TAG}" \
+            --title "chore: release ${TAG}" --body-file /tmp/release-body.md
+
+  release:
+    name: Gate, tag and release
+    runs-on: ubuntu-latest
+    if: |
+      (github.event_name == 'workflow_dispatch' && inputs.mode == 'release') ||
+      (github.event_name == 'pull_request' &&
+       github.event.pull_request.merged == true &&
+       startsWith(github.event.pull_request.head.ref, 'release/'))
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    steps:
+      # On the pull request path, the merge commit itself — not `main`, which by then
+      # may be whatever merged next, a different tree from the one gated below. On a
+      # dispatch it is main's head, pinned immediately so the tag cannot land on
+      # something that merged while the gates ran.
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.merge_commit_sha || github.ref }}
+          fetch-depth: 0
+
+      # The merge path cannot take workflow inputs, so a critical patch is declared by a
+      # `Critical-Patch: #N` line in the release pull request's body — the prepare job
+      # writes it, and a person can add it. The body reaches the shell through the
+      # environment, never by expansion.
+      - name: Read a critical-patch declaration
+        id: critical
+        env:
+          EVENT: ${{ github.event_name }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          INPUT_PATCH: ${{ inputs.critical_patch }}
+          INPUT_ISSUE: ${{ inputs.critical_issue }}
+        run: |
+          if [ "${EVENT}" = "pull_request" ]; then
+            issue=$(printf '%s\n' "${PR_BODY}" | tr -d '\r' \
+              | sed -n -E 's/^Critical-Patch:[[:space:]]*([^[:space:]]+)[[:space:]]*$/\1/p' | head -n 1)
+            patch=$([ -n "${issue}" ] && echo true || echo false)
+          else
+            issue="${INPUT_ISSUE}"
+            patch="${INPUT_PATCH:-false}"
+          fi
+          echo "patch=${patch}" >> "$GITHUB_OUTPUT"
+          echo "issue=${issue}" >> "$GITHUB_OUTPUT"
+
+      # Before the gates, the tag and anything else is written (kpubdata#685). Prepare
+      # refuses first, so this only stops a release pull request merged outside the rule.
+      # Then the raised version sits on main untagged, and nothing needs undoing:
+      # dispatch mode=release in the window, or now with critical_patch and
+      # critical_issue. Re-running this job does not help — it replays the same event,
+      # so a Critical-Patch line added to the body after the merge is not seen.
+      - name: Release window
+        uses: yeongseon/kpubdata/.github/actions/release-window@main
+        with:
+          policy: monthly
+          critical_patch: ${{ steps.critical.outputs.patch }}
+          critical_issue: ${{ steps.critical.outputs.issue }}
+
+      - name: Pin the commit being released
+        id: commit
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Read the version being released
+        id: tag
+        run: |
+          version=$(python3 -c "
+          import pathlib, re
+          text = pathlib.Path('pyproject.toml').read_text(encoding='utf-8')
+          print(re.search(r'^version = \"([^\"]+)\"', text, re.MULTILINE).group(1))
+          ")
+          echo "tag=v${version}" >> "$GITHUB_OUTPUT"
+          echo "releasing v${version}"
+
+      # The branch name and the file disagree only if someone edited the pull request.
+      - name: The branch name and the file must agree
+        if: github.event_name == 'pull_request'
+        env:
+          BRANCH: ${{ github.event.pull_request.head.ref }}
+          TAG: ${{ steps.tag.outputs.tag }}
+        run: |
+          if [ "${BRANCH}" != "release/${TAG}" ]; then
+            echo "::error::branch is ${BRANCH} but pyproject.toml says release/${TAG}"
+            exit 1
+          fi
+
+      # Before the gates, not after. kpubdata#586 is about a release that failed with
+      # a tag already created; spending half an hour to then say "tag exists" is the
+      # same waste one step earlier.
+      - name: The tag must not exist yet
+        env:
+          TAG: ${{ steps.tag.outputs.tag }}
+        run: |
+          if git rev-parse -q --verify "refs/tags/${TAG}" >/dev/null; then
+            echo "::error::${TAG} already exists. Nothing to release, or the version was not raised."
+            exit 1
+          fi
+          echo "${TAG} is free"
+
+      # The notes are the CHANGELOG section, not a list of pull request titles. Taken
+      # before the gates so a missing or empty section stops the release while there
+      # is still nothing to clean up.
+      - name: Release notes from the CHANGELOG
+        id: notes
+        uses: yeongseon/kpubdata/.github/actions/release-notes@main
+        with:
+          command: extract
+          version: ${{ steps.tag.outputs.tag }}
+
+      # The published KPubData from uv.lock, the thing users will install.
+      - name: Install dependencies
+        run: uv sync --frozen --extra dev
+
+      # Everything that has to be true before a tag exists. A failure here leaves no
+      # tag, no release and nothing to clean up.
+      - name: Run quality gates
+        run: |
+          uv run ruff check .
+          uv run ruff format --check .
+          uv run mypy src
+          uv run pytest -ra
+
+      - name: Tag and release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.tag.outputs.tag }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag "${TAG}"
+          git push origin "${TAG}"
+          gh release create "${TAG}" --title "${TAG}" \
+            --notes-file "${{ steps.notes.outputs.file }}" \
+            --target "${{ steps.commit.outputs.sha }}"
+

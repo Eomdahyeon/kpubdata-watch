@@ -1,0 +1,30 @@
+name: 기능 제안
+description: 새로운 기능이나 개선을 제안합니다
+title: "feat: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        MVP 범위는 docs/PRD.md 의 제품 경계로 판단합니다: "이 기능이 없으면 Public Status 가
+        실제 공공데이터의 이상을 발견하고, 그 판단 근거를 설명할 수 없는가?"
+  - type: textarea
+    id: problem
+    attributes:
+      label: 해결하려는 문제
+      description: 어떤 불편이나 한계를 해결하려는 건가요?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 제안 내용
+      description: 원하는 동작이나 API를 설명하세요.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: 대안 검토
+      description: 고려한 다른 방법이 있다면 적어주세요.
+    validations:
+      required: false
