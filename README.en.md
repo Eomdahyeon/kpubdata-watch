@@ -43,7 +43,7 @@ least 3 providers continuously. The implementation order and the definition of d
 | [ROADMAP](docs/ROADMAP.md) | MVP scope (P0/P1/deferred), implementation order, definition of done, later phases |
 | [DOMAIN_MODEL](docs/DOMAIN_MODEL.md) | Health, Check, Detection, Change, Incident |
 | [Detectors](docs/detectors/README.md) | Availability, Freshness, Contract, Quality |
-| [ARCHITECTURE](docs/ARCHITECTURE.md) | Probe, Observation, Scheduler, storage and deployment |
+| [ARCHITECTURE](docs/architecture/README.md) | Probe, Observation, Scheduler, storage and deployment |
 | [REGISTRY](docs/REGISTRY.md) | Dataset registry format and dataset selection |
 | [UI](docs/UI.md) | UI strategy, UI Lab, Public Status screen principles |
 | [TESTING](docs/TESTING.md) | Test strategy and CI gates |

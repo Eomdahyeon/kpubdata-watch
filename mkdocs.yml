@@ -46,3 +46,26 @@ markdown_extensions:
 
 nav:
   - 홈: index.md
+  - 제품:
+      - PRD: PRD.md
+      - 로드맵: ROADMAP.md
+  - 설계:
+      - 도메인 모델: DOMAIN_MODEL.md
+      - Detectors:
+          - 개요: detectors/README.md
+          - Availability: detectors/availability.md
+          - Freshness: detectors/freshness.md
+          - Contract: detectors/contract.md
+          - Quality: detectors/quality.md
+      - 아키텍처: architecture/README.md
+      - Registry: REGISTRY.md
+      - UI: UI.md
+      - 테스트: TESTING.md
+  - 결정 기록:
+      - 목록: decisions/README.md
+      - "0001 MVP 범위": decisions/0001-mvp-scope-public-status.md
+      - "0002 Health 와 Check": decisions/0002-one-health-many-checks.md
+      - "0003 설명 가능한 탐지": decisions/0003-explainable-rule-based-detection.md
+      - "0004 KPubData 에만 의존": decisions/0004-depend-on-kpubdata-only.md
+      - "0005 UI Lab": decisions/0005-ui-lab-and-single-repository.md
+      - "0006 Raw 응답 저장": decisions/0006-raw-response-storage.md

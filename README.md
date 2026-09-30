@@ -40,7 +40,7 @@ MVP 목표는 3개 이상 Provider 의 실제 공공 Dataset 10개를 지속 관
 | [ROADMAP](docs/ROADMAP.md) | MVP 범위(P0/P1/유예), 구현 순서, 완료 조건, 이후 단계 |
 | [DOMAIN_MODEL](docs/DOMAIN_MODEL.md) | Health · Check · Detection · Change · Incident |
 | [Detectors](docs/detectors/README.md) | Availability · Freshness · Contract · Quality |
-| [ARCHITECTURE](docs/ARCHITECTURE.md) | Probe · Observation · Scheduler · 저장·배포 |
+| [ARCHITECTURE](docs/architecture/README.md) | Probe · Observation · Scheduler · 저장·배포 |
 | [REGISTRY](docs/REGISTRY.md) | Dataset Registry 형식과 Dataset 선정 기준 |
 | [UI](docs/UI.md) | UI 전략 · UI Lab · Public Status 화면 원칙 |
 | [TESTING](docs/TESTING.md) | 테스트 전략과 CI 게이트 |

@@ -64,6 +64,11 @@ packages = ["src/kpubdata_watch"]
 line-length = 100
 target-version = "py312"
 
+[tool.ruff.format]
+# Ruff formats Python blocks inside Markdown. The design documents quote the PRD
+# verbatim, including the grouping inside its examples, so they are left as written.
+exclude = ["docs/**/*.md"]
+
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM"]
 

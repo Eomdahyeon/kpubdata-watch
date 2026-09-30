@@ -181,7 +181,7 @@ docs/                # PRD, ROADMAP, DOMAIN_MODEL, ARCHITECTURE, detectors, UI, 
 | [docs/PRD.md](docs/PRD.md) | The product |
 | [docs/ROADMAP.md](docs/ROADMAP.md) | Scope, order and definition of done |
 | [docs/DOMAIN_MODEL.md](docs/DOMAIN_MODEL.md) | Health, checks, changes, incidents |
-| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Pipeline, storage, deployment |
+| [docs/architecture/README.md](docs/architecture/README.md) | Pipeline, storage, deployment |
 | [docs/decisions/README.md](docs/decisions/README.md) | Decisions |
 | [API_CONTRACT.md](API_CONTRACT.md) | Read API and CLI |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | How to contribute |
