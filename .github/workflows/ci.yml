@@ -1,0 +1,21 @@
+name: CI
+
+# Bootstrap: the only job is the aggregate `CI gate`, so branch protection can require
+# it from the first commit. The real jobs arrive with the project skeleton and become
+# this gate's needs.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  gate:
+    name: CI gate
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "bootstrap — no project yet"
