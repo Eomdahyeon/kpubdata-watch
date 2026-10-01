@@ -46,7 +46,8 @@ If it can, the feature goes to the backlog.
 | Area | Language |
 |---|---|
 | Code identifiers, comments, docstrings | English |
-| Commit messages, PR titles, issue titles, CHANGELOG | English |
+| Commit titles (= PR titles), issue titles, CHANGELOG | English |
+| Commit bodies (= PR bodies) | Korean or English — the squash body is the PR body ([POLICY 2.1.3](https://github.com/yeongseon/kpubdata/blob/main/docs/governance/POLICY.md), kpubdata#743) |
 | Governance documents (`AGENTS.md`, `CONTRIBUTING.md`) | English |
 | Implementation contracts (`API_CONTRACT.md`, `SECURITY.md`) | English |
 | Design rationale (PRD, ARCHITECTURE, DOMAIN_MODEL, detectors, UI, ADRs) | Korean |

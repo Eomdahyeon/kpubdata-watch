@@ -25,6 +25,6 @@ type: feat fix docs test perf refactor ci build chore style revert
 
 ## 체크리스트
 - [ ] 기능 브랜치에서 작업했으며 `main`에 직접 push하지 않았다
-- [ ] 커밋 메시지를 영어로 작성했다
+- [ ] PR 제목이 POLICY 2.1.3 을 따른다 (영어, 100자 이하, 제목에 이슈 번호 없음 — 본문에 `Closes #N`)
 - [ ] 로그·DB·API·HTML 어디에도 credential 이 남지 않는다 (SECURITY.md)
 - [ ] 사용자 노출 변경 시 문서를 분류해 갱신했다: 제품→docs/PRD.md, 향후 의도→docs/ROADMAP.md, 릴리스 변경→CHANGELOG (해당 시)

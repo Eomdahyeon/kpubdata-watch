@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- The `PR title` check reads the title live from the API and applies kpubdata's pull-request rules — English, no issue reference or URL, at most 100 characters (kpubdata#741, #742); GitHub's `Revert "…"` title is exempt. A required check that failed no longer stays blocking once a later run of it passes: `required-check-refresh.yml` re-runs the stale failed runs of `R3 review` and `Titles` on the same head (kpubdata#759). AGENTS.md and the PR template say commit titles (= PR titles) are English and commit bodies (= PR bodies) are free, since the squash body is now the PR body (kpubdata#743).
+
 ### Added
 
 - The MVP PRD, split by purpose: `docs/PRD.md` (the product), `docs/ROADMAP.md` (scope, order, definition of done, epics, open questions), `docs/DOMAIN_MODEL.md`, `docs/detectors/`, `docs/architecture/`, `docs/REGISTRY.md`, `docs/UI.md`, `docs/TESTING.md`, `API_CONTRACT.md` and `SECURITY.md` in English, and six ADRs in `docs/decisions/` covering decisions D-001 to D-020. `docs/index.md` maps every PRD section to the document that now holds it. Epics and open questions are GitHub issues.
