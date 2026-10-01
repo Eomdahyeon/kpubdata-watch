@@ -101,7 +101,7 @@ Example:
 
 ## History API
 
-<small>PRD §59</small>
+<small>PRD §59 · ADR 0010 (#32)</small>
 
 ```text
 GET /api/v1/datasets/{id}/history
@@ -114,6 +114,12 @@ GET /api/v1/changes
 
 GET /api/v1/changes/{id}
 ```
+
+The dataset history accepts `days` — default `30` (the public-history retention
+floor), capped at `90` (the internal-metadata floor). A request above the cap is
+served at the cap, and the response reports both `requested_days` and
+`effective_days`. Change and incident listings carry no period limit: those
+entities are kept as long as possible.
 
 ## Operator CLI
 
