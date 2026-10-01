@@ -95,3 +95,12 @@ integer → string
 Incident
 Severity = CRITICAL
 ```
+
+<small>[ADR 0008](../decisions/0008-breaking-contract-default-severity.md) (#30) —
+세 가지 경계와 함께 확정:</small>
+
+- Incident 는 **확인 probe 후** 개시한다. 첫 탐지는 Change(Breaking 분류)로 기록한다.
+- Diff 의 기준은 **마지막으로 확인된 스냅샷**이다. 실패·빈·잘린 응답은 Contract diff
+  를 만들지 않고 Availability/Quality 신호가 된다.
+- Dataset 별 override 로 **WARNING 까지만** 낮출 수 있다(사람만 하며, Breaking 이
+  INFO 가 되는 경우는 없다).
