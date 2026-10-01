@@ -15,6 +15,7 @@ KPubData Watch 의 설계 결정. 형식은 KPubData 시리즈의 ADR 과 같다
 | [0007](0007-registry-declares-provider-rate-limits-and-terms.md) | Provider 의 Rate Limit 과 이용조건은 Registry 에 선언하고 검증이 지킨다 (#27) |
 | [0008](0008-breaking-contract-default-severity.md) | Breaking Contract 변경의 기본 Severity 는 CRITICAL 이다 — 확인 후 개시, WARNING 까지만 하향 (#30) |
 | [0010](0010-public-history-default-period.md) | 공개 History 기본 기간은 30일, 조회 상한은 90일이다 (#32) |
+| [0011](0011-notice-entity-manual-linking.md) | 공지는 독립 엔티티이고 Incident·Change 에 N:N 수동 링크된다 (#35) |
 
 ## PRD 결정 로그 대응표
 
