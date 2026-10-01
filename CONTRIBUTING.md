@@ -37,6 +37,7 @@ uv run pytest
 uv run python scripts/check_english_comments.py src tests scripts
 uv run python scripts/check_readme_parity.py
 uv run python scripts/check_independence.py
+uv run python scripts/check_governance.py
 ```
 
 Live tests call real public APIs and need credentials in the environment. They are
@@ -57,6 +58,15 @@ uv run pytest -m live
 - Pull requests are squash-merged, so the title becomes the commit.
 - Add a line under `## [Unreleased]` in `CHANGELOG.md` for anything a user or
   operator would notice.
+
+## Issues carry a Required Verification
+
+Every issue states the machine verification that proves it done — V0 static
+checks through V5-live product E2E, the levels of kpubdata
+[POLICY.md §18](https://github.com/yeongseon/kpubdata/blob/main/docs/governance/POLICY.md).
+The issue templates ask for the level, and `scripts/check_governance.py` fails
+CI when a template stops asking. A pull request that closes an issue meets that
+level, or says why it cannot yet.
 
 ## What a good change looks like here
 

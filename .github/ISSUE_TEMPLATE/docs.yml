@@ -17,3 +17,20 @@ body:
       description: 무엇이 부정확하거나 부족한가요? 어떻게 바뀌면 좋을까요?
     validations:
       required: true
+  - type: dropdown
+    id: verification
+    attributes:
+      label: Required Verification (POLICY 18)
+      description: |
+        이 문서 이슈가 완료되었다고 판단하려면 어떤 기계 검증이 필요한가요?
+        문서 대부분은 V0 (링크·빌드·lint) 로 충분합니다.
+      options:
+        - V0 — Static (lint, typecheck, schema validation)
+        - V1 — Unit (unit tests)
+        - V2 — Replay / Contract (fixture-based contract tests)
+        - V3 — Component Integration
+        - V4 — Live Provider (real provider API calls)
+        - V5-replay — Product E2E (replay)
+        - V5-live — Product E2E (live)
+    validations:
+      required: true

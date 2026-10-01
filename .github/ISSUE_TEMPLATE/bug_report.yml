@@ -48,3 +48,21 @@ body:
       description: OS, Python 버전, kpubdata-watch 버전
     validations:
       required: false
+  - type: dropdown
+    id: verification
+    attributes:
+      label: Required Verification (POLICY 18)
+      description: |
+        이 버그가 고쳐졌다고 판단하려면 어떤 수준의 기계 검증이 필요한가요?
+        kpubdata POLICY 18 의 V0~V5 중 하나를 고릅니다. 잘 모르겠으면 V1 로 두면
+        triage 가 정합니다.
+      options:
+        - V0 — Static (lint, typecheck, schema validation)
+        - V1 — Unit (unit tests)
+        - V2 — Replay / Contract (fixture-based contract tests)
+        - V3 — Component Integration
+        - V4 — Live Provider (real provider API calls)
+        - V5-replay — Product E2E (replay)
+        - V5-live — Product E2E (live)
+    validations:
+      required: true

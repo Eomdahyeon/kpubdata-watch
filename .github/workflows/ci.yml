@@ -58,6 +58,11 @@ jobs:
       - name: Independence (no Builder or Studio dependency)
         run: uv run python scripts/check_independence.py
 
+      # #3: issue templates keep asking for a Required Verification level, and the
+      # PR title gate in titles.yml stays wired.
+      - name: Governance gates stay wired
+        run: uv run python scripts/check_governance.py
+
   test:
     name: Test (Python ${{ matrix.python-version }})
     runs-on: ubuntu-latest
