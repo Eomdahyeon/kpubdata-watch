@@ -56,6 +56,7 @@ checks:
 
     volume:
       enabled: true
+      metric: total_record_count   # totalCount 없는 provider 는 record_count
       minimum_samples: 14
 
     completeness:

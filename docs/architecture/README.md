@@ -165,8 +165,8 @@ ProbeResult(
     http_status=200,
     latency_ms=812,
 
-    record_count=100,
-    total_record_count=254832,
+    record_count=100,            # 수신한 레코드 수(표본) — len(RecordBatch.items)
+    total_record_count=254832,   # provider 총건수 — RecordBatch.total_count, None = 알 수 없음
 
     latest_data_at=...,
 
@@ -229,6 +229,10 @@ error_message
 
 created_at
 ```
+
+`total_record_count` 는 비어 있을 수 있다. Provider 가 총건수를 주지 않으면
+`None`(알 수 없음)이고, 이는 provider 가 보고한 `0` 과 다르다 — `None` 은 Volume
+baseline 에 들어가지 않는다([Quality — Volume](../detectors/quality.md#none-0)).
 
 ## Raw Data Storage Policy
 

@@ -42,25 +42,56 @@ Public Status UI에서는 Quality 하나로 표현할 수 있다.
 <small>2026-10-01 관측(#28): `datago.air_quality` 응답 envelope 의 `totalCount=40`(서울
 측정소 전체), 같은 응답의 실제 레코드는 `page_size` 만큼만 수신 — 두 값은 정의부터 다르다</small>
 
-| 지표 | 뜻 | 의존 대상 |
-|---|---|---|
-| `provider_total_count` | 응답 envelope 의 `totalCount` — provider 가 선언하는 이 쿼리의 전체 결과 수 | Probe 설정과 무관, **쿼리에 의존** (같은 쿼리끼리만 비교) |
-| `sample_count` | Watch 가 실제로 수신한 레코드 수 | Probe 설정(`page_size`)에 의존 |
+| 지표 | 뜻 | kpubdata 출처 | 의존 대상 |
+|---|---|---|---|
+| `total_record_count` | 응답 envelope 의 `totalCount` — provider 가 선언하는 이 쿼리의 전체 결과 수 | `RecordBatch.total_count` (`int \| None`) | Probe 설정과 무관, **쿼리에 의존** (같은 쿼리끼리만 비교) |
+| `record_count` | Watch 가 실제로 수신한 레코드 수(표본) | `len(RecordBatch.items)` | Probe 설정(`page_size`)에 의존 |
+
+이름은 [아키텍처](../architecture/README.md#probe-result)의 `ProbeResult`·`Observation`
+필드를 그대로 쓴다. 같은 구분을 Volume 에서만 다른 이름(`provider_total_count`·
+`sample_count`)으로 부르면 Observation 의 어느 필드를 읽는지가 문서마다 달라진다 —
+두 번째 용어 체계를 두지 않는다([ADR 0007](../decisions/0007-registry-declares-provider-rate-limits-and-terms.md)). Registry 의 `volume.metric` 값도 이
+필드 이름이다.
 
 규칙:
 
 - 두 값은 **절대 하나의 baseline 에 섞지 않는다.** 각각 자신의 rolling baseline 을
   가진다.
-- 이상 판정의 기본 신호는 `provider_total_count` 다 (있을 때). Provider 스스로
+- 이상 판정의 기본 신호는 `total_record_count` 다 (있을 때). Provider 스스로
   밝힌 전체량이므로 페이지 잘림과 무관하다.
-- `totalCount` 를 주지 않는 provider(odcloud 계열 등)는 `sample_count` 로 판정하되
+- `totalCount` 를 주지 않는 provider(odcloud 계열 등)는 `record_count` 로 판정하되
   Evidence 에 그 사실을 명시한다 — "몇 개를 요청했고 몇 개를 받았는가"가 판정의
   일부가 된다.
-- `sample_count` 가 요청한 `page_size` 보다 지속적으로 작은 것은 volume 이상이
+- `record_count` 가 요청한 `page_size` 보다 지속적으로 작은 것은 volume 이상이
   아니라 응답 잘림·빈 데이터의 별도 증상이다. 정보성일 수 있으므로 Health 를
   낮추지 않고 증상으로만 기록한다(D-008).
 - `totalCount` 는 데이터의 자연스러운 증가(예: 이번 달 실거래 누적)도 반영한다.
   baseline 비교는 상대 변화율로 하고, 증가·감소 방향을 Evidence 에 남긴다.
+
+### 알 수 없음(None)과 0 은 다르다
+
+<small>#57 · kpubdata#642: `_extract_total_count` 는 `0` 을 `0` 으로 두고, 값이 없으면
+`None` 을 돌려준다 — "결과 없음"과 "건수를 모름"은 다른 답이다</small>
+
+`total_record_count` 는 `int | None` 이다. 평소 `totalCount` 를 주는 provider 라도
+어떤 probe 에서는 값이 빠질 수 있다(파싱 실패, 일시 누락).
+
+- **`None`(알 수 없음)은 baseline 에 넣지 않는다.** 그 probe 의 Volume 판정은
+  `UNKNOWN` 이고, Evidence 에 "provider 총건수 없음"을 남긴다. `0` 으로 바꿔 넣으면
+  거짓 "급감"이 된다.
+- **`0` 은 provider 가 0 을 보고했을 때만이다.** 그때는 정상 관측값으로 baseline 에
+  들어가고, 평소 대비 급감이면 그대로 판정한다.
+- `metric: total_record_count` 인 Dataset 에서 `None` 이 나와도 `record_count` 로
+  대신 판정하지 않는다. 두 값은 baseline 을 섞지 않는다(위 규칙). 처음부터
+  `totalCount` 를 주지 않는 provider 는 Registry 에 `metric: record_count` 를
+  선언한다.
+- `record_count` 는 응답을 받은 probe 에서 센 값이다. probe 자체가 실패했으면
+  Availability 의 영역이고(Watch 자신의 실패는 D-009 에 따라 `UNKNOWN`), 어느
+  baseline 에도 `0` 으로 들어가지 않는다.
+
+Volume Detector 구현(Epic 8)은 이 규칙을 테스트한다: `total_record_count` 가
+`None` 인 관측이 baseline 을 바꾸지 않고 `UNKNOWN` 을 내는 경우, provider 가 보고한
+`0` 이 baseline 에 들어가 급감으로 판정되는 경우를 각각 fixture 로 둔다.
 
 ### 판정 방식
 
@@ -91,7 +122,7 @@ Dataset-specific threshold
 volume:
   enabled: true
 
-  metric: provider_total_count   # 기본값. totalCount 없는 provider 는 sample_count
+  metric: total_record_count   # 기본값. totalCount 없는 provider 는 record_count
 
   baseline:
     minimum_samples: 14
