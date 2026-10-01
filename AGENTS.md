@@ -79,6 +79,10 @@ POLICY 2.1, 2.1.1 and 2.1.2 are the label reference. What is specific to agents:
 - Pull request titles use the same types; the `PR title` check fails otherwise.
 - No issue numbers in titles. They go in the body (`Closes #N`).
 - Leave Priority off when there is no evidence for it.
+- A pull request labelled `review:R3` cannot merge until someone other than its
+  author, with write access, approves it: the required `R3 review` check fails until
+  then (kpubdata POLICY 14.1). The author's own approval, a bot's, and one followed by
+  a request for changes do not count. Ask for the review; do not remove the label.
 - Do not create labels POLICY does not list, lower a `review:*` level, or promote to
   `priority:high`/`priority:critical`.
 
