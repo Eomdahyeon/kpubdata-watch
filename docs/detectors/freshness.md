@@ -10,14 +10,18 @@
 
 > 데이터가 예정된 시점에 갱신되고 있는가?
 
-Dataset Registry에 명시적으로 설정한다.
+Dataset Registry에 명시적으로 설정한다. 필드 하나가 아니라 추출 종류(`kind`)와
+필드·형식·시간대를 선언한다 — 스키마와 종류별 예는
+[Registry — Freshness 설정](../REGISTRY.md#freshness)에 있다.
 
 예:
 
 ```yaml
 freshness:
   enabled: true
-  field: modified_at
+  kind: record_modified
+  fields: [modifiedtime]
+  format: "%Y%m%d%H%M%S"
 
   timezone: Asia/Seoul
 
@@ -63,22 +67,26 @@ Freshness는 공공데이터 특화 기능 중 핵심으로 취급한다.
 <small>#26 실측, 2026-10-01 — kpubdata 0.8.0 로 data.go.kr 계열 Dataset 을 각 1~3 건 조회</small>
 
 Freshness Check 는 Registry 의 `field` 하나가 아니라, 아래 세 종류의 시간 필드를
-추출 대상으로 삼아야 한다. 관측된 값은 모두 KST naive 시간이었다 — Registry 의
-`timezone: Asia/Seoul` 가정이 유지된다.
+추출 대상으로 삼아야 한다. 각 종류는 Registry `freshness.kind` 값 하나에
+대응한다([Registry — Freshness 설정](../REGISTRY.md#freshness)에 행마다 예가
+있다). 관측된 값은 모두 KST naive 시간이었다 — Registry 의 `timezone: Asia/Seoul`
+가정이 유지된다.
 
-| 종류 | 의미 | 관측된 Dataset · 필드 (표본값) |
-|---|---|---|
-| Record 수정 시각 | 레코드가 provider 에서 마지막으로 수정·갱신된 시각 | `datago.tour_kor_area` · `modifiedtime` (`20250707103442`), `localdata.general_restaurant` · `DAT_UPDT_PNT` (`2026-09-30 22:47:51`), `LAST_MDFCN_PNT` (`2026-09-29 12:01:13`) |
-| 관측 시각 | 실시간 관측값의 측정 시각 | `datago.air_quality` · `dataTime` (`2026-10-01 20:00`), `datago.airkorea_station_realtime` · `dataTime` |
-| 사건 시각 (조합) | 레코드의 사건 발생 시각이 연·월·일 필드로 쪼개져 있음 | `datago.apt_trade` · `dealYear/dealMonth/dealDay` (`2026-09-23`), `datago.apt_rent` · 동일 |
+| 종류 | Registry `kind` | 의미 | 관측된 Dataset · 필드 (표본값) |
+|---|---|---|---|
+| Record 수정 시각 | `record_modified` | 레코드가 provider 에서 마지막으로 수정·갱신된 시각 | `datago.tour_kor_area` · `modifiedtime` (`20250707103442`), `localdata.general_restaurant` · `DAT_UPDT_PNT` (`2026-09-30 22:47:51`), `LAST_MDFCN_PNT` (`2026-09-29 12:01:13`) |
+| 관측 시각 | `observed_at` | 실시간 관측값의 측정 시각 | `datago.air_quality` · `dataTime` (`2026-10-01 20:00`), `datago.airkorea_station_realtime` · `dataTime` |
+| 사건 시각 (조합) | `event_date_parts` | 레코드의 사건 발생 시각이 연·월·일 필드로 쪼개져 있음 | `datago.apt_trade` · `dealYear/dealMonth/dealDay` (`2026-09-23`), `datago.apt_rent` · 동일 |
 
 그 밖의 관측:
 
 - `datago.social_enterprise` · `baseD` (`2025-11-04`) 는 레코드별 수정 시각이
   아니라 데이터 전체의 기준일이다. Freshness 신호로 쓸 수 있지만 Dataset 단위
-  신호이며, 별도 종류로 다룬다.
+  신호이며, 별도 종류(`kind: dataset_reference_date`)로 다룬다.
 - `datago.hospital_info` 는 시간 필드로 `estbDd`(설립일)만 가진다 — Freshness 를
-  레코드에서 추출할 수 없는 Dataset 이 실제로 존재한다.
+  레코드에서 추출할 수 없는 Dataset 이 실제로 존재한다. 이런 Dataset 은
+  `freshness.enabled: false` 와 `reason` 을 선언하고, Check 결과는
+  `NOT_APPLICABLE` 이다.
 - 기상청 단기예보 3종(초단기실황·초단기예보·동네예보)은 이 관측 호스트에서
   `APPLICATION_ERROR` 로 호출 자체가 되지 않았다(해외 IP 차단으로 추정). 두
   번에 걸쳐 재시도해도 같았다. `baseDate/baseTime` 필드의 존재는 문서상으로만

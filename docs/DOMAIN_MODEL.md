@@ -160,6 +160,11 @@ Contract       PASS
 Quality        PASS
 ```
 
+Freshness 는 Registry 의 필드 하나(`field: modified_at`)가 아니라 추출 종류(`kind`)로
+선언되고, 레코드에서 갱신 시점을 뽑을 수 없는 Dataset 은 `freshness.enabled: false`
+와 사유(`reason`)를 선언해 `NOT_APPLICABLE` 이 된다 — 예: 시간 필드가 설립일뿐인
+`datago.hospital_info` ([Registry — Freshness 설정](REGISTRY.md#freshness)).
+
 ## Health Aggregation
 
 <small>PRD §9</small>
