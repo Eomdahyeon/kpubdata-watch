@@ -161,13 +161,34 @@ Dataset마다 관측할 Field를 Registry에 명시한다.
 1. **등록 전 측정으로 고른다.** 후보 Field 는 Registry 등록 전 샘플 관측(예: 30건)으로
    채움율을 잰다. 기준: 이용 가치가 있는 Field(식별·위치·대표값·시간) 중 채움율이
    높은 것. 그 측정 결과가 선정 근거가 되므로 Registry 의 필드 선정도 근거 기반이다.
+   단, kpubdata 가 `LicenseSpec.pii_columns` 로 선언한 Field 는 채움율과 무관하게
+   **선정하지 않는다.** Completeness Evidence 는 값의 원표현(규칙 4)을 남기는데,
+   개인정보는 저장하지 않는다는 결정(ADR 0006 D-017)과 부딪치기 때문이다. 어휘는
+   kpubdata 의 것을 그대로 쓴다(ADR 0007). 예: kpubdata 의
+   `localdata.general_restaurant` 는 `TELNO` 를 `pii_columns` 로 선언한다 — 위 표에서
+   이미 "항상 비움"으로 제외됐지만, 채워지기 시작해도 대상이 되지 않는다.
 2. **상시 비어있는 Field 는 대상이 아니다.** 항상 비어 있으면(예: `TELNO` 30/30,
    `addr2` 87%) 이상을 감지할 신호가 없다. 이런 Field 는 관찰 대상에서 빼고,
    나중에 채워지기 시작하면 그 자체가 정보성 Change 다.
 3. **Dataset 당 1~3개.** 모든 Field 를 무조건 분석하지 않는다(PRD 원칙).
-4. **빈 값 표현을 하나로 본다.** JSON `null`·빈 문자열·`-`·`N/A` 를 "값 없음"으로
-   정규화하되, 어떤 표현이었는지 Evidence 에 남긴다 — 실측에서 `air_quality` 는
-   `khaiValue` 에 `-`, `pm25Flag` 에 JSON `null` 이 섞여 있었다.
+4. **빈 값 표현은 Field 타입에 따라 정규화한다.** 타입은 kpubdata 가 선언한
+   `FieldSpec.type` 이고, 어떤 표현이었는지는 Evidence 에 남긴다.
+   - **숫자 Field**(`integer`·`number`): kpubdata 와 같게, 앞뒤 공백을 지운 뒤
+     `""`·`-` 를 JSON `null` 과 함께 "값 없음"으로 본다. kpubdata 의
+     `_DEFAULT_NULL_MARKERS = frozenset({"", "-"})` 와 그 null 집계가 이 범위다
+     (kpubdata#615). 실측에서 `air_quality` 의 `khaiValue`(kpubdata 선언
+     `integer`) 에 `-` 가 있었다.
+   - **문자열 Field**(그 밖의 타입·미선언 Field): JSON `null` 과 빈 문자열(공백만
+     있는 문자열 포함)만 "값 없음"이다. `-` 는 문자열에서 의미 있는 값일 수 있으므로
+     값으로 센다 — kpubdata 가 null 인식을 숫자 casting 으로 한정한 이유와 같다.
+     빈 문자열을 "값 없음"으로 보는 것은 kpubdata 의 validation 집계(문자열 Field 는
+     원값을 그대로 non-null 로 센다)보다 넓다. Completeness 의 질문은 "값이
+     비어 있는가"이고, 빈 문자열은 표현만 다를 뿐 값이 없기 때문이다. 어떤 문자열
+     Field 에서 `-` 가 결측 표기임이 실측으로 확인되면, 그 Field 에 한해 Registry 에
+     근거와 함께 선언한다 — 전역 규칙으로 넓히지 않는다.
+   - 실측(#29)에서 확인된 표현은 숫자 Field 의 `-`(`khaiValue`)와 JSON
+     `null`(`pm25Flag`)뿐이다. `N/A` 같은 다른 표기는 실측 근거가 없으므로 규칙에
+     넣지 않는다 — 관측되면 근거와 함께 추가한다.
 5. **필드 자체가 사라지는 것은 Completeness 가 아니다.** 스키마에서 필드가 없어지는
    경우는 Contract Check 의 영역이다. Completeness 는 "필드는 있으나 값이 비어
    있는가"만 본다. 두 Check 의 결과는 함께 해석한다.

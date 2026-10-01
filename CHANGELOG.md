@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Completeness null handling in `docs/detectors/quality.md` now follows kpubdata's field types (#60): numeric fields (`integer`/`number`) treat `""` and `-` as no value exactly as kpubdata's `_DEFAULT_NULL_MARKERS` does (kpubdata#615); string fields treat only JSON `null` and an empty string as no value and count `-` as a value, unless a field-level registry declaration backed by measurement says otherwise. `N/A` is dropped from the rule for lack of measured evidence, and fields kpubdata declares in `LicenseSpec.pii_columns` are never chosen for completeness, since its evidence keeps original representations and ADR 0006 (D-017) stores no personal data.
 - The `PR title` check reads the title live from the API and applies kpubdata's pull-request rules — English, no issue reference or URL, at most 100 characters (kpubdata#741, #742); GitHub's `Revert "…"` title is exempt. A required check that failed no longer stays blocking once a later run of it passes: `required-check-refresh.yml` re-runs the stale failed runs of `R3 review` and `Titles` on the same head (kpubdata#759). AGENTS.md and the PR template say commit titles (= PR titles) are English and commit bodies (= PR bodies) are free, since the squash body is now the PR body (kpubdata#743).
 
 ### Added
