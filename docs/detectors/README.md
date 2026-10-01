@@ -52,9 +52,20 @@ Timeout 수준이 되면 Availability에 영향을 준다.
 
 ## Confirmation / Flapping Protection
 
-<small>PRD §27</small>
+<small>PRD §27 · ADR 0009 (#31)</small>
 
-한 번의 실패로 즉시 장애를 선언하지 않는 것을 기본값으로 한다.
+한 번의 실패로 즉시 장애를 선언하지 않는 것을 기본값으로 한다. 전역 기본은
+`2 failures → OPEN`, `2 successes → RESOLVE` 이고, Registry 는 `failures` 만
+1~3 범위에서 사유를 적어 조정할 수 있다(`successes` 는 고정 — 플래핑 방지는
+Dataset 사정이 아니다). Availability 는 즉시 재시도로 확인하므로 지연이
+interval 과 무관하고, Freshness·Quality 는 다음 정기 probe 에서만 확인되므로
+interval 에 비례한다(24시간↑ 주기는 `failures: 1` 권장). Contract(Breaking)
+확인은 1회(ADR 0008).
+
+**이 `failures` 카운터는 Watch 자체 실패를 세지 않는다.** D-009(ADR 0002)가
+정한 대로, probe 가 provider 를 실제로 검사해 실패를 관측한 경우만 세고,
+Watch 쪽 장애(네트워크 오류, 버그, 타임아웃 설정 오류 등으로 probe 자체를
+실행하지 못한 경우)는 `UNKNOWN` 으로 남아 `failures` 에 들어가지 않는다.
 
 ### Availability
 

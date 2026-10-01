@@ -15,7 +15,10 @@
 > delay never depends on the probe interval; freshness and quality only observe
 > on the scheduled probe, so a long-interval dataset (≥ 24h) should drop
 > failures to 1 — otherwise confirming a stale daily dataset takes two more
-> days.
+> days. The `failures` counter only counts observed provider/probe failures;
+> a watch-side probe failure (D-009, ADR 0002) never feeds it and stays
+> `UNKNOWN`, so a Watch outage cannot reopen an incident through this
+> mechanism.
 
 ## 문제
 
@@ -46,6 +49,14 @@ Dataset 에서 "확인 2회"의 의미는 전혀 다르다:
    - Contract(Breaking): 확인 probe 1회(ADR 0008 과 동일).
 4. **바닥은 1이다.** `failures: 0`(한 번의 실패로 즉시 개시)은 어떤 Dataset 에서도
    허용하지 않는다(PRD §27 원칙).
+5. **확인 카운터는 실제로 관측된 실패만 센다.** D-009(ADR 0002)는 Watch 자체
+   실패(네트워크 장애, Watch 버그, 타임아웃 설정 오류 등 — probe 가 provider 를
+   실제로 검사하지 못한 경우)를 Dataset 장애로 표시하지 않고 `UNKNOWN` 으로 둔다고
+   이미 정했다. 이 ADR 의 `failures` 카운터는 그 결정을 그대로 물려받는다:
+   provider/probe 가 실제로 관측한 실패만 세고, Watch 쪽에서 probe 자체를
+   실행하지 못한 경우는 `failures` 에 포함하지 않고 `UNKNOWN` 으로 기록한다.
+   그래야 Watch 장애가 confirmation 메커니즘을 거쳐 Dataset 장애로 둔갑하는
+   경로가 생기지 않는다.
 
 ## 근거
 
@@ -62,3 +73,6 @@ Dataset 에서 "확인 2회"의 의미는 전혀 다르다:
 - 장주기 Dataset 온보딩(#25 계열 작업) 시 `failures: 1` 권장이 선정 가이드에
   포함된다.
 - Flapping 보호(successes 2)는 구현이 그 값을 상수로 둔다.
+- Probe 실행기는 "provider 가 실패를 응답함"과 "Watch 가 probe 를 실행하지
+  못함"을 구분해 기록한다. 후자는 `failures` 를 증가시키지 않고 해당 관측을
+  `UNKNOWN` 으로 남긴다(D-009, ADR 0002).
