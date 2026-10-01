@@ -12,6 +12,7 @@ KPubData Watch 의 설계 결정. 형식은 KPubData 시리즈의 ADR 과 같다
 | [0004](0004-depend-on-kpubdata-only.md) | KPubData Watch 는 KPubData 에만 의존하고 Builder 에는 의존하지 않는다 |
 | [0005](0005-ui-lab-and-single-repository.md) | UI 는 확정하지 않고 UI Lab 에서 실험한다 — 한 저장소, 최소 Server-rendered UI |
 | [0006](0006-raw-response-storage.md) | 전체 Raw API Response 는 기본적으로 장기 저장하지 않는다 |
+| [0007](0007-registry-declares-provider-rate-limits-and-terms.md) | Provider 의 Rate Limit 과 이용조건은 Registry 에 선언하고 검증이 지킨다 (#27) |
 
 ## PRD 결정 로그 대응표
 
