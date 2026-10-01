@@ -142,10 +142,14 @@ kpubdata-watch incidents resolve <id>
 
 kpubdata-watch incidents false-positive <id>
 
-kpubdata-watch incidents add-notice <id> <url>
+kpubdata-watch notices add <url> [--title ...] [--excerpt ...]
+
+kpubdata-watch notices link <notice-id> --incident <id> | --change <id>
 ```
 
-Today only `kpubdata-watch --version` exists.
+Today only `kpubdata-watch --version` exists. Notices are their own entity and
+link many-to-many to incidents and changes (ADR 0011, #35); linking is
+informational and never resolves an incident.
 
 ## Read model the UIs share
 

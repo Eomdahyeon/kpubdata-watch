@@ -373,7 +373,7 @@ Database-backed state
 
 ## Database Model
 
-<small>PRD §66</small>
+<small>PRD §66 · ADR 0011 (#35)</small>
 
 MVP 최소 Table:
 
@@ -393,6 +393,10 @@ detections
 changes
 
 incidents
+
+notices
+
+notice_links
 ```
 
 관계:
@@ -413,7 +417,15 @@ Provider
           ├── Change
           │
           └── Incident
+
+Notice N:N Incident (notice_links)
+Notice N:N Change   (notice_links)
 ```
+
+`notices` 는 Dataset 에 속하지 않는 독립 엔티티다(공지 하나가 여러 Dataset 에
+걸칠 수 있다). `notice_links` 는 `(notice_id, target_type, target_id)` 로
+Incident 와 Change 에 N:N 링크한다 — Incident 의 `official_notice_url` 필드는
+이 Table 로 대체됐다(ADR 0011).
 
 ## Retention
 
