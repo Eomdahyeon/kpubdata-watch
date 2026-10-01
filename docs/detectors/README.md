@@ -75,6 +75,13 @@ Incident Open
 2 successes → RESOLVE
 ```
 
+<small>[ADR 0009](../decisions/0009-confirmation-counts-global-default.md) (#31) —
+전역 기본을 유지하되, Registry 가 `failures` 만 1~3 에서 사유와 함께 조정할 수
+있다(`successes` 는 고정). Availability 의 확인 probe 는 즉시 재시도라 interval 과
+무관하고, Freshness·Quality 는 다음 정기 probe 에서만 확인되므로 24시간 이상
+주기의 Dataset 은 `failures: 1` 을 권장한다. Contract(Breaking) 확인은 1회
+(ADR 0008).</small>
+
 ---
 
 ### Freshness
