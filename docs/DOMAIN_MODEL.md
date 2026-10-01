@@ -408,10 +408,48 @@ evidence
 
 related_change_id
 
-official_notice_url
-
 review_result
 ```
+
+Incident 는 단일 `official_notice_url` 필드를 갖지 않는다 — Notice 는 독립
+엔티티이고 N:N 링크로 연결된다(ADR 0011).
+
+## Notice
+
+<small>PRD §55 · ADR 0011 (#35)</small>
+
+공식 공지(점검, 장애, 정정 등)는 독립 엔티티다. 등록·링크는 운영자 CLI 로
+한다(자동 수집 없음, D-018).
+
+필드:
+
+```text
+id
+
+url
+title
+published_at
+provider
+
+excerpt
+captured_at
+registered_by
+```
+
+Incident 와 Change 에 N:N 으로 링크한다. 링크 레코드:
+
+```text
+notice_id
+target_type
+target_id
+
+linked_at
+linked_by
+note
+```
+
+링크는 정보성이다 — 공지가 Incident 를 설명해도 자동 resolve 하지 않는다.
+해소는 Watch 의 관측 근거(ADR 0009)만으로 한다.
 
 ## Incident Lifecycle
 
