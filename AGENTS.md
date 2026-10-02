@@ -1,6 +1,6 @@
 # AGENTS.md — kpubdata-watch
 
-> **[POLICY.md](https://github.com/yeongseon/kpubdata/blob/main/docs/governance/POLICY.md)
+> **[POLICY.md](https://github.com/kpubdata-lab/kpubdata/blob/main/docs/governance/POLICY.md)
 > is the single canonical source for project-management and review policy.** Epic,
 > Issue, Priority, Review Level, Verification and Release rules come from there.
 > This file keeps only what is specific to this repository. POLICY.md wins any conflict.
@@ -40,14 +40,14 @@ If it can, the feature goes to the backlog.
 
 ## Language policy
 
-> [kpubdata ADR 0003](https://github.com/yeongseon/kpubdata/blob/main/docs/adrs/0003-language-policy.md)
+> [kpubdata ADR 0003](https://github.com/kpubdata-lab/kpubdata/blob/main/docs/adrs/0003-language-policy.md)
 > is canonical.
 
 | Area | Language |
 |---|---|
 | Code identifiers, comments, docstrings | English |
 | Commit titles (= PR titles), issue titles, CHANGELOG | English |
-| Commit bodies (= PR bodies) | Korean or English — the squash body is the PR body ([POLICY 2.1.3](https://github.com/yeongseon/kpubdata/blob/main/docs/governance/POLICY.md), kpubdata#743) |
+| Commit bodies (= PR bodies) | Korean or English — the squash body is the PR body ([POLICY 2.1.3](https://github.com/kpubdata-lab/kpubdata/blob/main/docs/governance/POLICY.md), kpubdata#743) |
 | Governance documents (`AGENTS.md`, `CONTRIBUTING.md`) | English |
 | Implementation contracts (`API_CONTRACT.md`, `SECURITY.md`) | English |
 | Design rationale (PRD, ARCHITECTURE, DOMAIN_MODEL, detectors, UI, ADRs) | Korean |
@@ -59,8 +59,8 @@ If it can, the feature goes to the backlog.
 
 ## Verification is done by machines
 
-[POLICY 18.2](https://github.com/yeongseon/kpubdata/blob/main/docs/governance/POLICY.md)
-and [VERIFICATION.md](https://github.com/yeongseon/kpubdata/blob/main/docs/governance/VERIFICATION.md)
+[POLICY 18.2](https://github.com/kpubdata-lab/kpubdata/blob/main/docs/governance/POLICY.md)
+and [VERIFICATION.md](https://github.com/kpubdata-lab/kpubdata/blob/main/docs/governance/VERIFICATION.md)
 are canonical.
 
 - **A sentence with a number in it comes from a command.** Paste the output.
@@ -99,7 +99,7 @@ POLICY 2.1, 2.1.1 and 2.1.2 are the label reference. What is specific to agents:
 ## Releases
 
 Cadence lives in
-[kpubdata's compatibility.md §5.1](https://github.com/yeongseon/kpubdata/blob/main/docs/compatibility.md#release-cadence);
+[kpubdata's compatibility.md §5.1](https://github.com/kpubdata-lab/kpubdata/blob/main/docs/compatibility.md#release-cadence);
 who may do what lives in POLICY 14.
 
 - **Watch's cadence is not decided yet** (on demand like kpubdata, or monthly like
@@ -196,6 +196,6 @@ docs/                # PRD, ROADMAP, DOMAIN_MODEL, ARCHITECTURE, detectors, UI, 
 
 | Repository | Document |
 |---|---|
-| [kpubdata](https://github.com/yeongseon/kpubdata) | [AGENTS.md](https://github.com/yeongseon/kpubdata/blob/main/AGENTS.md) |
-| [kpubdata-builder](https://github.com/yeongseon/kpubdata-builder) | [AGENTS.md](https://github.com/yeongseon/kpubdata-builder/blob/main/AGENTS.md) |
-| [kpubdata-studio](https://github.com/yeongseon/kpubdata-studio) | [AGENTS.md](https://github.com/yeongseon/kpubdata-studio/blob/main/AGENTS.md) |
+| [kpubdata](https://github.com/kpubdata-lab/kpubdata) | [AGENTS.md](https://github.com/kpubdata-lab/kpubdata/blob/main/AGENTS.md) |
+| [kpubdata-builder](https://github.com/kpubdata-lab/kpubdata-builder) | [AGENTS.md](https://github.com/kpubdata-lab/kpubdata-builder/blob/main/AGENTS.md) |
+| [kpubdata-studio](https://github.com/kpubdata-lab/kpubdata-studio) | [AGENTS.md](https://github.com/kpubdata-lab/kpubdata-studio/blob/main/AGENTS.md) |

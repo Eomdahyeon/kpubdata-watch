@@ -7,9 +7,9 @@
 >
 > 관련 프로젝트:
 >
-> - [KPubData](https://github.com/yeongseon/kpubdata) — 한국 공공데이터 접근을 위한 독립 Python SDK. Watch 가 의존하는 유일한 제품
-> - [KPubData Builder](https://github.com/yeongseon/kpubdata-builder) — KPubData 로 재현 가능한 데이터셋·테이블을 만드는 형제 제품
-> - [KPubData Studio](https://github.com/yeongseon/kpubdata-studio) — KPubData Builder 의 시각적 작업 공간
+> - [KPubData](https://github.com/kpubdata-lab/kpubdata) — 한국 공공데이터 접근을 위한 독립 Python SDK. Watch 가 의존하는 유일한 제품
+> - [KPubData Builder](https://github.com/kpubdata-lab/kpubdata-builder) — KPubData 로 재현 가능한 데이터셋·테이블을 만드는 형제 제품
+> - [KPubData Studio](https://github.com/kpubdata-lab/kpubdata-studio) — KPubData Builder 의 시각적 작업 공간
 
 [English](./README.en.md)
 
@@ -34,11 +34,11 @@ MVP 목표는 3개 이상 Provider 의 실제 공공 Dataset 10개를 지속 관
 
 ## 문서
 
-데모: <https://yeongseon.github.io/kpubdata-watch/> — Public Status 화면을 고정
+데모: <https://kpubdata-lab.github.io/kpubdata-watch/> — Public Status 화면을 고정
 Fixture 데이터로 보여주는 정적 데모입니다. 실제 관측 결과가 아닙니다
 ([ADR 0012](docs/decisions/0012-pages-hosts-a-fixture-demo-not-the-service.md)).
 
-문서 사이트: <https://yeongseon.github.io/kpubdata-watch/docs/>
+문서 사이트: <https://kpubdata-lab.github.io/kpubdata-watch/docs/>
 
 | 문서 | 내용 |
 |---|---|
@@ -56,15 +56,15 @@ Fixture 데이터로 보여주는 정적 데모입니다. 실제 관측 결과�
 | [CONTRIBUTING](CONTRIBUTING.md) · [AGENTS](AGENTS.md) | 기여 방법과 에이전트 규칙 |
 
 프로젝트 관리 규칙의 정본은 kpubdata 의
-[POLICY.md](https://github.com/yeongseon/kpubdata/blob/main/docs/governance/POLICY.md) 입니다.
+[POLICY.md](https://github.com/kpubdata-lab/kpubdata/blob/main/docs/governance/POLICY.md) 입니다.
 
 ## 제품군
 
 | Repository | Role |
 |---|---|
-| [kpubdata](https://github.com/yeongseon/kpubdata) | 공공데이터 수집·정규화 SDK — Watch 가 의존하는 유일한 제품 |
-| [kpubdata-builder](https://github.com/yeongseon/kpubdata-builder) | 데이터셋 파이프라인과 배포 — Watch 의 형제 제품, 의존하지 않음 |
-| [kpubdata-studio](https://github.com/yeongseon/kpubdata-studio) | Builder 의 화면과 작업 흐름 |
+| [kpubdata](https://github.com/kpubdata-lab/kpubdata) | 공공데이터 수집·정규화 SDK — Watch 가 의존하는 유일한 제품 |
+| [kpubdata-builder](https://github.com/kpubdata-lab/kpubdata-builder) | 데이터셋 파이프라인과 배포 — Watch 의 형제 제품, 의존하지 않음 |
+| [kpubdata-studio](https://github.com/kpubdata-lab/kpubdata-studio) | Builder 의 화면과 작업 흐름 |
 | **kpubdata-watch** | 공공데이터 신뢰성 관측과 Public Status — 이 저장소 |
 
 ## 라이선스

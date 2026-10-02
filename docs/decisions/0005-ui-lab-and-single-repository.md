@@ -35,5 +35,5 @@ Dataset 이 10개일 때 좋은 화면이 150개에서도 좋다는 보장이 �
 
 ## 결과
 
-- 화면 원칙과 평가 기준은 [UI](../UI.md), Read API 는 [API 계약](https://github.com/yeongseon/kpubdata-watch/blob/main/API_CONTRACT.md).
+- 화면 원칙과 평가 기준은 [UI](../UI.md), Read API 는 [API 계약](https://github.com/kpubdata-lab/kpubdata-watch/blob/main/API_CONTRACT.md).
 - 50~150 Dataset 에서 어떤 배치가 가장 효과적인지는 열린 질문이다 (#33).

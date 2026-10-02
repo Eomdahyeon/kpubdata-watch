@@ -8,7 +8,7 @@
 
 > GitHub Pages hosts two static things for this repository: a fixture-based
 > demo of the Public Status page at the root
-> (`https://yeongseon.github.io/kpubdata-watch/`), and the mkdocs
+> (`https://kpubdata-lab.github.io/kpubdata-watch/`), and the mkdocs
 > documentation site at `/docs/`. The demo renders
 > `demo/fixtures/datasets.json` through the same Jinja template a future
 > FastAPI route will reuse (`scripts/build_demo.py`), clearly labelled as
@@ -81,4 +81,4 @@ Pages 자리에 **Mock 데이터로 동작하는 실제 앱 데모**를 루트�
   `scripts/build_demo.py`·`tests/unit/scripts/test_build_demo.py` 가 항상
   함께 검증한다(배너 누락은 테스트 실패).
 - Pages 저장소 Homepage 는 데모 URL
-  (`https://yeongseon.github.io/kpubdata-watch/`) 로 설정한다.
+  (`https://kpubdata-lab.github.io/kpubdata-watch/`) 로 설정한다.

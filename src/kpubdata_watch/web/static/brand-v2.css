@@ -1,7 +1,7 @@
 /*
  * KPubData Studio Brand v2 design tokens — the single token source for KPubData Watch (#68).
  *
- * Copied verbatim from yeongseon/kpubdata-studio src/globals.css lines 19-178 at commit
+ * Copied verbatim from kpubdata-lab/kpubdata-studio src/globals.css lines 19-178 at commit
  * 1fbf57e41a32b3ef9cd353666beb1fcd0d6b97e9 (the light, dark and OS-dark custom-property
  * blocks). Studio Brand v2 is canonical: do not edit a value here. To follow a Studio change,
  * copy the blocks again, update the commit above and the table in docs/VISUAL_IDENTITY.md,
