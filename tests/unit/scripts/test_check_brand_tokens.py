@@ -8,11 +8,13 @@ Running against this repository is what makes pytest the CI gate.
 
 from __future__ import annotations
 
+import importlib.util
 import os
 import shutil
 import subprocess
 import sys
 from pathlib import Path
+from types import ModuleType
 
 import pytest
 
@@ -63,6 +65,10 @@ def test_this_repository_passes() -> None:
     result = _run(REPO_ROOT)
     assert result.returncode == 0, result.stderr
     assert "40 light and 40 dark tokens" in result.stdout
+    assert "24 pairs at or above 4.5:1" in result.stdout
+    assert (
+        "lowest light Degraded #b45309 on --status-warning-subtle #fef3c7 = 4.51:1" in result.stdout
+    )
 
 
 def test_a_clean_copy_passes(tmp_path: Path) -> None:
@@ -307,3 +313,76 @@ def test_a_missing_token_file_fails_rather_than_passing_empty(tmp_path: Path) ->
     result = _run(root)
     assert result.returncode == 1
     assert "nothing was checked" in result.stderr
+
+
+def _module() -> ModuleType:
+    spec = importlib.util.spec_from_file_location("check_brand_tokens", _SCRIPT)
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+@pytest.mark.parametrize(
+    ("first", "second", "expected"),
+    [
+        ("#000000", "#ffffff", 21.0),
+        ("#ffffff", "#ffffff", 1.0),
+        ("#b45309", "#fef3c7", 4.51),  # Degraded on its badge, light: the lowest pair
+        ("#fef3c7", "#b45309", 4.51),  # order does not matter
+        ("#15803d", "#dcfce7", 4.57),
+    ],
+)
+def test_contrast_ratio_follows_wcag_2_1(first: str, second: str, expected: float) -> None:
+    assert round(_module().contrast_ratio(first, second), 2) == expected
+
+
+def test_contrast_prints_the_24_health_pairs() -> None:
+    result = _run(REPO_ROOT, "--contrast")
+    assert result.returncode == 0, result.stderr
+    rows = [
+        line
+        for line in result.stdout.splitlines()
+        if line.startswith("| light") or line.startswith("| dark")
+    ]
+    assert len(rows) == 24
+    assert (
+        "| light | Degraded | `--status-warning` `#b45309` | `--status-warning-subtle` `#fef3c7` | 4.51:1 |"
+        in rows
+    )
+
+
+def test_lowering_a_status_contrast_below_4_5_fails(tmp_path: Path) -> None:
+    """#b6540a is a shade lighter than Degraded's #b45309: 4.43:1 on its badge background."""
+    root = _repo(tmp_path)
+    _edit(root / _TOKEN_FILE, "--status-warning: #b45309;", "--status-warning: #b6540a;")
+    _edit(root / _DOC, "| `--status-warning` | `#b45309` |", "| `--status-warning` | `#b6540a` |")
+
+    result = _run(root)
+
+    assert result.returncode == 1
+    assert (
+        "light Degraded: --status-warning #b6540a on --status-warning-subtle #fef3c7 is 4.4"
+        in result.stderr
+    )
+    assert "below 4.5:1" in result.stderr
+
+
+def test_a_contrast_table_not_pasted_from_the_script_fails(tmp_path: Path) -> None:
+    root = _repo(tmp_path)
+    _edit(root / _DOC, "| 4.51:1 |", "| 4.60:1 |")
+
+    result = _run(root)
+
+    assert result.returncode == 1
+    assert "the contrast table is not what `--contrast` prints" in result.stderr
+
+
+def test_missing_contrast_markers_fail(tmp_path: Path) -> None:
+    root = _repo(tmp_path)
+    _edit(root / _DOC, "<!-- health-contrast:start -->", "")
+
+    result = _run(root)
+
+    assert result.returncode == 1
+    assert "contrast table markers" in result.stderr

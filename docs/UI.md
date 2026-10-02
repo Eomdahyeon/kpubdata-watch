@@ -270,7 +270,19 @@ All Datasets
 9. 모바일에서도 핵심 상태 확인이 가능한가?
 
 10. 판정 근거로 자연스럽게 Drill-down할 수 있는가?
+
+11. Studio와 같은 제품군으로 보이는가?
+
+12. 로고를 제외해도 Brand v2의 bright / clear / data-first / professional 성격이 유지되는가?
+
+13. Brand color와 status color를 혼동하지 않는가?
+
+14. Light theme가 dark monitoring console보다 canonical하게 보이는가?
+
+15. 150 Dataset에서도 Brand v2 density가 유지되는가?
 ```
+
+11–15 는 #68 에서 추가했다 (ADR 0012, D-021~D-024).
 
 UI 선택은 구현 편의가 아니라 이 기준으로 결정한다.
 

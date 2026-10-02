@@ -197,10 +197,49 @@ Studio 기준을 그대로 쓴다.
 
 | 항목 | 기준 |
 |---|---|
-| 대비 (Studio §3.5, #631) | 텍스트 4.5:1, 큰 텍스트 · 비텍스트(차트 마크 · focus ring · 아이콘) 3:1. 토큰 값이 이 기준으로 정해졌으므로 토큰을 바꾸지 않으면 지켜진다 |
+| 대비 (Studio §3.5, #631) | 텍스트 4.5:1, 큰 텍스트 · 비텍스트(차트 마크 · focus ring · 아이콘) 3:1. Health 상태 글자는 아래 §6.1 처럼 계산해서 검사한다 |
 | 390px | 390px 폭에서 페이지 가로 스크롤이 없다. 넓은 표는 카드 안에서만 스크롤한다 (Studio §5) |
 | Reduced motion | `prefers-reduced-motion: reduce` 에서 animation · transition 을 끈다 (Studio `globals.css` 의 reduced-motion 규칙). 상태 점이 깜박여도 옆에 글자가 있으므로 정보는 사라지지 않는다 |
 | 색에 의존하지 않기 | §4.4 — 아이콘 + 글자 + 색 |
+
+### 6.1 Health 상태 글자의 대비
+
+네 Health 상태 글자색(`--status-*`) 을 세 배경 — 자기 `-subtle` 배경(배지), `--card`, `--background`
+— 위에서 light · dark 로 계산한 WCAG 2.1 대비다 (4 × 3 × 2 = 24 쌍). 아래 표는
+`python scripts/check_brand_tokens.py --contrast` 의 출력을 그대로 붙였다. `check_brand_tokens.py` 가
+한 쌍이라도 4.5:1 미만이면 실패하고, 이 표가 계산 결과와 다르면 실패한다.
+
+<!-- health-contrast:start -->
+| theme | Health | 글자 | 배경 | 대비 |
+|---|---|---|---|---|
+| light | Healthy | `--status-success` `#15803d` | `--status-success-subtle` `#dcfce7` | 4.57:1 |
+| light | Healthy | `--status-success` `#15803d` | `--card` `#ffffff` | 5.02:1 |
+| light | Healthy | `--status-success` `#15803d` | `--background` `#f7f8f3` | 4.70:1 |
+| light | Degraded | `--status-warning` `#b45309` | `--status-warning-subtle` `#fef3c7` | 4.51:1 |
+| light | Degraded | `--status-warning` `#b45309` | `--card` `#ffffff` | 5.02:1 |
+| light | Degraded | `--status-warning` `#b45309` | `--background` `#f7f8f3` | 4.71:1 |
+| light | Critical | `--status-failure` `#b91c1c` | `--status-failure-subtle` `#fee2e2` | 5.30:1 |
+| light | Critical | `--status-failure` `#b91c1c` | `--card` `#ffffff` | 6.47:1 |
+| light | Critical | `--status-failure` `#b91c1c` | `--background` `#f7f8f3` | 6.06:1 |
+| light | Unknown | `--status-unknown` `#52525b` | `--status-unknown-subtle` `#f4f4f5` | 7.03:1 |
+| light | Unknown | `--status-unknown` `#52525b` | `--card` `#ffffff` | 7.73:1 |
+| light | Unknown | `--status-unknown` `#52525b` | `--background` `#f7f8f3` | 7.24:1 |
+| dark | Healthy | `--status-success` `#4ade80` | `--status-success-subtle` `#052e16` | 8.55:1 |
+| dark | Healthy | `--status-success` `#4ade80` | `--card` `#1c1f23` | 9.49:1 |
+| dark | Healthy | `--status-success` `#4ade80` | `--background` `#15171a` | 10.31:1 |
+| dark | Degraded | `--status-warning` `#fbbf24` | `--status-warning-subtle` `#422006` | 8.73:1 |
+| dark | Degraded | `--status-warning` `#fbbf24` | `--card` `#1c1f23` | 9.91:1 |
+| dark | Degraded | `--status-warning` `#fbbf24` | `--background` `#15171a` | 10.76:1 |
+| dark | Critical | `--status-failure` `#f87171` | `--status-failure-subtle` `#450a0a` | 5.84:1 |
+| dark | Critical | `--status-failure` `#f87171` | `--card` `#1c1f23` | 5.98:1 |
+| dark | Critical | `--status-failure` `#f87171` | `--background` `#15171a` | 6.49:1 |
+| dark | Unknown | `--status-unknown` `#a1a1aa` | `--status-unknown-subtle` `#27272a` | 5.81:1 |
+| dark | Unknown | `--status-unknown` `#a1a1aa` | `--card` `#1c1f23` | 6.45:1 |
+| dark | Unknown | `--status-unknown` `#a1a1aa` | `--background` `#15171a` | 7.01:1 |
+<!-- health-contrast:end -->
+
+가장 낮은 쌍은 light Degraded — `#b45309` on `#fef3c7` = 4.51:1 — 로, 기준을 넘지만 여유가 거의 없다.
+Studio 가 이 값을 바꾸면 이 gate 가 먼저 알려 준다.
 
 ## 7. 문서 사이트
 
@@ -213,7 +252,7 @@ Studio 기준을 그대로 쓴다.
 
 | 언제 | 무엇을 | 어디서 |
 |---|---|---|
-| 항상 (offline) | 토큰 파일의 세 블록, OS-dark = dark, light 의 핵심 역할이 Studio §3.1 팔레트(Blue · Cyan · Mint · Ink · Canvas · Surface · Border) 와 같음, 브랜드 ↔ 상태 분리, §4.2 표 = 토큰 파일, §4.4 의 네 Health 가 정의된 `--status-*` 토큰, `docs/` 의 고정 Studio 링크 = 토큰 파일 머리의 commit, `ui-lab/` · `web/` 의 다른 CSS · HTML · template 이 토큰을 다시 정의하지 않음 | `tests/unit/scripts/test_check_brand_tokens.py` 가 이 저장소에 대해 실행하므로 CI 의 pytest 가 gate 다 |
+| 항상 (offline) | 토큰 파일의 세 블록, OS-dark = dark, light 의 핵심 역할이 Studio §3.1 팔레트(Blue · Cyan · Mint · Ink · Canvas · Surface · Border) 와 같음, 브랜드 ↔ 상태 분리, Health 대비 24 쌍 ≥ 4.5:1 과 §6.1 표 = 계산 결과, §4.2 표 = 토큰 파일, §4.4 의 네 Health 가 정의된 `--status-*` 토큰, `docs/` 의 고정 Studio 링크 = 토큰 파일 머리의 commit, `ui-lab/` · `web/` 의 다른 CSS · HTML · template 이 토큰을 다시 정의하지 않음 | `tests/unit/scripts/test_check_brand_tokens.py` 가 이 저장소에 대해 실행하므로 CI 의 pytest 가 gate 다 |
 | Studio 를 줄 때 | 세 블록의 모든 토큰 값이 Studio `src/globals.css` 와 같음 | `STUDIO_GLOBALS_CSS=<Studio 의 globals.css> python scripts/check_brand_tokens.py` 또는 `--studio <path>` |
 
 offline 검사는 Watch 안의 일관성만 본다. Studio 가 바뀌었는지는 Studio 파일을 줘야 알 수 있다 —

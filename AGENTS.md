@@ -117,7 +117,8 @@ who may do what lives in POLICY 14.
 
 ## Build order
 
-The PRD's recommended implementation order ([docs/ROADMAP.md](docs/ROADMAP.md)):
+The PRD's recommended implementation order ([docs/ROADMAP.md](docs/ROADMAP.md)), with
+step 12 added by #68 ([ADR 0012](docs/decisions/0012-brand-v2-visual-identity.md)):
 
 1. Repository / CI
 2. Dataset registry
@@ -130,12 +131,13 @@ The PRD's recommended implementation order ([docs/ROADMAP.md](docs/ROADMAP.md)):
 9. Detection / change / incident
 10. Health aggregation
 11. Read API
-12. Minimal public status
-13. UI Lab (10 / 50 / 150 datasets)
-14. 10 real datasets
-15. History accumulation
-16. Real incident / change replay
-17. Production hardening
+12. Public UI Foundation (Brand v2 tokens, Logo/lockup, status components, theme)
+13. Minimal public status
+14. UI Lab (10 / 50 / 150 datasets)
+15. 10 real datasets
+16. History accumulation
+17. Real incident / change replay
+18. Production hardening
 
 Do not stop the observation engine waiting for UI decisions, and do not invent UI
 data shapes because the backend came first: the connection point is

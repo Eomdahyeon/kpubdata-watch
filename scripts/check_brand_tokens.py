@@ -21,6 +21,11 @@ Always checked, offline:
   same light and dark values as the file;
 - the Health table maps Healthy, Degraded, Critical and Unknown each to a
   `--status-*` token the file defines;
+- each Health status colour (`--status-success`, `-warning`, `-failure`,
+  `-unknown`) reaches the WCAG 2.1 text contrast of 4.5:1 on its own `-subtle`
+  background, on `--card` and on `--background`, light and dark (24 pairs), and
+  the contrast table in `docs/VISUAL_IDENTITY.md` is exactly what `--contrast`
+  prints, so its numbers come from this computation;
 - every pinned `kpubdata-studio/blob/<sha>` link under `docs/` names the commit
   the token file was copied from;
 - no `.css`, `.html`, `.jinja` or `.j2` file under `ui-lab/` or
@@ -34,6 +39,7 @@ has moved on since the pinned commit.
 
 Usage:
     python scripts/check_brand_tokens.py [--root PATH] [--studio PATH]
+    python scripts/check_brand_tokens.py --contrast   # print the contrast table
 """
 
 from __future__ import annotations
@@ -55,6 +61,17 @@ STUDIO_ENV = "STUDIO_GLOBALS_CSS"
 HEALTH_STATES = ("Healthy", "Degraded", "Critical", "Unknown")
 TOKEN_TABLE = ("<!-- brand-v2-tokens:start -->", "<!-- brand-v2-tokens:end -->")
 HEALTH_TABLE = ("<!-- health-status-map:start -->", "<!-- health-status-map:end -->")
+CONTRAST_TABLE = ("<!-- health-contrast:start -->", "<!-- health-contrast:end -->")
+
+# WCAG 2.1 SC 1.4.3: normal-size text needs 4.5:1. Health labels are normal-size text.
+TEXT_CONTRAST = 4.5
+HEALTH_STATUS = {
+    "Healthy": "success",
+    "Degraded": "warning",
+    "Critical": "failure",
+    "Unknown": "unknown",
+}
+_HEX = re.compile(r"^#([0-9a-f]{6})$")
 
 # Studio VISUAL_IDENTITY.md section 3.1: the Brand v2 palette, light theme.
 BRAND_V2_PALETTE = {
@@ -186,6 +203,80 @@ def health_problems(doc: str, light: Tokens) -> list[str]:
     return found
 
 
+def _channel(value: int) -> float:
+    c = value / 255
+    return c / 12.92 if c <= 0.03928 else ((c + 0.055) / 1.055) ** 2.4
+
+
+def relative_luminance(colour: str) -> float:
+    """WCAG 2.1 relative luminance of a `#rrggbb` colour."""
+    match = _HEX.match(colour)
+    if match is None:
+        raise ValueError(f"not a #rrggbb colour: {colour!r}")
+    digits = match.group(1)
+    r, g, b = (int(digits[i : i + 2], 16) for i in (0, 2, 4))
+    return 0.2126 * _channel(r) + 0.7152 * _channel(g) + 0.0722 * _channel(b)
+
+
+def contrast_ratio(first: str, second: str) -> float:
+    """WCAG 2.1 contrast ratio, (L1 + 0.05) / (L2 + 0.05) with L1 the lighter."""
+    a, b = sorted((relative_luminance(first), relative_luminance(second)), reverse=True)
+    return (a + 0.05) / (b + 0.05)
+
+
+def contrast_pairs(blocks: dict[str, Tokens]) -> list[tuple[str, str, str, str, str, str, float]]:
+    """(theme, health, fg token, fg, bg token, bg, ratio) for every Health pair."""
+    pairs = []
+    for theme in ("light", "dark"):
+        tokens = blocks.get(theme, {})
+        for health, status in HEALTH_STATUS.items():
+            fg_name = f"--status-{status}"
+            for bg_name in (f"--status-{status}-subtle", "--card", "--background"):
+                if fg_name not in tokens or bg_name not in tokens:
+                    continue
+                fg, bg = resolve(tokens, fg_name), resolve(tokens, bg_name)
+                pairs.append((theme, health, fg_name, fg, bg_name, bg, contrast_ratio(fg, bg)))
+    return pairs
+
+
+def contrast_table(blocks: dict[str, Tokens]) -> str:
+    """The Markdown table `--contrast` prints and docs/VISUAL_IDENTITY.md carries."""
+    lines = [
+        "| theme | Health | 글자 | 배경 | 대비 |",
+        "|---|---|---|---|---|",
+    ]
+    for theme, health, fg_name, fg, bg_name, bg, ratio in contrast_pairs(blocks):
+        lines.append(
+            f"| {theme} | {health} | `{fg_name}` `{fg}` | `{bg_name}` `{bg}` | {ratio:.2f}:1 |"
+        )
+    return "\n".join(lines)
+
+
+def contrast_problems(blocks: dict[str, Tokens], doc: str) -> list[str]:
+    """Health pairs below 4.5:1, and a documented table that is not the computed one."""
+    found: list[str] = []
+    expected = 2 * len(HEALTH_STATUS) * 3
+    pairs = contrast_pairs(blocks)
+    if len(pairs) != expected:
+        found.append(f"only {len(pairs)} of {expected} Health contrast pairs could be computed")
+    for theme, health, fg_name, fg, bg_name, bg, ratio in pairs:
+        if ratio < TEXT_CONTRAST:
+            found.append(
+                f"{theme} {health}: {fg_name} {fg} on {bg_name} {bg} is {ratio:.2f}:1, "
+                f"below {TEXT_CONTRAST}:1"
+            )
+    start, end = CONTRAST_TABLE
+    if start not in doc or end not in doc:
+        found.append(f"{VISUAL_DOC}: the contrast table markers {CONTRAST_TABLE} are missing")
+    else:
+        documented = doc[doc.index(start) + len(start) : doc.index(end)].strip()
+        if documented != contrast_table(blocks):
+            found.append(
+                f"{VISUAL_DOC}: the contrast table is not what `--contrast` prints; paste it again"
+            )
+    return found
+
+
 def pin_problems(root: Path, css: str) -> list[str]:
     """Pinned Studio links under docs/ must name the commit the tokens came from."""
     match = _SHA.search(css.split("*/", 1)[0])
@@ -250,6 +341,11 @@ def main(argv: list[str] | None = None) -> int:
         default=os.environ.get(STUDIO_ENV) or None,
         help=f"Studio's src/globals.css to compare against (default: ${STUDIO_ENV})",
     )
+    parser.add_argument(
+        "--contrast",
+        action="store_true",
+        help="print the Health contrast table for docs/VISUAL_IDENTITY.md and exit",
+    )
     args = parser.parse_args(argv)
     root: Path = args.root.resolve()
 
@@ -264,6 +360,9 @@ def main(argv: list[str] | None = None) -> int:
     css = token_file.read_text(encoding="utf-8")
     doc = doc_file.read_text(encoding="utf-8")
     blocks = parse_blocks(css)
+    if args.contrast:
+        print(contrast_table(blocks))
+        return 0
     problems = [f"{TOKEN_FILE}: no {name} block" for name in BLOCKS if name not in blocks]
     light, dark = blocks.get("light", {}), blocks.get("dark", {})
     if "os-dark" in blocks and blocks["os-dark"] != dark:
@@ -276,6 +375,7 @@ def main(argv: list[str] | None = None) -> int:
     problems.extend(f"brand colour used as status: {p}" for p in separation_problems(blocks))
     problems.extend(f"{VISUAL_DOC}: {p}" for p in table_problems(doc, light, dark))
     problems.extend(f"{VISUAL_DOC}: {p}" for p in health_problems(doc, light))
+    problems.extend(contrast_problems(blocks, doc))
     problems.extend(pin_problems(root, css))
     problems.extend(fork_problems(root, set(light) | set(dark)))
 
@@ -301,9 +401,14 @@ def main(argv: list[str] | None = None) -> int:
         )
         return 1
 
+    theme, health, fg_name, fg, bg_name, bg, ratio = min(
+        contrast_pairs(blocks), key=lambda pair: pair[-1]
+    )
     print(
         f"Brand v2 tokens agree: {len(light)} light and {len(dark)} dark tokens in "
-        f"{TOKEN_FILE} match {VISUAL_DOC}{compared}"
+        f"{TOKEN_FILE} match {VISUAL_DOC}{compared}\n"
+        f"Health contrast: {len(contrast_pairs(blocks))} pairs at or above {TEXT_CONTRAST}:1, "
+        f"lowest {theme} {health} {fg} on {bg_name} {bg} = {ratio:.2f}:1"
     )
     return 0
 
