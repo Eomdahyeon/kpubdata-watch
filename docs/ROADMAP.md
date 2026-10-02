@@ -167,7 +167,7 @@ Automatic seasonality modeling
 18. Production Hardening
 ```
 
-12 단계(Public UI Foundation)는 PRD 원문에 없고 #68 ([ADR 0012](decisions/0012-brand-v2-visual-identity.md)) 에서 추가했다. Minimal Public Status 와 UI Lab 이 같은 Brand v2 토큰 · lockup · 상태 컴포넌트 · theme 위에서 시작하게 하기 위해서다. 그 뒤 단계 번호는 하나씩 밀렸다.
+12 단계(Public UI Foundation)는 PRD 원문에 없고 #68 ([ADR 0013](decisions/0013-brand-v2-visual-identity.md)) 에서 추가했다. Minimal Public Status 와 UI Lab 이 같은 Brand v2 토큰 · lockup · 상태 컴포넌트 · theme 위에서 시작하게 하기 위해서다. 그 뒤 단계 번호는 하나씩 밀렸다.
 
 UI 디자인 결정을 기다리느라 Observation Engine 개발을 멈추지 않는다.
 

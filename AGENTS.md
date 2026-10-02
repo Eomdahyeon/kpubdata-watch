@@ -118,7 +118,7 @@ who may do what lives in POLICY 14.
 ## Build order
 
 The PRD's recommended implementation order ([docs/ROADMAP.md](docs/ROADMAP.md)), with
-step 12 added by #68 ([ADR 0012](docs/decisions/0012-brand-v2-visual-identity.md)):
+step 12 added by #68 ([ADR 0013](docs/decisions/0013-brand-v2-visual-identity.md)):
 
 1. Repository / CI
 2. Dataset registry
