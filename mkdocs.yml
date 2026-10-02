@@ -1,4 +1,5 @@
 site_name: KPubData Watch
+site_url: "https://yeongseon.github.io/kpubdata-watch/"
 site_description: 한국 공공데이터 신뢰성 관측
 repo_url: https://github.com/yeongseon/kpubdata-watch
 repo_name: yeongseon/kpubdata-watch
@@ -69,3 +70,8 @@ nav:
       - "0004 KPubData 에만 의존": decisions/0004-depend-on-kpubdata-only.md
       - "0005 UI Lab": decisions/0005-ui-lab-and-single-repository.md
       - "0006 Raw 응답 저장": decisions/0006-raw-response-storage.md
+      - "0007 Rate Limit 과 이용조건": decisions/0007-registry-declares-provider-rate-limits-and-terms.md
+      - "0008 Breaking Contract 기본 Severity": decisions/0008-breaking-contract-default-severity.md
+      - "0009 확인 횟수": decisions/0009-confirmation-counts-global-default.md
+      - "0010 공개 History 기간": decisions/0010-public-history-default-period.md
+      - "0011 공지 엔티티": decisions/0011-notice-entity-manual-linking.md

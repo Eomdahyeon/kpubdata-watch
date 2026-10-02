@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- The documentation site is published to GitHub Pages at <https://yeongseon.github.io/kpubdata-watch/> on every push to `main` (`.github/workflows/docs.yml`, the same workflow kpubdata-builder uses: `mkdocs build --strict`, then `deploy-pages`). The navigation now lists ADRs 0007–0011, and both READMEs link the site.
+
 ### Changed
 
 - Completeness null handling in `docs/detectors/quality.md` now follows kpubdata's field types (#60): numeric fields (`integer`/`number`) treat `""` and `-` as no value exactly as kpubdata's `_DEFAULT_NULL_MARKERS` does (kpubdata#615); string fields treat only JSON `null` and an empty string as no value and count `-` as a value, unless a field-level registry declaration backed by measurement says otherwise. `N/A` is dropped from the rule for lack of measured evidence, and fields kpubdata declares in `LicenseSpec.pii_columns` are never chosen for completeness, since its evidence keeps original representations and ADR 0006 (D-017) stores no personal data.

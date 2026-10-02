@@ -34,6 +34,8 @@ MVP 목표는 3개 이상 Provider 의 실제 공공 Dataset 10개를 지속 관
 
 ## 문서
 
+문서 사이트: <https://yeongseon.github.io/kpubdata-watch/>
+
 | 문서 | 내용 |
 |---|---|
 | [PRD](docs/PRD.md) | 제품 정의·문제·원칙·목표·비목표·성공 지표 |
