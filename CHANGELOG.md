@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- The documentation site is published to GitHub Pages at <https://yeongseon.github.io/kpubdata-watch/> on every push to `main` (`.github/workflows/docs.yml`, the same workflow kpubdata-builder uses: `mkdocs build --strict`, then `deploy-pages`). The navigation now lists ADRs 0007–0011, and both READMEs link the site.
+- A GitHub Pages deploy workflow (`.github/workflows/docs.yml`, the same workflow kpubdata-builder uses: `mkdocs build --strict`, then `deploy-pages`). The Pages root is meant for the Public Status demo, not the documentation, so the READMEs do not link it. The navigation now lists ADRs 0007–0011.
 
 ### Changed
 

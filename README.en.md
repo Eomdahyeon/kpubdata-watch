@@ -37,8 +37,6 @@ least 3 providers continuously. The implementation order and the definition of d
 
 ## 문서
 
-Documentation site: <https://yeongseon.github.io/kpubdata-watch/>
-
 | Document | Contents |
 |---|---|
 | [PRD](docs/PRD.md) | Product definition, problem, principles, goals, non-goals, success metrics |
