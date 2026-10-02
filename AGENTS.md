@@ -33,6 +33,11 @@ Evidence-based.**
   `kpubdata_studio` (PRD D-016); `scripts/check_independence.py` enforces it.
 - **UI layout is not fixed; the read model is.** UIs consume the read API, never
   database tables ([docs/UI.md](docs/UI.md)).
+- **The visual identity is fixed: KPubData Studio Brand v2.** Every UI links the one
+  token file, `src/kpubdata_watch/web/static/brand-v2.css`, copied verbatim from
+  Studio; never edit a value there, define tokens elsewhere, or paint a status in a
+  brand colour ([docs/VISUAL_IDENTITY.md](docs/VISUAL_IDENTITY.md));
+  `scripts/check_brand_tokens.py` enforces it.
 
 When a feature's place is unclear, ask the PRD's boundary question: *without it,
 can Public Status still discover a real anomaly in public data and explain why?*

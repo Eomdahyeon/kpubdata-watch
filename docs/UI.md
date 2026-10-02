@@ -37,10 +37,31 @@ Active Issues 위치
 
 Dashboard 형태
 
-색상 세부 규칙
-
 Chart 종류
 ```
+
+### 고정된 visual identity 와 실험하는 layout
+
+<small>#68</small>
+
+PRD §33 은 "색상 세부 규칙" 도 고정하지 않는 쪽에 두었다. #68 에서 이를 바꿨다: **visual identity 는
+고정하고, layout 만 실험한다.** 같은 KPubData 제품군이 다른 제품처럼 보이지 않게 하고, UI Lab 의
+비교가 색 · 글꼴 차이로 오염되지 않게 하기 위해서다.
+
+| 고정 — KPubData Studio Brand v2 와 같다 | 실험 — UI Lab (#33) |
+|---|---|
+| Logo geometry · lockup hierarchy (`KPubData` + 중립 `Watch`) | Status vs Provider-grouped vs Issues-first |
+| Color tokens (`src/kpubdata_watch/web/static/brand-v2.css`) | Card vs compact table |
+| Light canonical / dark 대체 테마 | Issue 위치 |
+| Typography · spacing · radius · surface | 30/90-day history 시각화 |
+| 상태색 의미 (Health → Studio status token) | Filter 위치 |
+| 접근성 · 대비 기준 | Dataset 목록 밀도 |
+
+Canonical 기준은 Studio 의
+[docs/brand/VISUAL_IDENTITY.md](https://github.com/yeongseon/kpubdata-studio/blob/1fbf57e41a32b3ef9cd353666beb1fcd0d6b97e9/docs/brand/VISUAL_IDENTITY.md)
+와 [src/globals.css](https://github.com/yeongseon/kpubdata-studio/blob/1fbf57e41a32b3ef9cd353666beb1fcd0d6b97e9/src/globals.css) 다 (commit
+고정). Watch 에 적용하는 규칙은 [시각 정체성](VISUAL_IDENTITY.md) 에 있고, 아래 §52 · §53 은 그 문서가
+우선한다. Watch 는 새 로고 · 팔레트 · 상태색을 만들지 않는다.
 
 ## UI Architecture
 
@@ -111,6 +132,10 @@ ui-lab/
 UI Lab은 언제든 버릴 수 있어야 한다.
 
 Watch Engine은 UI Lab에 의존하면 안 된다.
+
+모든 prototype 은 같은 토큰 파일 `src/kpubdata_watch/web/static/brand-v2.css` 를 링크하고, 토큰을
+스스로 정의하지 않는다 (#68). `scripts/check_brand_tokens.py` 가 `ui-lab/` 아래 CSS · HTML 이 토큰을
+다시 정의하면 실패한다.
 
 ## UI Lab Fixtures
 
@@ -625,6 +650,9 @@ PASS
 
 <small>PRD §52</small>
 
+> 구체적인 값(radius 8px, 36px 행, 20px page title, 글꼴)은 [시각 정체성](VISUAL_IDENTITY.md) §5 —
+> Studio Brand v2 — 가 정한다. 아래는 PRD 원문의 방향이다.
+
 UI 톤:
 
 ```text
@@ -663,6 +691,11 @@ monospace optional
 ## Color Semantics
 
 <small>PRD §53</small>
+
+> 색 값과 토큰은 [시각 정체성](VISUAL_IDENTITY.md) §4 가 정한다: Healthy · Degraded · Critical ·
+> Unknown 은 Studio 의 `--status-success` · `--status-warning` · `--status-failure` ·
+> `--status-unknown` 이다. Informational Change 는 **중립**이다 — Brand Blue 는 상호작용 색이라
+> 아래 원문의 "Blue" 는 쓰지 않는다. Brand Blue · Data Cyan · Fresh Mint 는 상태를 나타내지 않는다.
 
 색상만으로 상태를 표현하지 않는다.
 

@@ -14,6 +14,7 @@
 | [아키텍처](architecture/README.md) | Probe · Observation · Scheduler · 저장 · 관측성 · 배포 |
 | [Registry](REGISTRY.md) | Dataset Registry 형식과 Dataset 선정 기준 |
 | [UI](UI.md) | UI 전략 · UI Lab · Public Status 화면 원칙 |
+| [시각 정체성](VISUAL_IDENTITY.md) | KPubData Studio Brand v2 — 로고 · 토큰 · 상태색 · 접근성 (고정) |
 | [테스트](TESTING.md) | 테스트 전략과 CI 게이트 |
 | [결정 기록](decisions/README.md) | ADR 과 PRD 결정 로그 대응표 |
 | [API 계약](https://github.com/yeongseon/kpubdata-watch/blob/main/API_CONTRACT.md) | Public Read API 와 운영자 CLI (초안, English) |

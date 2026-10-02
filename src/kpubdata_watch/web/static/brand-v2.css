@@ -1,0 +1,172 @@
+/*
+ * KPubData Studio Brand v2 design tokens — the single token source for KPubData Watch (#68).
+ *
+ * Copied verbatim from yeongseon/kpubdata-studio src/globals.css lines 19-178 at commit
+ * 1fbf57e41a32b3ef9cd353666beb1fcd0d6b97e9 (the light, dark and OS-dark custom-property
+ * blocks). Studio Brand v2 is canonical: do not edit a value here. To follow a Studio change,
+ * copy the blocks again, update the commit above and the table in docs/VISUAL_IDENTITY.md,
+ * and run `python scripts/check_brand_tokens.py`. Public Status (web/static) and every
+ * UI Lab prototype link this file; neither defines these properties itself.
+ * The references to #628, #631, #667 and __tests__/ in the comments below are Studio's.
+ */
+
+/*
+ * Semantic design tokens — Brand v2 (#628, docs/brand/VISUAL_IDENTITY.md §3).
+ *
+ * Roles are separate tokens: brand-primary (interaction), data-accent (data emphasis),
+ * brand-secondary (Fresh Mint) and status-* never share a value. Light is the canonical
+ * theme; dark is an alternative with the same hierarchy. The Brand v1 catch-all interaction
+ * names are retired (#667) and must not come back (__tests__/brandV2Gate.test.ts):
+ * interaction is `brand-primary`, its tint `brand-subtle`, blue text `brand-text`.
+ * `--ring` and `--sidebar-*` are role names (focus ring, the sidebar region), not v1 colours.
+ * docs/prototype/warehouse/tokens.css carries the same values (__tests__/brandV2Gate.test.ts).
+ * Contrast: text pairs 4.5:1, chart marks 3:1 — the values for secondary text and the
+ * strong chart variants were decided in #631.
+ */
+:root,
+:root[data-theme="light"] {
+  /* Brand (#628) — interaction, never a status. */
+  --brand-primary: #2563eb;
+  --brand-primary-foreground: #ffffff;
+  /* A tint behind selected items, and Brand Blue as text (links, selected labels). */
+  --brand-subtle: #eaf1fe;
+  --brand-text: var(--brand-primary);
+  /* Data accent — data emphasis only, never a CTA. The strong variants are for chart
+     marks, which need 3:1 against the surface (#631). */
+  --data-accent: #06b6d4;
+  --data-accent-strong: #0891b2;
+  /* Fresh Mint — secondary brand/data accent. Never success. */
+  --brand-secondary: #14b8a6;
+  --brand-secondary-strong: #0d9488;
+
+  /* Neutral surfaces. */
+  --background: #f7f8f3;
+  --foreground: #172033;
+  --card: #ffffff;
+  --card-foreground: #172033;
+  --muted: #f1f3ef;
+  --muted-foreground: #5e6e84;
+  --border: #e5e7e2;
+  --input: #d5d9d2;
+  --ring: var(--brand-primary);
+
+  /* Light sidebar (#628 §9): neutral, and only the active item is blue. */
+  --sidebar: #f1f4f4;
+  --sidebar-foreground: #172033;
+  --sidebar-muted: #5e6e84;
+  --sidebar-border: #e5e7e2;
+  --sidebar-hover: #e6eaea;
+  --sidebar-active: #eaf1fe;
+  --sidebar-active-foreground: var(--brand-primary);
+
+  /* Status (#425, docs/brand/VISUAL_IDENTITY.md §3.2) — never the brand colour. */
+  --status-success: #15803d;
+  --status-success-subtle: #dcfce7;
+  --status-success-border: #86efac;
+  --status-warning: #b45309;
+  --status-warning-subtle: #fef3c7;
+  --status-warning-border: #fcd34d;
+  --status-failure: #b91c1c;
+  --status-failure-subtle: #fee2e2;
+  --status-failure-border: #fca5a5;
+  --status-unknown: #52525b;
+  --status-unknown-subtle: #f4f4f5;
+  --status-unknown-border: #d4d4d8;
+  --status-success-solid: #15803d;
+  --status-warning-solid: #b45309;
+  --status-failure-solid: #b91c1c;
+  --status-unknown-solid: #52525b;
+}
+
+:root[data-theme="dark"] {
+  /* Neutral charcoal, no pure black, almost no navy (#628 §10). Brand Blue fills keep
+     #2563eb with white text; blue text on these surfaces uses the lighter #60a5fa. */
+  --brand-primary: #2563eb;
+  --brand-primary-foreground: #ffffff;
+  --brand-subtle: #1e2836;
+  --brand-text: #60a5fa;
+  --data-accent: #06b6d4;
+  --data-accent-strong: #06b6d4;
+  --brand-secondary: #14b8a6;
+  --brand-secondary-strong: #14b8a6;
+  --background: #15171a;
+  --foreground: #e8eaed;
+  --card: #1c1f23;
+  --card-foreground: #e8eaed;
+  --muted: #23272c;
+  --muted-foreground: #9aa3ae;
+  --border: #2e3238;
+  --input: #3a3f46;
+  --ring: #60a5fa;
+  --sidebar: #1a1d21;
+  --sidebar-foreground: #e8eaed;
+  --sidebar-muted: #9aa3ae;
+  --sidebar-border: #2a2e34;
+  --sidebar-hover: #23272c;
+  --sidebar-active: #1e2836;
+  --sidebar-active-foreground: #60a5fa;
+
+  --status-success: #4ade80;
+  --status-success-subtle: #052e16;
+  --status-success-border: #166534;
+  --status-warning: #fbbf24;
+  --status-warning-subtle: #422006;
+  --status-warning-border: #92400e;
+  --status-failure: #f87171;
+  --status-failure-subtle: #450a0a;
+  --status-failure-border: #991b1b;
+  --status-unknown: #a1a1aa;
+  --status-unknown-subtle: #27272a;
+  --status-unknown-border: #3f3f46;
+  --status-success-solid: #16a34a;
+  --status-warning-solid: #d97706;
+  --status-failure-solid: #dc2626;
+  --status-unknown-solid: #71717a;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    /* Neutral charcoal, no pure black, almost no navy (#628 §10). Brand Blue fills keep
+       #2563eb with white text; blue text on these surfaces uses the lighter #60a5fa. */
+    --brand-primary: #2563eb;
+    --brand-primary-foreground: #ffffff;
+    --brand-subtle: #1e2836;
+    --brand-text: #60a5fa;
+    --data-accent: #06b6d4;
+    --data-accent-strong: #06b6d4;
+    --brand-secondary: #14b8a6;
+    --brand-secondary-strong: #14b8a6;
+    --background: #15171a;
+    --foreground: #e8eaed;
+    --card: #1c1f23;
+    --card-foreground: #e8eaed;
+    --muted: #23272c;
+    --muted-foreground: #9aa3ae;
+    --border: #2e3238;
+    --input: #3a3f46;
+    --ring: #60a5fa;
+    --sidebar: #1a1d21;
+    --sidebar-foreground: #e8eaed;
+    --sidebar-muted: #9aa3ae;
+    --sidebar-border: #2a2e34;
+    --sidebar-hover: #23272c;
+    --sidebar-active: #1e2836;
+    --sidebar-active-foreground: #60a5fa;
+    --status-success: #4ade80;
+    --status-success-subtle: #052e16;
+    --status-success-border: #166534;
+    --status-warning: #fbbf24;
+    --status-warning-subtle: #422006;
+    --status-warning-border: #92400e;
+    --status-failure: #f87171;
+    --status-failure-subtle: #450a0a;
+    --status-failure-border: #991b1b;
+    --status-unknown: #a1a1aa;
+    --status-unknown-subtle: #27272a;
+    --status-unknown-border: #3f3f46;
+    --status-success-solid: #16a34a;
+    --status-warning-solid: #d97706;
+    --status-failure-solid: #dc2626;
+    --status-unknown-solid: #71717a;
+  }
+}
