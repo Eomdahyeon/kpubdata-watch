@@ -1,0 +1,152 @@
+[
+  {
+    "dataset_id": "visitkorea-tourism",
+    "name": "국문 관광정보",
+    "provider": "한국관광공사",
+    "health": "healthy",
+    "checked_label": "Checked 3m ago",
+    "checked_exact": "2026-10-02 21:12:43 KST",
+    "issue": null,
+    "change": null
+  },
+  {
+    "dataset_id": "datago.apt_trade",
+    "name": "아파트 매매 실거래가",
+    "provider": "국토교통부",
+    "health": "healthy",
+    "checked_label": "Checked 8m ago",
+    "checked_exact": "2026-10-02 21:07:10 KST",
+    "issue": null,
+    "change": null
+  },
+  {
+    "dataset_id": "datago.apt_basic_info",
+    "name": "공동주택 기본정보",
+    "provider": "국토교통부",
+    "health": "healthy",
+    "checked_label": "Checked 12m ago",
+    "checked_exact": "2026-10-02 21:03:02 KST",
+    "issue": null,
+    "change": null
+  },
+  {
+    "dataset_id": "datago.underground_safety",
+    "name": "지하안전정보",
+    "provider": "국토교통부",
+    "health": "degraded",
+    "checked_label": "Checked 2m ago",
+    "checked_exact": "2026-10-02 21:13:51 KST",
+    "issue": "Freshness delayed 1h 12m",
+    "change": null
+  },
+  {
+    "dataset_id": "datago.apt_rent",
+    "name": "아파트 전월세 실거래가",
+    "provider": "국토교통부",
+    "health": "critical",
+    "checked_label": "Checked 1m ago",
+    "checked_exact": "2026-10-02 21:14:40 KST",
+    "issue": "Breaking contract change — field removed",
+    "change": null
+  },
+  {
+    "dataset_id": "seoul.bus_realtime",
+    "name": "버스정보(실시간 위치)",
+    "provider": "서울특별시",
+    "health": "degraded",
+    "checked_label": "Checked 2m ago",
+    "checked_exact": "2026-10-02 21:13:22 KST",
+    "issue": "Freshness delayed 42m",
+    "change": null
+  },
+  {
+    "dataset_id": "seoul.public_bike",
+    "name": "공공자전거(따릉이) 대여소 현황",
+    "provider": "서울특별시",
+    "health": "critical",
+    "checked_label": "Checked 4m ago",
+    "checked_exact": "2026-10-02 21:11:05 KST",
+    "issue": "Availability failure — HTTP 500 (3 consecutive)",
+    "change": null
+  },
+  {
+    "dataset_id": "pps.product_list",
+    "name": "물품목록정보",
+    "provider": "조달청",
+    "health": "healthy",
+    "checked_label": "Checked 5m ago",
+    "checked_exact": "2026-10-02 21:10:18 KST",
+    "issue": null,
+    "change": "Contract changed"
+  },
+  {
+    "dataset_id": "localdata.general_restaurant",
+    "name": "일반음식점 인허가 정보",
+    "provider": "행정안전부(지방행정인허가)",
+    "health": "healthy",
+    "checked_label": "Checked 6m ago",
+    "checked_exact": "2026-10-02 21:09:47 KST",
+    "issue": null,
+    "change": null
+  },
+  {
+    "dataset_id": "datago.air_quality",
+    "name": "대기오염정보",
+    "provider": "한국환경공단",
+    "health": "healthy",
+    "checked_label": "Checked 14m ago",
+    "checked_exact": "2026-10-02 21:01:09 KST",
+    "issue": null,
+    "change": null
+  },
+  {
+    "dataset_id": "datago.airkorea_station_realtime",
+    "name": "에어코리아 측정소 실시간",
+    "provider": "한국환경공단",
+    "health": "degraded",
+    "checked_label": "Checked 9m ago",
+    "checked_exact": "2026-10-02 21:06:25 KST",
+    "issue": "Freshness delayed 55m",
+    "change": null
+  },
+  {
+    "dataset_id": "datago.social_enterprise",
+    "name": "사회적기업 현황",
+    "provider": "고용노동부",
+    "health": "healthy",
+    "checked_label": "Checked 18m ago",
+    "checked_exact": "2026-10-02 20:57:30 KST",
+    "issue": null,
+    "change": null
+  },
+  {
+    "dataset_id": "datago.hospital_info",
+    "name": "병원정보",
+    "provider": "건강보험심사평가원",
+    "health": "healthy",
+    "checked_label": "Checked 21m ago",
+    "checked_exact": "2026-10-02 20:54:02 KST",
+    "issue": null,
+    "change": null
+  },
+  {
+    "dataset_id": "kma.ultra_srt_ncst",
+    "name": "초단기실황조회",
+    "provider": "기상청",
+    "health": "unknown",
+    "checked_label": "Checked 7m ago",
+    "checked_exact": "2026-10-02 21:08:03 KST",
+    "issue": "Probe failed — APPLICATION_ERROR, not a dataset outage (D-009)",
+    "change": null
+  },
+  {
+    "dataset_id": "kostat.population_census",
+    "name": "인구총조사",
+    "provider": "통계청",
+    "health": "degraded",
+    "checked_label": "Checked 34m ago",
+    "checked_exact": "2026-10-02 20:41:16 KST",
+    "issue": "Volume 40% below expected range",
+    "change": null
+  }
+]

@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}KPubData Watch{% endblock %}</title>
+    <meta
+      name="description"
+      content="{% block description %}KPubData Watch — public data reliability observation for Korean public data APIs.{% endblock %}"
+    />
+    <link rel="icon" href="static/favicon.svg" type="image/svg+xml" />
+    {# Brand v2 is the single token source (kpubdata-watch#68). Everything below
+       reads colour only through var(--...) and never redefines a token here. #}
+    <link rel="stylesheet" href="static/brand-v2.css" />
+    <link rel="stylesheet" href="static/demo.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="shell-header">
+      <div class="shell-brand">
+        <img
+          class="brand-symbol"
+          src="static/kpubdata-symbol.svg"
+          width="24"
+          height="24"
+          alt=""
+        />
+        <span class="brand-lockup">
+          <span class="brand-name">KPubData</span>
+          <span class="brand-suffix">Watch</span>
+        </span>
+      </div>
+      <nav class="shell-nav" aria-label="Site">
+        <a href="docs/">Docs</a>
+        <a href="https://github.com/yeongseon/kpubdata-watch">GitHub</a>
+      </nav>
+    </header>
+
+    <div class="demo-banner" role="note">
+      <p lang="ko">데모 — 고정된 예시 데이터이며 실제 관측 결과가 아닙니다.</p>
+      <p lang="en">Demo — fixed sample data, not a live observation result.</p>
+    </div>
+
+    <main id="main">{% block content %}{% endblock %}</main>
+
+    <footer class="shell-footer">
+      <p>
+        KPubData Watch demo · <a href="docs/">Documentation</a> ·
+        <a href="https://github.com/yeongseon/kpubdata-watch">Source</a>
+      </p>
+    </footer>
+  </body>
+</html>

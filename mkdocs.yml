@@ -1,5 +1,5 @@
 site_name: KPubData Watch
-site_url: "https://yeongseon.github.io/kpubdata-watch/"
+site_url: "https://yeongseon.github.io/kpubdata-watch/docs/"
 site_description: 한국 공공데이터 신뢰성 관측
 repo_url: https://github.com/yeongseon/kpubdata-watch
 repo_name: yeongseon/kpubdata-watch
@@ -75,3 +75,4 @@ nav:
       - "0009 확인 횟수": decisions/0009-confirmation-counts-global-default.md
       - "0010 공개 History 기간": decisions/0010-public-history-default-period.md
       - "0011 공지 엔티티": decisions/0011-notice-entity-manual-linking.md
+      - "0012 Pages 데모": decisions/0012-pages-hosts-a-fixture-demo-not-the-service.md

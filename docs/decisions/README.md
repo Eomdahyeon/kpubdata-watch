@@ -17,6 +17,7 @@ KPubData Watch 의 설계 결정. 형식은 KPubData 시리즈의 ADR 과 같다
 | [0009](0009-confirmation-counts-global-default.md) | 확인 횟수는 전역 기본(2 실패 개시·2 성공 해소)을 두고 Registry 가 failures 만 1~3 조정 (#31) |
 | [0010](0010-public-history-default-period.md) | 공개 History 기본 기간은 30일, 조회 상한은 90일이다 (#32) |
 | [0011](0011-notice-entity-manual-linking.md) | 공지는 독립 엔티티이고 Incident·Change 에 N:N 수동 링크된다 (#35) |
+| [0012](0012-pages-hosts-a-fixture-demo-not-the-service.md) | GitHub Pages 는 고정 Fixture 기반 Public Status 데모와 문서만 호스팅한다 — 운영 서비스는 FastAPI + Worker + PostgreSQL 그대로다 (#78) |
 
 ## PRD 결정 로그 대응표
 

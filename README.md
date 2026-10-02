@@ -34,6 +34,12 @@ MVP 목표는 3개 이상 Provider 의 실제 공공 Dataset 10개를 지속 관
 
 ## 문서
 
+데모: <https://yeongseon.github.io/kpubdata-watch/> — Public Status 화면을 고정
+Fixture 데이터로 보여주는 정적 데모입니다. 실제 관측 결과가 아닙니다
+([ADR 0012](docs/decisions/0012-pages-hosts-a-fixture-demo-not-the-service.md)).
+
+문서 사이트: <https://yeongseon.github.io/kpubdata-watch/docs/>
+
 | 문서 | 내용 |
 |---|---|
 | [PRD](docs/PRD.md) | 제품 정의·문제·원칙·목표·비목표·성공 지표 |

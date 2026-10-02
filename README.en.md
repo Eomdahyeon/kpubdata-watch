@@ -37,6 +37,12 @@ least 3 providers continuously. The implementation order and the definition of d
 
 ## 문서
 
+Demo: <https://yeongseon.github.io/kpubdata-watch/> — a static demo of the Public
+Status page rendered from fixed fixture data. It is not a live observation result
+([ADR 0012](docs/decisions/0012-pages-hosts-a-fixture-demo-not-the-service.md)).
+
+Documentation site: <https://yeongseon.github.io/kpubdata-watch/docs/>
+
 | Document | Contents |
 |---|---|
 | [PRD](docs/PRD.md) | Product definition, problem, principles, goals, non-goals, success metrics |

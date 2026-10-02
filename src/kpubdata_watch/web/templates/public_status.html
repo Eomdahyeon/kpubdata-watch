@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}Public Data Health — KPubData Watch{% endblock %}
+{% block description %}A fixture-based demo of the KPubData Watch Public Status page: per-dataset health, checked time and the reason behind any Degraded, Critical or Unknown verdict.{% endblock %}
+
+{% block content %}
+<section class="status-header">
+  <h1>Public Data Health</h1>
+  <p class="status-subtitle">{{ total }} monitored datasets</p>
+</section>
+
+<section class="summary" aria-label="Health summary">
+  <ul class="summary-counts">
+    {% for key in health_order %}
+    <li class="count count-{{ key }}">
+      <span class="count-icon" aria-hidden="true">{{ health_meta[key].icon }}</span>
+      <span class="count-value">{{ counts[key] }}</span>
+      <span class="count-label">{{ health_meta[key].label }}</span>
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+
+<ul class="dataset-list">
+  {% for d in datasets %}
+  <li class="dataset-row status-{{ d.health }}">
+    <div class="dataset-main">
+      <span class="dataset-name">{{ d.name }}</span>
+      <span class="dataset-provider">{{ d.provider }}</span>
+    </div>
+    <div class="dataset-status-line">
+      <span class="status-badge status-{{ d.health }}">
+        <span class="status-icon" aria-hidden="true">{{ d.status_icon }}</span>
+        <span class="status-text">{{ d.status_label }}</span>
+      </span>
+      <span class="checked-at" title="{{ d.checked_exact }}">{{ d.checked_label }}</span>
+    </div>
+    {% if d.issue %}
+    <p class="dataset-issue">
+      <span class="dataset-issue-icon" aria-hidden="true">{{ d.issue_icon }}</span>
+      {{ d.issue }}
+    </p>
+    {% endif %}
+    {% if d.change %}
+    <p class="dataset-change">
+      <span class="dataset-change-icon" aria-hidden="true">{{ d.change_icon }}</span>
+      {{ d.change }}
+    </p>
+    {% endif %}
+  </li>
+  {% endfor %}
+</ul>
+{% endblock %}
