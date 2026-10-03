@@ -79,3 +79,4 @@ nav:
       - "0010 공개 History 기간": decisions/0010-public-history-default-period.md
       - "0011 공지 엔티티": decisions/0011-notice-entity-manual-linking.md
       - "0012 Pages 데모": decisions/0012-pages-hosts-a-fixture-demo-not-the-service.md
+      - "0013 Overview 와 History": decisions/0013-overview-now-and-history-views.md

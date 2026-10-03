@@ -557,11 +557,36 @@ Raw evidence second
 
 ## History UX
 
-<small>PRD §50</small>
+<small>PRD §50 · [ADR 0013](decisions/0013-overview-now-and-history-views.md), [ADR 0010](decisions/0010-public-history-default-period.md)</small>
 
-Dataset Detail에는 시간 흐름을 제공한다.
+Watch의 장기 자산은 단순 현재 상태가 아니라 History다. [ADR 0013](decisions/0013-overview-now-and-history-views.md)은
+이 History를 Overview(`/`, 현재 스냅샷)와 대칭인 별도 페이지
+History(`/history/`, 최근 30일)로 분리한다. 두 페이지는 같은 행(데이터셋)에
+다른 열을 쓴다 — Overview는 현재 health와 체크 4종(A/F/C/Q) 매트릭스, History는
+데이터셋 × 30일 상태 히트맵. 기간은 [ADR 0010](decisions/0010-public-history-default-period.md)의
+기본값(30일, 조회 상한 90일)을 그대로 따른다.
 
-예:
+History 페이지 구성:
+
+```text
+History                     Sep 3 – Oct 2, 2026 KST
+
+[일자별 비정상 데이터셋 수 — 30일 누적 막대: degraded / critical / unknown]
+
+Dataset             Provider        Sep 3 ... Oct 2   비정상 N일
+한국환경공단 대기질     환경부           ●●●▲✕●...●       3일
+...
+```
+
+히트맵의 각 칸은 그 날의 health 상태이고, 칸마다 심볼(●▲✕?)과
+`aria-label`/`title`(예: "2026-09-21 Degraded")을 함께 단다. 색은
+`--status-*` 토큰만 쓰고, 정상 칸은 옅게(`-subtle`), 비정상 칸만 진하게
+칠한다([Color Semantics](#color-semantics)).
+
+Dataset Detail에는 지금처럼 현재 상태와 30일 History strip을 함께 보여준다.
+이 구조는 바뀌지 않는다.
+
+예(Dataset Detail의 History strip):
 
 ```text
 Sep 30 21:12
@@ -583,15 +608,13 @@ Sep 27 10:21
 Recovered
 ```
 
-Watch의 장기 자산은 단순 현재 상태가 아니라 History다.
-
 ## Charts
 
-<small>PRD §51</small>
+<small>PRD §51 · [ADR 0013](decisions/0013-overview-now-and-history-views.md)</small>
 
 Chart는 최소화한다.
 
-MVP에서 다음과 같은 Dashboard는 만들지 않는다.
+MVP에서 다음과 같은 메트릭 대시보드는 만들지 않는다.
 
 ```text
 Requests
@@ -604,9 +627,17 @@ Null Ratio
 ...
 ```
 
-대신 의미를 우선한다.
+이 금지의 반대편 — 그래서 무엇은 그려도 되는가 — 를 [ADR 0013](decisions/0013-overview-now-and-history-views.md)이
+두 가지로 한정해 명시한다.
 
-예:
+1. **상태 이력 시각화** — health 또는 check 상태를 시간축에 표시하는 형태.
+   History의 30일 히트맵, Dataset Detail의 history strip, 일자별 비정상
+   데이터셋 수 막대가 여기 속한다. 그리는 값은 상태뿐이고, 상태를 숫자로
+   바꾼 파생 메트릭(가동률 %, 평균 지연 등)은 그리지 않는다.
+2. **Evidence 시각화** — 하나의 탐지에 대한 expected vs observed를 그리는
+   형태. evidence에 실제로 있는 값만 그린다.
+
+예(Evidence 시각화, quality/volume):
 
 ```text
 Volume
@@ -619,7 +650,10 @@ Expected range
 PASS
 ```
 
-추후 필요 시 Sparkline을 추가할 수 있다.
+두 범주 밖의 시각화(메트릭 시계열, 집계 대시보드)는 금지가 그대로 적용된다.
+"대시보드처럼 보이는가"가 아니라 "상태 이력인가, evidence인가, 둘 다
+아닌가"로 판단한다. 차트 라이브러리나 외부 CDN, 클라이언트 JS 렌더링은 쓰지
+않는다 — Jinja 매크로가 CSS grid와 인라인 SVG를 서버에서 렌더링한다.
 
 ## Visual Design Principles
 
