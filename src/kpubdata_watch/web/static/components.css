@@ -15,7 +15,46 @@
  * opens, not through the Change's own colour.
  */
 
-/* ---- HealthSummary: counts, not KPI cards. ---- */
+/* ---- HealthSummary: a headline, a decorative ratio bar, then counts. ---- */
+
+.health-headline {
+  margin: 0 0 8px;
+  font-size: var(--text-section-title);
+  line-height: var(--text-section-title--line-height);
+  font-weight: var(--text-section-title--font-weight);
+}
+
+/* Decorative only (aria-hidden): `.summary-counts` below says the same thing in
+   text, so the bar's colour is never the only way to read the proportions. */
+.status-ratio-bar {
+  display: flex;
+  width: 100%;
+  height: 8px;
+  margin: 0 0 12px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--muted);
+}
+
+.status-ratio-segment {
+  height: 100%;
+}
+
+.status-ratio-segment--healthy {
+  background: var(--status-success-solid);
+}
+
+.status-ratio-segment--degraded {
+  background: var(--status-warning-solid);
+}
+
+.status-ratio-segment--critical {
+  background: var(--status-failure-solid);
+}
+
+.status-ratio-segment--unknown {
+  background: var(--status-unknown-solid);
+}
 
 .summary-counts {
   display: flex;
@@ -347,6 +386,71 @@
 
 .check-not_applicable {
   color: var(--muted-foreground);
+  font-weight: 500;
+}
+
+/* ---- CheckMatrix (issue 110): A/F/C/Q as four small cells, reused in catalog.html. ---- */
+
+.check-matrix {
+  display: flex;
+  gap: 4px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.check-cell {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 20px;
+  padding: 0 2px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  font-size: var(--text-meta);
+  line-height: 1;
+  font-weight: 600;
+}
+
+.check-cell:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* A passing check keeps the subtle fill; only a problem takes the solid fill, so
+   the eye finds trouble across the row without colour being the only signal
+   (same rule as HistoryGrid). */
+.check-cell-pass {
+  color: var(--status-success);
+  background: var(--status-success-subtle);
+  border-color: var(--status-success-border);
+}
+
+.check-cell-warn {
+  background: var(--status-warning-solid);
+  color: var(--status-warning-subtle);
+  border-color: var(--status-warning-solid);
+}
+
+.check-cell-fail {
+  background: var(--status-failure-solid);
+  color: var(--status-failure-subtle);
+  border-color: var(--status-failure-solid);
+}
+
+.check-cell-unknown {
+  background: var(--status-unknown-solid);
+  color: var(--status-unknown-subtle);
+  border-color: var(--status-unknown-solid);
+}
+
+/* Not applicable is not a health state: neutral surface tokens only, never a
+   --status-* colour, so it cannot be mistaken for Pass or any problem state. */
+.check-cell-not_applicable {
+  background: var(--muted);
+  color: var(--muted-foreground);
+  border-color: var(--border);
   font-weight: 500;
 }
 

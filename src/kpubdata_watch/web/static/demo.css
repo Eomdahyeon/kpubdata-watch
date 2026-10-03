@@ -248,7 +248,8 @@ main {
   margin: 4px 0 0;
 }
 
-.issue-meta {
+.issue-meta,
+.issue-history {
   margin: 4px 0 0;
   color: var(--muted-foreground);
   font-size: var(--text-table);

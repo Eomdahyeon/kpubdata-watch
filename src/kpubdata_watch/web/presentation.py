@@ -43,6 +43,18 @@ CHECK_LABELS = {
     "contract": "Contract",
     "quality": "Quality",
 }
+# The check order the matrix and the catalog's Checks column always use (#110);
+# matches `kpubdata_watch.api.read_models.public.CHECK_NAMES`.
+CHECK_NAMES: tuple[str, ...] = ("availability", "freshness", "contract", "quality")
+# A one-letter abbreviation for the matrix (#110): a full name always comes with it
+# (the cell's aria-label/title, or the column header), so the letter is never the
+# only way to tell the checks apart.
+CHECK_ABBR: dict[str, str] = {
+    "availability": "A",
+    "freshness": "F",
+    "contract": "C",
+    "quality": "Q",
+}
 # Incident severity -> the health tone its badge uses; `info` stays neutral (#87).
 SEVERITY_TONE: dict[str, str | None] = {"critical": "critical", "warning": "degraded", "info": None}
 SEVERITY_LABELS = {"critical": "Critical", "warning": "Warning", "info": "Info"}
@@ -154,6 +166,8 @@ def environment(templates_dir: Path = TEMPLATES_DIR) -> Environment:
         severity_labels=SEVERITY_LABELS,
         incident_status_labels=INCIDENT_STATUS_LABELS,
         check_labels=CHECK_LABELS,
+        check_names=CHECK_NAMES,
+        check_abbr=CHECK_ABBR,
         nav_items=NAV_ITEMS,
         asset_url=asset_url,
         page_url=page_url,

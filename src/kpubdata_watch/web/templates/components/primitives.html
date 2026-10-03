@@ -94,13 +94,50 @@
 </div>
 {%- endmacro %}
 
-{% macro health_summary(counts) -%}
+{% macro health_summary(headline, status_ratio, counts) -%}
+{#-
+  Overview's headline (issue 110): a sentence built from `counts` (never written here
+  as a number), a decorative status-ratio bar scaled to `status_ratio` (a percent
+  per health state, computed in build_demo.py like DailyCountsBar's heights), and
+  the same per-state counts as before, now the bar's accessible legend. The bar
+  itself carries no meaning JAWS/VoiceOver would miss: `counts` below says the
+  same thing in text, so the bar is aria-hidden.
+-#}
+<p class="health-headline">{{ headline }}</p>
+<div class="status-ratio-bar" aria-hidden="true">
+  {%- for key in health_order %}
+  {%- if status_ratio[key] %}
+  <span class="status-ratio-segment status-ratio-segment--{{ key }}" style="width: {{ status_ratio[key] }}%"></span>
+  {%- endif %}
+  {%- endfor %}
+</div>
 <ul class="summary-counts">
   {%- for key in health_order %}
   <li class="count count-{{ key }}">
     <span class="count-icon" aria-hidden="true">{{ health_meta[key].icon }}</span>
     <span class="count-value">{{ counts[key] }}</span>
     <span class="count-label">{{ health_meta[key].label }}</span>
+  </li>
+  {%- endfor %}
+</ul>
+{%- endmacro %}
+
+{% macro check_matrix(checks) -%}
+{#-
+  The dataset x check matrix cell (issue 110): A/F/C/Q in a fixed order, each a small
+  cell with its own icon, title and aria-label — "Availability: Pass" and so on —
+  so the letter is never the only way to tell checks apart. Reused as-is for the
+  Overview matrix and as the Checks column in catalog.html. `not_applicable` uses
+  the neutral surface tokens (--muted, --border), never a --status-* token, so it
+  cannot be mistaken for a health state (docs/UI.md Color Semantics).
+-#}
+<ul class="check-matrix">
+  {%- for name in check_names %}
+  {%- set result = checks[name] %}
+  {%- set meta = check_meta[result.status] %}
+  {%- set label = check_labels[name] ~ ": " ~ meta.label ~ (" · " ~ result.summary if result.summary else "") %}
+  <li class="check-cell check-cell-{{ result.status }}" tabindex="0" title="{{ label }}" aria-label="{{ label }}">
+    <span aria-hidden="true">{{ check_abbr[name] }}{{ meta.icon }}</span>
   </li>
   {%- endfor %}
 </ul>

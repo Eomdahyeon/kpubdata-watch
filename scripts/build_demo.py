@@ -37,7 +37,7 @@ from datetime import date
 from pathlib import Path
 from typing import Any
 
-from kpubdata_watch.api.read_models.public import CHECK_NAMES
+from kpubdata_watch.api.read_models.public import CHECK_NAMES, DatasetHistory
 from kpubdata_watch.api.read_models.snapshot import ProductSnapshot
 from kpubdata_watch.web.presentation import (
     CHANGE_ICON,
@@ -128,6 +128,7 @@ def dataset_rows(snapshot: ProductSnapshot) -> list[dict[str, Any]]:
                 "name": dataset.name,
                 "provider": dataset.provider.name,
                 "health": dataset.health,
+                "checks": dataset.checks,
                 "checked_label": f"Checked {kst_time(dataset.last_checked_at)}",
                 "checked_at": dataset.last_checked_at.isoformat(),
                 "checked_exact": kst_datetime(dataset.last_checked_at),
@@ -136,6 +137,16 @@ def dataset_rows(snapshot: ProductSnapshot) -> list[dict[str, Any]]:
             }
         )
     return rows
+
+
+def _dataset_abnormal_days(history: DatasetHistory) -> int:
+    """How many of a dataset's 30-day history days were not Healthy (#109, #110).
+
+    The single source of this count: History's heatmap rows and the abnormal-day
+    line on an Overview active issue both call this instead of each re-deriving
+    it from `history.days`.
+    """
+    return sum(1 for day in history.days if day.health != "healthy")
 
 
 def health_counts(datasets: list[dict[str, Any]]) -> dict[str, int]:
@@ -157,8 +168,16 @@ def _shell(snapshot: ProductSnapshot, root: str, active_nav: str) -> dict[str, A
 
 
 def overview_context(snapshot: ProductSnapshot, built_pages: frozenset[str]) -> dict[str, Any]:
-    """Active issues, recent changes and the dataset list for the Overview (#84)."""
+    """What is wrong now, what changed, and the dataset x check matrix (#84, #110).
+
+    Overview and History are symmetric (ADR 0013): the same dataset rows, but
+    Overview's own column is the current check matrix, not the 30-day heatmap.
+    An active issue's abnormal-day line reuses History's own count
+    (`_dataset_abnormal_days`) instead of re-deriving it here.
+    """
     datasets = {d.id: d for d in snapshot.datasets}
+    history_days = len(snapshot.histories[0].days) if snapshot.histories else 0
+    abnormal_by_dataset = {h.dataset_id: _dataset_abnormal_days(h) for h in snapshot.histories}
     active = [i for i in snapshot.incidents if i.status in {"open", "ongoing"}]
     active.sort(key=lambda i: (_SEVERITY_RANK[i.severity], i.detected_at))
     issues = [
@@ -173,6 +192,8 @@ def overview_context(snapshot: ProductSnapshot, built_pages: frozenset[str]) -> 
             "summary": i.summary,
             "detected_at": i.detected_at,
             "duration": duration(i.started_at, snapshot.generated_at),
+            "history_days": history_days,
+            "abnormal_days": abnormal_by_dataset.get(i.dataset_id, 0),
         }
         for i in active
     ]
@@ -182,13 +203,29 @@ def overview_context(snapshot: ProductSnapshot, built_pages: frozenset[str]) -> 
     ]
     rows = sorted(dataset_rows(snapshot), key=lambda row: _HEALTH_RANK[row["health"]])
     preview = "datasets" in built_pages
+    counts = health_counts(rows)
+    total = len(rows)
+    problem_count = total - counts["healthy"]
+    headline = (
+        f"{total}개 중 {problem_count}개에 문제가 있습니다."
+        if problem_count
+        else f"{total}개 모두 정상입니다."
+    )
+    # One bar segment per health state, as a percentage of `total`; a day's own
+    # tallest-neighbour scaling (`_DAILY_BAR_HEIGHT_PX`) does not apply here since
+    # this bar always sums to the whole dataset count, not one day's count.
+    status_ratio = {key: round(counts[key] / total * 100) if total else 0 for key in HEALTH_ORDER}
+    matrix_summary = f"{total}개 데이터셋의 체크 상태를 현재 심각도 순으로 보여줍니다."
     return {
         "active_issues": issues,
         "recent_changes": changes,
         "datasets": rows[:PREVIEW_SIZE] if preview else rows,
         "preview": preview,
-        "counts": health_counts(rows),
-        "total": len(rows),
+        "counts": counts,
+        "total": total,
+        "headline": headline,
+        "status_ratio": status_ratio,
+        "matrix_summary": matrix_summary,
     }
 
 
@@ -238,7 +275,7 @@ def history_context(snapshot: ProductSnapshot) -> dict[str, Any]:
     heatmap_rows: list[dict[str, Any]] = []
     for history in snapshot.histories:
         dataset = snapshot.dataset(history.dataset_id)
-        abnormal_days = sum(1 for day in history.days if day.health != "healthy")
+        abnormal_days = _dataset_abnormal_days(history)
         heatmap_rows.append(
             {
                 "dataset_id": dataset.id,
@@ -357,6 +394,7 @@ def render_catalog(snapshot: ProductSnapshot) -> str:
                 "provider_name": dataset.provider.name,
                 "health": dataset.health,
                 "checks": failing,
+                "check_results": dataset.checks,
                 "incident": snapshot.incident(dataset.active_incident_ids[0])
                 if dataset.active_incident_ids
                 else None,

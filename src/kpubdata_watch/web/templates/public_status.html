@@ -1,10 +1,13 @@
 {% extends "base.html" %}
 {% import "components/primitives.html" as ui with context %}
 {#-
-  Overview (#84): what is wrong right now, then what changed, then the datasets.
-  Context: `counts`, `total`, `active_issues` and `recent_changes` (newest first),
-  `datasets` (issues first), `preview` (true when the full catalog exists and this
-  page shows only part of the list).
+  Overview (#84, issue 110): what is wrong right now, then what changed, then the
+  dataset x check matrix. Context: `counts`, `total`, `headline` and
+  `status_ratio` (the HealthSummary bar), `active_issues` (each with
+  `history_days`/`abnormal_days`, History's own count, ADR 0013) and
+  `recent_changes` (newest first), `datasets` (issues first, each with `checks`
+  for the matrix), `preview` (true when the full catalog exists and this page
+  shows only part of the list).
 -#}
 
 {% block title %}Public Data Health — KPubData Watch{% endblock %}
@@ -25,7 +28,7 @@
 </section>
 
 <section class="summary" aria-label="Health summary">
-  {{ ui.health_summary(counts) }}
+  {{ ui.health_summary(headline, status_ratio, counts) }}
 </section>
 
 {% call ui.panel("Active Issues", "active-issues", active_issues | length) %}
@@ -41,6 +44,10 @@
     <p class="issue-meta">
       First detected {{ issue.detected_at | kst_time }} · {{ issue.duration }}
       {%- if "incident" in built_pages %} · <a href="{{ page_url('incident', issue.id) }}">View →</a>{% endif %}
+    </p>
+    <p class="issue-history">
+      최근 {{ issue.history_days }}일 중 비정상 {{ issue.abnormal_days }}일
+      {%- if "history" in built_pages %} · <a href="{{ page_url('history') }}">History 보기 →</a>{% endif %}
     </p>
   </li>
   {%- endfor %}
@@ -73,11 +80,36 @@
 {% endcall %}
 
 {% call ui.panel("Datasets", "datasets") %}
-<ul class="dataset-list">
-  {% for d in datasets %}
-  {{ ui.dataset_row(d) }}
-  {% endfor %}
-</ul>
+<div class="table-scroll">
+  <table class="catalog-table">
+    <caption class="sr-only">Dataset health by check, {{ total }} datasets, sorted by current severity</caption>
+    <thead>
+      <tr>
+        <th scope="col">Dataset</th>
+        <th scope="col">Provider</th>
+        <th scope="col">Health</th>
+        <th scope="col" aria-label="Checks (Availability, Freshness, Contract, Quality)">Checks</th>
+      </tr>
+    </thead>
+    <tbody>
+      {%- for d in datasets %}
+      <tr>
+        <th scope="row">
+          {%- if "dataset" in built_pages -%}
+          <a class="dataset-name" href="{{ page_url('dataset', d.dataset_id) }}">{{ d.name }}</a>
+          {%- else -%}
+          {{ d.name }}
+          {%- endif -%}
+        </th>
+        <td>{{ d.provider }}</td>
+        <td>{{ ui.status_badge(d.health) }}</td>
+        <td>{{ ui.check_matrix(d.checks) }}</td>
+      </tr>
+      {%- endfor %}
+    </tbody>
+  </table>
+</div>
+<p class="sr-only">{{ matrix_summary }}</p>
 {%- if preview %}
 <p class="panel-note"><a class="view-all" href="{{ page_url('datasets') }}">View all datasets</a></p>
 {%- endif %}

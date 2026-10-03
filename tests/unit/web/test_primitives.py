@@ -16,6 +16,7 @@ import pytest
 
 from kpubdata_watch.web.presentation import (
     CHANGE_ICON,
+    CHECK_META,
     HEALTH_META,
     HEALTH_ORDER,
     STATIC_DIR,
@@ -60,12 +61,68 @@ def test_unknown_and_critical_differ_in_icon_text_and_colour() -> None:
 
 def test_health_summary_lists_every_state_in_order() -> None:
     counts = {"healthy": 8, "degraded": 4, "critical": 2, "unknown": 1}
-    html = render("{{ ui.health_summary(counts) }}", counts=counts)
+    ratio = {"healthy": 53, "degraded": 27, "critical": 13, "unknown": 7}
+    html = render(
+        "{{ ui.health_summary(headline, status_ratio, counts) }}",
+        headline="15개 중 7개에 문제가 있습니다.",
+        status_ratio=ratio,
+        counts=counts,
+    )
+    assert '<p class="health-headline">15개 중 7개에 문제가 있습니다.</p>' in html
     positions = [html.index(f"count-{key}") for key in HEALTH_ORDER]
     assert positions == sorted(positions)
     for key in HEALTH_ORDER:
         assert HEALTH_META[key]["label"] in html
         assert f'<span class="count-value">{counts[key]}</span>' in html
+
+
+def test_health_summary_ratio_bar_is_decorative_and_skips_zero_segments() -> None:
+    counts = {"healthy": 15, "degraded": 0, "critical": 0, "unknown": 0}
+    ratio = {"healthy": 100, "degraded": 0, "critical": 0, "unknown": 0}
+    html = render(
+        "{{ ui.health_summary(headline, status_ratio, counts) }}",
+        headline="15개 모두 정상입니다.",
+        status_ratio=ratio,
+        counts=counts,
+    )
+    assert '<div class="status-ratio-bar" aria-hidden="true">' in html
+    assert html.count("status-ratio-segment--") == 1
+    assert 'class="status-ratio-segment status-ratio-segment--healthy" style="width: 100%"' in html
+
+
+@pytest.mark.parametrize(
+    ("status", "summary"),
+    [
+        ("pass", None),
+        ("warn", "지연 42분"),
+        ("fail", "HTTP 500"),
+        ("unknown", None),
+        ("not_applicable", "freshness.enabled = false"),
+    ],
+)
+def test_check_matrix_renders_every_check_state(status: str, summary: str | None) -> None:
+    from kpubdata_watch.api.read_models.public import CheckResult, Checks
+
+    checks = Checks(
+        availability=CheckResult(status=status, summary=summary),
+        freshness=CheckResult(status="pass"),
+        contract=CheckResult(status="pass"),
+        quality=CheckResult(status="pass"),
+    )
+    html = render("{{ ui.check_matrix(checks) }}", checks=checks)
+    assert f'class="check-cell check-cell-{status}"' in html
+    label = f"Availability: {CHECK_META[status]['label']}"
+    if summary:
+        label += f" · {summary}"
+    assert f'title="{label}"' in html
+    assert f'aria-label="{label}"' in html
+    assert html.count('class="check-cell ') == 4
+
+
+def test_check_matrix_not_applicable_uses_neutral_tokens_not_a_status_colour() -> None:
+    rule = _css_rule(".check-cell-not_applicable")
+    assert "--status-" not in rule
+    assert "--muted" in rule and "--border" in rule
 
 
 def test_change_badge_is_informational_and_never_a_health_colour() -> None:

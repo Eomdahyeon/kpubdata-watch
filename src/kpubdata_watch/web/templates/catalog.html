@@ -1,10 +1,12 @@
 {% extends "base.html" %}
 {% import "components/primitives.html" as ui with context %}
 {#-
-  Dataset catalog (#85): every dataset as a table row; the whole row leads to its
-  detail page. The filters are a progressive enhancement: static/catalog.js
-  reveals the form and filters rows on their data attributes. Context: `rows`,
-  `providers` ((id, name) pairs, sorted), `total`.
+  Dataset catalog (#85, issue 110): every dataset as a table row; the whole row leads
+  to its detail page. The filters are a progressive enhancement: static/catalog.js
+  reveals the form and filters rows on their data attributes. Context: `rows`
+  (each with `check_results`, the dataset's four CheckResult objects, for the
+  Checks column's check_matrix cell), `providers` ((id, name) pairs, sorted),
+  `total`.
 -#}
 
 {% block title %}Datasets — KPubData Watch{% endblock %}
@@ -62,6 +64,7 @@
         <th scope="col">Dataset</th>
         <th scope="col">Provider</th>
         <th scope="col">Health</th>
+        <th scope="col" aria-label="Checks (Availability, Freshness, Contract, Quality)">Checks</th>
         <th scope="col">Active issue</th>
         <th scope="col">Latest change</th>
         <th scope="col">Last checked</th>
@@ -76,6 +79,7 @@
         </td>
         <td>{{ row.provider_name }}</td>
         <td>{{ ui.status_badge(row.health) }}</td>
+        <td>{{ ui.check_matrix(row.check_results) }}</td>
         <td>
           {%- if row.incident %}
           <a class="cell-link" href="{{ page_url('incident', row.incident.id) }}">{{ row.incident.title }}</a>

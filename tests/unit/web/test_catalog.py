@@ -65,6 +65,19 @@ def test_the_catalog_lists_every_dataset(catalog: str) -> None:
         assert f'<th scope="col">{column}</th>' in catalog
 
 
+def test_the_catalog_has_a_checks_column_reusing_the_matrix_cell(catalog: str) -> None:
+    # The Checks column header (issue 110) and every row's check_matrix cell —
+    # the same macro the Overview matrix uses, per row with its own 4 cells.
+    assert (
+        '<th scope="col" aria-label="Checks (Availability, Freshness, Contract, '
+        'Quality)">Checks</th>' in catalog
+    )
+    assert catalog.count('class="check-matrix"') == 15
+    blocks = catalog.split('<tr class="catalog-row"')[1:]
+    rent = next(block for block in blocks if 'data-id="datago.apt_rent"' in block)
+    assert 'class="check-cell check-cell-fail"' in rent
+
+
 def test_each_row_carries_what_the_filters_need(catalog: str) -> None:
     rent = next(row for row in rows(catalog) if 'data-id="datago.apt_rent"' in row)
     assert 'data-provider="molit"' in rent
