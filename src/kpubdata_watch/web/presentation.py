@@ -9,6 +9,7 @@ never colour alone (docs/UI.md, PRD §53).
 
 from __future__ import annotations
 
+import unicodedata
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any
@@ -85,6 +86,21 @@ _ENTITY_PATHS = {"dataset": "datasets/{}/", "incident": "incidents/{}/", "change
 _PAGE_PATHS = {key: path for key, _, path in NAV_ITEMS}
 
 KST = ZoneInfo("Asia/Seoul")
+
+
+def normalize_search_text(text: str) -> str:
+    """Fold text into the one form the catalog's search filter compares (issue 105).
+
+    Hangul reaches this field in more than one Unicode normalization form: NFC
+    (precomposed syllables) from ordinary typing, or NFD (decomposed combining
+    jamo) from some IME commit paths, HFS+-originated filenames, and certain
+    clipboard round-trips. The two forms render identically but compare unequal
+    byte-for-byte, so both the row text built here and the query typed into
+    `static/catalog.js` must pass through this same fold (NFC, collapsed
+    whitespace, lowercase) before either side is compared.
+    """
+    collapsed = " ".join(text.split())
+    return unicodedata.normalize("NFC", collapsed).lower()
 
 
 def kst_time(moment: datetime) -> str:

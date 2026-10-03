@@ -13,6 +13,7 @@ from __future__ import annotations
 import importlib.util
 import json
 import re
+import unicodedata
 from datetime import date, datetime, timedelta
 from pathlib import Path
 from types import ModuleType
@@ -20,7 +21,7 @@ from typing import Any
 
 import pytest
 
-from kpubdata_watch.web.presentation import STATIC_DIR
+from kpubdata_watch.web.presentation import STATIC_DIR, normalize_search_text
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 SCRIPT = REPO_ROOT / "scripts" / "build_demo.py"
@@ -99,6 +100,73 @@ def test_each_row_carries_what_the_filters_need(catalog: str) -> None:
     assert 'data-search="아파트 전월세 실거래가 국토교통부 datago.apt_rent"' in rent
     healthy = next(row for row in rows(catalog) if 'data-id="visitkorea-tourism"' in row)
     assert 'data-active="false"' in healthy and 'data-checks=""' in healthy
+
+
+def test_every_rows_search_attribute_is_nfc_normalized(catalog: str) -> None:
+    """issue 105: a `data-search` value must already be in one canonical Unicode
+    form, or the browser-side filter cannot compare it against a query reliably."""
+    values = re.findall(r'data-search="([^"]*)"', catalog)
+    assert len(values) == 15
+    for value in values:
+        assert value == unicodedata.normalize("NFC", value), value
+
+
+def test_the_search_text_normalizes_a_name_recorded_as_nfd(
+    build_demo: ModuleType, tmp_path: Path
+) -> None:
+    """issue 105: a provider's own record can hold Hangul as decomposed combining
+    jamo (NFD) rather than precomposed syllables (NFC); the catalog's own render
+    step must still produce one normalized, comparable `data-search` value."""
+    name_nfc = "아파트"
+    name_nfd = unicodedata.normalize("NFD", name_nfc)
+    assert name_nfd != name_nfc, "the fixture must actually exercise two byte forms"
+
+    now = "2026-10-02T21:15:00+09:00"
+    checks = {
+        kind: {"status": "pass"} for kind in ("availability", "freshness", "contract", "quality")
+    }
+    fixtures = tmp_path / "fixtures"
+    fixtures.mkdir()
+    dataset = {
+        "id": "nfd.sample",
+        "name": name_nfd,
+        "provider": {"id": "nfd-provider", "name": name_nfd},
+        "category": "sample",
+        "health": "healthy",
+        "checks": checks,
+        "last_checked_at": now,
+    }
+    days = [
+        {"date": (date(2026, 10, 2) - timedelta(days=n)).isoformat(), "health": "healthy"}
+        for n in range(29, -1, -1)
+    ]
+    files = {
+        "snapshot": {"generated_at": now},
+        "datasets": [dataset],
+        "incidents": [],
+        "changes": [],
+        "histories": [{"dataset_id": "nfd.sample", "days": days}],
+    }
+    for filename, content in files.items():
+        (fixtures / f"{filename}.json").write_text(json.dumps(content), encoding="utf-8")
+
+    out = build_demo.build(output_dir=tmp_path / "_site", fixtures_dir=fixtures)
+    html = (out / "datasets" / "index.html").read_text(encoding="utf-8")
+    match = re.search(r'data-search="([^"]*)"', html)
+    assert match is not None
+    rendered = match.group(1)
+    assert rendered == unicodedata.normalize("NFC", rendered)
+    assert name_nfd not in rendered, "the raw NFD bytes must not survive into the page"
+    assert name_nfc.lower() in rendered
+
+
+def test_normalize_search_text_folds_nfc_nfd_case_and_whitespace() -> None:
+    """issue 105: the one function both `build_demo.py` and the browser lean on."""
+    nfc = "아파트"
+    nfd = unicodedata.normalize("NFD", nfc)
+    assert nfd != nfc
+    assert normalize_search_text(nfc) == normalize_search_text(nfd)
+    assert normalize_search_text("  Datago   Apt   Rent  ") == "datago apt rent"
 
 
 def test_each_row_leads_to_its_detail_page(site: Path, catalog: str) -> None:

@@ -18,9 +18,23 @@
     else field.value = params.get(field.name);
   }
 
+  // Hangul can reach this field in more than one Unicode normalization form:
+  // NFC (precomposed) from ordinary typing, or NFD (decomposed combining jamo)
+  // from some IME commit paths, HFS+-originated filenames, or a clipboard
+  // round-trip. The two forms render identically but compare unequal
+  // byte-for-byte, so both the query and the row's search text are folded
+  // through this same function before either side is compared (issue 105).
+  // `data-search` is already NFC and lowercase (`build_demo.py`,
+  // `presentation.normalize_search_text`); normalizing again here is
+  // defensive, not redundant -- it keeps this script correct even if a
+  // row's text ever reaches the page unnormalized.
+  function fold(text) {
+    return text.normalize("NFC").trim().replace(/\s+/g, " ").toLowerCase();
+  }
+
   function matches(row, filters) {
     const data = row.dataset;
-    if (filters.q && !data.search.toLowerCase().includes(filters.q)) return false;
+    if (filters.q && !fold(data.search).includes(filters.q)) return false;
     if (filters.provider && data.provider !== filters.provider) return false;
     if (filters.health && data.health !== filters.health) return false;
     if (filters.check && !data.checks.split(" ").includes(filters.check)) return false;
@@ -30,7 +44,7 @@
 
   function apply() {
     const filters = {
-      q: form.elements.q.value.trim().toLowerCase(),
+      q: fold(form.elements.q.value),
       provider: form.elements.provider.value,
       health: form.elements.health.value,
       check: form.elements.check.value,

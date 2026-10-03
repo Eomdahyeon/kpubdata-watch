@@ -53,6 +53,7 @@ from kpubdata_watch.web.presentation import (
     kst_datetime,
     kst_minute,
     kst_time,
+    normalize_search_text,
 )
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -406,7 +407,12 @@ def render_catalog(snapshot: ProductSnapshot) -> str:
                 if dataset.latest_change_ids
                 else None,
                 "last_checked_at": dataset.last_checked_at,
-                "search": f"{dataset.name} {dataset.provider.name} {dataset.id}",
+                # NFC-normalized and lowercased (issue 105) so the browser-side
+                # filter in catalog.js compares like with like regardless of
+                # which Unicode normalization form a query arrives in.
+                "search": normalize_search_text(
+                    f"{dataset.name} {dataset.provider.name} {dataset.id}"
+                ),
             }
         )
     providers = sorted(
