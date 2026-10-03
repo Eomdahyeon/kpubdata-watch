@@ -58,6 +58,34 @@ jobs:
       - name: Independence (no Builder or Studio dependency)
         run: uv run python scripts/check_independence.py
 
+      # #72: brand-v2.css must match Studio's real token source, so read Studio's
+      # src/globals.css from its main branch. This is a text comparison of a checked-out
+      # file, not a package dependency or an import, which is all check_independence.py
+      # (PRD D-016) forbids.
+      - name: Check out KPubData Studio tokens
+        uses: actions/checkout@v7
+        with:
+          repository: kpubdata-lab/kpubdata-studio
+          ref: main
+          path: .studio
+          sparse-checkout: |
+            src/globals.css
+            assets/logo/kpubdata-brand-assets/svg/symbol_light.svg
+            assets/logo/kpubdata-brand-assets/svg/favicon.svg
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+
+      - name: Brand v2 tokens match Studio
+        run: uv run python scripts/check_brand_tokens.py --studio .studio/src/globals.css
+
+      # #71: the K symbol and favicon are Studio's approved files, unchanged.
+      - name: Brand symbol matches Studio
+        run: |
+          studio=.studio/assets/logo/kpubdata-brand-assets/svg
+          static=src/kpubdata_watch/web/static
+          cmp "$studio/symbol_light.svg" "$static/kpubdata-symbol.svg"
+          cmp "$studio/favicon.svg" "$static/favicon.svg"
+
       # #3: issue templates keep asking for a Required Verification level, and the
       # PR title gate in titles.yml stays wired.
       - name: Governance gates stay wired
@@ -251,10 +279,44 @@ jobs:
   # One gate, so that editing the matrix is not also editing branch protection. GitHub
   # does not treat an absent required check as a failure — it waits, and every pull
   # request stays BLOCKED. Branch protection requires this job and nothing else.
+  surface:
+    name: Product surface (browser)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: uv sync --frozen --extra dev
+
+      # #89: what HTML parsing cannot check (sideways scroll at 390px, reduced motion)
+      # is checked in a real Chromium. Playwright is added for this job only (`--with`),
+      # not to the project's dependencies.
+      - name: Install Chromium
+        run: uv run --with "playwright>=1.48,<2" playwright install --with-deps chromium
+
+      - name: Build the demo
+        run: uv run python scripts/build_demo.py --output _site
+
+      - name: The browser checks catch a deliberate violation
+        run: uv run --with "playwright>=1.48,<2" python scripts/check_product_surface.py --self-test
+
+      - name: Every page passes the browser checks
+        run: uv run --with "playwright>=1.48,<2" python scripts/check_product_surface.py _site
+
   gate:
     name: CI gate
     runs-on: ubuntu-latest
-    needs: [quality, test, coverage, build, base-install, docs, secret-scan]
+    needs: [quality, test, coverage, build, base-install, docs, secret-scan, surface]
     # `always()` so a failed job still reaches this step; a skipped required check is
     # the same absence this job exists to remove.
     if: always()

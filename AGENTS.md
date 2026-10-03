@@ -1,6 +1,6 @@
 # AGENTS.md — kpubdata-watch
 
-> **[POLICY.md](https://github.com/yeongseon/kpubdata/blob/main/docs/governance/POLICY.md)
+> **[POLICY.md](https://github.com/kpubdata-lab/kpubdata/blob/main/docs/governance/POLICY.md)
 > is the single canonical source for project-management and review policy.** Epic,
 > Issue, Priority, Review Level, Verification and Release rules come from there.
 > This file keeps only what is specific to this repository. POLICY.md wins any conflict.
@@ -45,14 +45,14 @@ If it can, the feature goes to the backlog.
 
 ## Language policy
 
-> [kpubdata ADR 0003](https://github.com/yeongseon/kpubdata/blob/main/docs/adrs/0003-language-policy.md)
+> [kpubdata ADR 0003](https://github.com/kpubdata-lab/kpubdata/blob/main/docs/adrs/0003-language-policy.md)
 > is canonical.
 
 | Area | Language |
 |---|---|
 | Code identifiers, comments, docstrings | English |
 | Commit titles (= PR titles), issue titles, CHANGELOG | English |
-| Commit bodies (= PR bodies) | Korean or English — the squash body is the PR body ([POLICY 2.1.3](https://github.com/yeongseon/kpubdata/blob/main/docs/governance/POLICY.md), kpubdata#743) |
+| Commit bodies (= PR bodies) | Korean or English — the squash body is the PR body ([POLICY 2.1.3](https://github.com/kpubdata-lab/kpubdata/blob/main/docs/governance/POLICY.md), kpubdata#743) |
 | Governance documents (`AGENTS.md`, `CONTRIBUTING.md`) | English |
 | Implementation contracts (`API_CONTRACT.md`, `SECURITY.md`) | English |
 | Design rationale (PRD, ARCHITECTURE, DOMAIN_MODEL, detectors, UI, ADRs) | Korean |
@@ -64,8 +64,8 @@ If it can, the feature goes to the backlog.
 
 ## Verification is done by machines
 
-[POLICY 18.2](https://github.com/yeongseon/kpubdata/blob/main/docs/governance/POLICY.md)
-and [VERIFICATION.md](https://github.com/yeongseon/kpubdata/blob/main/docs/governance/VERIFICATION.md)
+[POLICY 18.2](https://github.com/kpubdata-lab/kpubdata/blob/main/docs/governance/POLICY.md)
+and [VERIFICATION.md](https://github.com/kpubdata-lab/kpubdata/blob/main/docs/governance/VERIFICATION.md)
 are canonical.
 
 - **A sentence with a number in it comes from a command.** Paste the output.
@@ -104,7 +104,7 @@ POLICY 2.1, 2.1.1 and 2.1.2 are the label reference. What is specific to agents:
 ## Releases
 
 Cadence lives in
-[kpubdata's compatibility.md §5.1](https://github.com/yeongseon/kpubdata/blob/main/docs/compatibility.md#release-cadence);
+[kpubdata's compatibility.md §5.1](https://github.com/kpubdata-lab/kpubdata/blob/main/docs/compatibility.md#release-cadence);
 who may do what lives in POLICY 14.
 
 - **Watch's cadence is not decided yet** (on demand like kpubdata, or monthly like
@@ -118,7 +118,7 @@ who may do what lives in POLICY 14.
 ## Build order
 
 The PRD's recommended implementation order ([docs/ROADMAP.md](docs/ROADMAP.md)), with
-step 12 added by #68 ([ADR 0013](docs/decisions/0013-brand-v2-visual-identity.md)):
+step 12 added by #68 ([ADR 0014](docs/decisions/0014-brand-v2-visual-identity.md)):
 
 1. Repository / CI
 2. Dataset registry
@@ -131,7 +131,7 @@ step 12 added by #68 ([ADR 0013](docs/decisions/0013-brand-v2-visual-identity.md
 9. Detection / change / incident
 10. Health aggregation
 11. Read API
-12. Public UI Foundation (Brand v2 tokens, Logo/lockup, status components, theme)
+12. Public UI Foundation (Brand v2 tokens, Logo/lockup, status components, theme — landed via #90–#94, #97–#104)
 13. Minimal public status
 14. UI Lab (10 / 50 / 150 datasets)
 15. 10 real datasets
@@ -172,6 +172,7 @@ src/kpubdata_watch/
 ├── storage/
 └── cli/             # operator commands
 ui-lab/              # disposable UI experiments on the same read model
+showcase/            # showcase project (placeholder)
 migrations/          # Alembic
 tests/               # unit, integration, fixtures, replay, live
 docs/                # PRD, ROADMAP, DOMAIN_MODEL, ARCHITECTURE, detectors, UI, decisions
@@ -203,6 +204,6 @@ docs/                # PRD, ROADMAP, DOMAIN_MODEL, ARCHITECTURE, detectors, UI, 
 
 | Repository | Document |
 |---|---|
-| [kpubdata](https://github.com/yeongseon/kpubdata) | [AGENTS.md](https://github.com/yeongseon/kpubdata/blob/main/AGENTS.md) |
-| [kpubdata-builder](https://github.com/yeongseon/kpubdata-builder) | [AGENTS.md](https://github.com/yeongseon/kpubdata-builder/blob/main/AGENTS.md) |
-| [kpubdata-studio](https://github.com/yeongseon/kpubdata-studio) | [AGENTS.md](https://github.com/yeongseon/kpubdata-studio/blob/main/AGENTS.md) |
+| [kpubdata](https://github.com/kpubdata-lab/kpubdata) | [AGENTS.md](https://github.com/kpubdata-lab/kpubdata/blob/main/AGENTS.md) |
+| [kpubdata-builder](https://github.com/kpubdata-lab/kpubdata-builder) | [AGENTS.md](https://github.com/kpubdata-lab/kpubdata-builder/blob/main/AGENTS.md) |
+| [kpubdata-studio](https://github.com/kpubdata-lab/kpubdata-studio) | [AGENTS.md](https://github.com/kpubdata-lab/kpubdata-studio/blob/main/AGENTS.md) |

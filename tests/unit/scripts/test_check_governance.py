@@ -59,7 +59,7 @@ jobs:
     steps:
       - name: Parse the title
         id: title
-        uses: yeongseon/kpubdata/.github/actions/conventional-title@main
+        uses: kpubdata-lab/kpubdata/.github/actions/conventional-title@main
       - name: The title must follow the convention
         run: |
           if [ "${VALID}" != "true" ]; then
@@ -163,7 +163,7 @@ def test_a_missing_template_directory_fails(tmp_path: Path) -> None:
 
 def test_removing_the_shared_title_action_fails(tmp_path: Path) -> None:
     titles = _TITLES_WIRED.replace(
-        "yeongseon/kpubdata/.github/actions/conventional-title", "actions/checkout@v7"
+        "kpubdata-lab/kpubdata/.github/actions/conventional-title", "actions/checkout@v7"
     )
     result = _run(_repo(tmp_path, titles=titles))
 

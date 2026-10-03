@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% import "components/primitives.html" as ui with context %}
+{#-
+  Incident list (#88): ongoing incidents first (most severe, then earliest),
+  then resolved ones (newest first). Context: `ongoing`, `resolved` (lists of
+  {incident, dataset}).
+-#}
+
+{% block title %}Incidents — KPubData Watch{% endblock %}
+{% block description %}Every incident KPubData Watch has detected on Korean public datasets, ongoing and resolved.{% endblock %}
+
+{% macro incident_list(items) -%}
+<ul class="issue-list">
+  {%- for item in items %}
+  {%- set incident = item.incident %}
+  <li class="incident-row status-{{ incident.status }}">
+    <div class="issue-head">
+      {%- if severity_tone[incident.severity] %}
+      {{ ui.status_badge(severity_tone[incident.severity], severity_labels[incident.severity]) }}
+      {%- else %}
+      {{ ui.change_badge(severity_labels[incident.severity]) }}
+      {%- endif %}
+      <a class="issue-dataset" href="{{ page_url('incident', incident.id) }}">{{ incident.title }}</a>
+      <span class="event-meta">{{ item.dataset.name }} · {{ check_labels[incident.check] }}</span>
+    </div>
+    <p class="issue-text">{{ incident.summary }}</p>
+    <p class="issue-meta">
+      Detected {{ incident.detected_at | kst_minute }}
+      {%- if incident.resolved_at %} · Resolved {{ incident.resolved_at | kst_minute }}{% endif %}
+      · {{ incident_status_labels[incident.status] }}
+    </p>
+  </li>
+  {%- endfor %}
+</ul>
+{%- endmacro %}
+
+{% block content %}
+<header class="page-header">
+  <h1>Incidents</h1>
+  <p class="status-subtitle">{{ ongoing | length }} ongoing · {{ resolved | length }} resolved</p>
+</header>
+
+{% call ui.panel("Ongoing", "ongoing", ongoing | length) %}
+{%- if ongoing %}{{ incident_list(ongoing) }}{% else %}{{ ui.empty_state("현재 진행 중인 Incident가 없습니다.") }}{% endif %}
+{% endcall %}
+
+{% call ui.panel("Resolved", "resolved", resolved | length) %}
+{%- if resolved %}{{ incident_list(resolved) }}{% else %}{{ ui.empty_state("해결된 Incident가 없습니다.") }}{% endif %}
+{% endcall %}
+{% endblock %}

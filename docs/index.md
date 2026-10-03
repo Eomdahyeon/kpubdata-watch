@@ -17,8 +17,8 @@
 | [시각 정체성](VISUAL_IDENTITY.md) | KPubData Studio Brand v2 — 로고 · 토큰 · 상태색 · 접근성 (고정) |
 | [테스트](TESTING.md) | 테스트 전략과 CI 게이트 |
 | [결정 기록](decisions/README.md) | ADR 과 PRD 결정 로그 대응표 |
-| [API 계약](https://github.com/yeongseon/kpubdata-watch/blob/main/API_CONTRACT.md) | Public Read API 와 운영자 CLI (초안, English) |
-| [SECURITY](https://github.com/yeongseon/kpubdata-watch/blob/main/SECURITY.md) | 보안 신고와 credential · redaction 요구사항 (English) |
+| [API 계약](https://github.com/kpubdata-lab/kpubdata-watch/blob/main/API_CONTRACT.md) | Public Read API 와 운영자 CLI (초안, English) |
+| [SECURITY](https://github.com/kpubdata-lab/kpubdata-watch/blob/main/SECURITY.md) | 보안 신고와 credential · redaction 요구사항 (English) |
 
 ## PRD
 
@@ -92,14 +92,14 @@
 | §53 | Color Semantics | [UI](UI.md) |
 | §54 | Time UX | [UI](UI.md) |
 | §55 | Official Notice | [UI](UI.md) |
-| §56 | Public Read API | [API 계약](https://github.com/yeongseon/kpubdata-watch/blob/main/API_CONTRACT.md) (English) |
-| §57 | GET `/api/v1/datasets` | [API 계약](https://github.com/yeongseon/kpubdata-watch/blob/main/API_CONTRACT.md) (English) |
-| §58 | GET `/api/v1/datasets/{id}` | [API 계약](https://github.com/yeongseon/kpubdata-watch/blob/main/API_CONTRACT.md) (English) |
-| §59 | History API | [API 계약](https://github.com/yeongseon/kpubdata-watch/blob/main/API_CONTRACT.md) (English) |
-| §60 | Operator Interface | [API 계약](https://github.com/yeongseon/kpubdata-watch/blob/main/API_CONTRACT.md) (English) |
-| §61 | Credentials | [SECURITY](https://github.com/yeongseon/kpubdata-watch/blob/main/SECURITY.md) (English) |
-| §62 | Secret Redaction | [SECURITY](https://github.com/yeongseon/kpubdata-watch/blob/main/SECURITY.md) (English) |
-| §63 | Security Requirements | [SECURITY](https://github.com/yeongseon/kpubdata-watch/blob/main/SECURITY.md) (English) |
+| §56 | Public Read API | [API 계약](https://github.com/kpubdata-lab/kpubdata-watch/blob/main/API_CONTRACT.md) (English) |
+| §57 | GET `/api/v1/datasets` | [API 계약](https://github.com/kpubdata-lab/kpubdata-watch/blob/main/API_CONTRACT.md) (English) |
+| §58 | GET `/api/v1/datasets/{id}` | [API 계약](https://github.com/kpubdata-lab/kpubdata-watch/blob/main/API_CONTRACT.md) (English) |
+| §59 | History API | [API 계약](https://github.com/kpubdata-lab/kpubdata-watch/blob/main/API_CONTRACT.md) (English) |
+| §60 | Operator Interface | [API 계약](https://github.com/kpubdata-lab/kpubdata-watch/blob/main/API_CONTRACT.md) (English) |
+| §61 | Credentials | [SECURITY](https://github.com/kpubdata-lab/kpubdata-watch/blob/main/SECURITY.md) (English) |
+| §62 | Secret Redaction | [SECURITY](https://github.com/kpubdata-lab/kpubdata-watch/blob/main/SECURITY.md) (English) |
+| §63 | Security Requirements | [SECURITY](https://github.com/kpubdata-lab/kpubdata-watch/blob/main/SECURITY.md) (English) |
 | §64 | Monitoring Reliability | [아키텍처](architecture/README.md) |
 | §65 | Watch Internal Observability | [아키텍처](architecture/README.md) |
 | §66 | Database Model | [아키텍처](architecture/README.md) |
@@ -112,7 +112,7 @@
 | §73 | Integration Tests | [테스트](TESTING.md) |
 | §74 | Live Tests | [테스트](TESTING.md) |
 | §75 | CI Quality Gates | [테스트](TESTING.md) |
-| §76 | Non-Functional Requirements | [아키텍처](architecture/README.md) · [API 계약](https://github.com/yeongseon/kpubdata-watch/blob/main/API_CONTRACT.md) |
+| §76 | Non-Functional Requirements | [아키텍처](architecture/README.md) · [API 계약](https://github.com/kpubdata-lab/kpubdata-watch/blob/main/API_CONTRACT.md) |
 | §77 | Deployment | [아키텍처](architecture/README.md) |
 | §78 | MVP Functional Scope | [로드맵](ROADMAP.md) |
 | §79 | P1 — 시간이 허용하면 | [로드맵](ROADMAP.md) |

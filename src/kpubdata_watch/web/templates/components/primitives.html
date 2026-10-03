@@ -1,0 +1,216 @@
+{#-
+  Brand v2 UI primitives for Watch (#73), styled by static/components.css.
+  Import with `{% import "components/primitives.html" as ui with context %}`.
+  `health_meta`, `health_order` and `change_icon` are environment globals from
+  kpubdata_watch.web.presentation. A status always shows an icon and a text label
+  together with its colour; a Change is informational and never a health colour.
+-#}
+
+{% macro status_badge(health, label=None) -%}
+<span class="status-badge status-{{ health }}"><span class="status-icon" aria-hidden="true">{{ health_meta[health].icon }}</span><span class="status-text">{{ label or health_meta[health].label }}</span></span>
+{%- endmacro %}
+
+{% macro change_badge(label="Changed") -%}
+<span class="change-badge"><span class="change-icon" aria-hidden="true">{{ change_icon }}</span><span class="change-text">{{ label }}</span></span>
+{%- endmacro %}
+
+{% macro check_status(status) -%}
+<span class="check-status check-{{ status }}"><span class="status-icon" aria-hidden="true">{{ check_meta[status].icon }}</span><span class="status-text">{{ check_meta[status].label }}</span></span>
+{%- endmacro %}
+
+{% macro history_strip(days) -%}
+<ol class="history-strip">
+  {%- for day in days %}
+  {%- set label = day.date.isoformat() ~ " · " ~ health_meta[day.health].label ~ (" · " ~ day.summary if day.summary else "") %}
+  <li class="history-day status-{{ day.health }}" tabindex="0" title="{{ label }}" aria-label="{{ label }}"><span aria-hidden="true">{{ health_meta[day.health].icon }}</span></li>
+  {%- endfor %}
+</ol>
+{%- endmacro %}
+
+{% macro history_grid(rows) -%}
+{#-
+  History's dataset x 30-day heatmap (issue 109): one row per dataset, each day a
+  cell reusing HistoryStrip's own class (`history-day status-<health>`), so the
+  same colour and icon rules apply. The column header shows only the first and
+  last date (docs/UI.md History UX); every cell still carries its own date in
+  `title`/`aria-label`.
+-#}
+{%- set day_count = rows[0].cells | length if rows else 0 %}
+{%- set period = (rows[0].cells[0].date.isoformat() ~ " – " ~ rows[0].cells[-1].date.isoformat()) if rows else "" %}
+<div class="table-scroll">
+  <table class="history-grid">
+    <caption class="sr-only">Dataset health by day, {{ period }}</caption>
+    <thead>
+      <tr>
+        <th scope="col">Dataset</th>
+        <th scope="col">Provider</th>
+        <th scope="col" colspan="{{ day_count }}">{{ period }}</th>
+        <th scope="col">비정상</th>
+      </tr>
+    </thead>
+    <tbody>
+      {%- for row in rows %}
+      <tr>
+        <th scope="row">
+          {%- if "dataset" in built_pages -%}
+          <a href="{{ page_url('dataset', row.dataset_id) }}">{{ row.name }}</a>
+          {%- else -%}
+          {{ row.name }}
+          {%- endif -%}
+        </th>
+        <td>{{ row.provider }}</td>
+        {%- for day in row.cells %}
+        {%- set label = day.date.isoformat() ~ " " ~ health_meta[day.health].label %}
+        <td class="history-day status-{{ day.health }}" tabindex="0" title="{{ label }}" aria-label="{{ label }}"><span aria-hidden="true">{{ health_meta[day.health].icon }}</span></td>
+        {%- endfor %}
+        <td class="history-grid-count">비정상 {{ row.abnormal_days }}일</td>
+      </tr>
+      {%- endfor %}
+    </tbody>
+  </table>
+</div>
+{%- endmacro %}
+
+{% macro daily_counts_bar(days) -%}
+{#-
+  History's daily abnormal-count bar (issue 109): one stacked column per day, scaled
+  to that day's own tallest neighbour. Only Degraded/Critical/Unknown stack here
+  (Healthy never appears) — a count of datasets, not a derived metric (ADR 0013).
+-#}
+<div class="table-scroll daily-bar">
+  <ol class="daily-bar-list">
+    {%- for day in days %}
+    <li class="daily-bar-day" tabindex="0" title="{{ day.label }}" aria-label="{{ day.label }}">
+      <span class="daily-bar-stack">
+        {%- for tone in ("degraded", "critical", "unknown") %}
+        {%- if day.heights[tone] %}
+        <span class="daily-bar-segment daily-bar-segment--{{ tone }}" style="height: {{ day.heights[tone] }}px" aria-hidden="true"></span>
+        {%- endif %}
+        {%- endfor %}
+      </span>
+    </li>
+    {%- endfor %}
+  </ol>
+</div>
+{%- endmacro %}
+
+{% macro health_summary(headline, status_ratio, counts) -%}
+{#-
+  Overview's headline (issue 110): a sentence built from `counts` (never written here
+  as a number), a decorative status-ratio bar scaled to `status_ratio` (a percent
+  per health state, computed in build_demo.py like DailyCountsBar's heights), and
+  the same per-state counts as before, now the bar's accessible legend. The bar
+  itself carries no meaning JAWS/VoiceOver would miss: `counts` below says the
+  same thing in text, so the bar is aria-hidden.
+-#}
+<p class="health-headline">{{ headline }}</p>
+<div class="status-ratio-bar" aria-hidden="true">
+  {%- for key in health_order %}
+  {%- if status_ratio[key] %}
+  <span class="status-ratio-segment status-ratio-segment--{{ key }}" style="width: {{ status_ratio[key] }}%"></span>
+  {%- endif %}
+  {%- endfor %}
+</div>
+<ul class="summary-counts">
+  {%- for key in health_order %}
+  <li class="count count-{{ key }}">
+    <span class="count-icon" aria-hidden="true">{{ health_meta[key].icon }}</span>
+    <span class="count-value">{{ counts[key] }}</span>
+    <span class="count-label">{{ health_meta[key].label }}</span>
+  </li>
+  {%- endfor %}
+</ul>
+{%- endmacro %}
+
+{% macro check_matrix(checks) -%}
+{#-
+  The dataset x check matrix cell (issue 110): A/F/C/Q in a fixed order, each a small
+  cell with its own icon, title and aria-label — "Availability: Pass" and so on —
+  so the letter is never the only way to tell checks apart. Reused as-is for the
+  Overview matrix and as the Checks column in catalog.html. `not_applicable` uses
+  the neutral surface tokens (--muted, --border), never a --status-* token, so it
+  cannot be mistaken for a health state (docs/UI.md Color Semantics).
+-#}
+<ul class="check-matrix">
+  {%- for name in check_names %}
+  {%- set result = checks[name] %}
+  {%- set meta = check_meta[result.status] %}
+  {%- set label = check_labels[name] ~ ": " ~ meta.label ~ (" · " ~ result.summary if result.summary else "") %}
+  <li class="check-cell check-cell-{{ result.status }}" tabindex="0" title="{{ label }}" aria-label="{{ label }}">
+    <span aria-hidden="true">{{ check_abbr[name] }}{{ meta.icon }}</span>
+  </li>
+  {%- endfor %}
+</ul>
+{%- endmacro %}
+
+{% macro panel(title, id, count=None) -%}
+<section class="panel" aria-labelledby="{{ id }}">
+  <div class="panel-head">
+    <h2 class="panel-title" id="{{ id }}">{{ title }}</h2>
+    {%- if count is not none %}
+    <span class="panel-count">{{ count }}</span>
+    {%- endif %}
+  </div>
+  {{ caller() }}
+</section>
+{%- endmacro %}
+
+{% macro timestamp(text, datetime=None, title=None) -%}
+{%- if datetime -%}
+<time class="timestamp" datetime="{{ datetime }}"{% if title %} title="{{ title }}"{% endif %}>{{ text }}</time>
+{%- else -%}
+<span class="timestamp"{% if title %} title="{{ title }}"{% endif %}>{{ text }}</span>
+{%- endif -%}
+{%- endmacro %}
+
+{% macro metadata(items) -%}
+<dl class="metadata">
+  {%- for label, value, technical in items %}
+  <dt>{{ label }}</dt>
+  <dd{% if technical %} class="technical-id"{% endif %}>{{ value }}</dd>
+  {%- endfor %}
+</dl>
+{%- endmacro %}
+
+{% macro contract_diff(added=(), removed=(), changed=()) -%}
+<ul class="contract-diff">
+  {%- for kind, sign, fields in (("added", "+", added), ("removed", "−", removed), ("changed", "~", changed)) %}
+  {%- for field in fields %}
+  <li class="diff-{{ kind }}"><span class="diff-sign" aria-hidden="true">{{ sign }}</span><span class="sr-only">{{ kind | capitalize }}: </span><code>{{ field }}</code></li>
+  {%- endfor %}
+  {%- endfor %}
+</ul>
+{%- endmacro %}
+
+{% macro empty_state(message) -%}
+<p class="empty-state">{{ message }}</p>
+{%- endmacro %}
+
+{% macro dataset_row(d) -%}
+<li class="dataset-row status-{{ d.health }}">
+  <div class="dataset-main">
+    {%- if "dataset" in built_pages %}
+    <a class="dataset-name" href="{{ page_url('dataset', d.dataset_id) }}">{{ d.name }}</a>
+    {%- else %}
+    <span class="dataset-name">{{ d.name }}</span>
+    {%- endif %}
+    <span class="dataset-provider">{{ d.provider }}</span>
+  </div>
+  <div class="dataset-status-line">
+    {{ status_badge(d.health) }}
+    {{ timestamp(d.checked_label, d.checked_at, d.checked_exact) }}
+  </div>
+  {%- if d.issue %}
+  <p class="dataset-issue">
+    <span class="dataset-issue-icon" aria-hidden="true">{{ health_meta[d.health].icon }}</span>
+    {{ d.issue }}
+  </p>
+  {%- endif %}
+  {%- if d.change %}
+  <p class="dataset-change">
+    <span class="dataset-change-icon" aria-hidden="true">{{ change_icon }}</span>
+    {{ d.change }}
+  </p>
+  {%- endif %}
+</li>
+{%- endmacro %}

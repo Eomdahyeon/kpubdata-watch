@@ -1,0 +1,38 @@
+[
+  {
+    "id": "chg-contract-apt-rent-001",
+    "dataset_id": "datago.apt_rent",
+    "change_type": "contract",
+    "severity": "critical",
+    "title": "Contract changed",
+    "summary": "필드 addr2가 삭제됐습니다.",
+    "detected_at": "2026-10-02T21:03:00+09:00",
+    "diff": {
+      "added": [],
+      "removed": [
+        "addr2:string"
+      ],
+      "changed": []
+    },
+    "health_impact": "critical",
+    "related_incident_id": "inc-contract-apt-rent-001"
+  },
+  {
+    "id": "chg-contract-pps-001",
+    "dataset_id": "pps.product_list",
+    "change_type": "contract",
+    "severity": "info",
+    "title": "Contract changed",
+    "summary": "필드 productEngName이 추가됐습니다. 기존 필드는 그대로입니다.",
+    "detected_at": "2026-10-02T20:37:00+09:00",
+    "diff": {
+      "added": [
+        "productEngName:string"
+      ],
+      "removed": [],
+      "changed": []
+    },
+    "health_impact": "none",
+    "related_incident_id": null
+  }
+]

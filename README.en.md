@@ -8,9 +8,9 @@
 >
 > Related projects:
 >
-> - [KPubData](https://github.com/yeongseon/kpubdata) — a standalone Python SDK for Korean public data; the only product Watch depends on
-> - [KPubData Builder](https://github.com/yeongseon/kpubdata-builder) — a sibling product that builds reproducible datasets and tables with KPubData
-> - [KPubData Studio](https://github.com/yeongseon/kpubdata-studio) — a visual workspace for KPubData Builder
+> - [KPubData](https://github.com/kpubdata-lab/kpubdata) — a standalone Python SDK for Korean public data; the only product Watch depends on
+> - [KPubData Builder](https://github.com/kpubdata-lab/kpubdata-builder) — a sibling product that builds reproducible datasets and tables with KPubData
+> - [KPubData Studio](https://github.com/kpubdata-lab/kpubdata-studio) — a visual workspace for KPubData Builder
 
 [한국어](./README.md)
 
@@ -37,6 +37,12 @@ least 3 providers continuously. The implementation order and the definition of d
 
 ## 문서
 
+Demo: <https://kpubdata-lab.github.io/kpubdata-watch/> — a static demo of the Public
+Status page rendered from fixed fixture data. It is not a live observation result
+([ADR 0012](docs/decisions/0012-pages-hosts-a-fixture-demo-not-the-service.md)).
+
+Documentation site: <https://kpubdata-lab.github.io/kpubdata-watch/docs/>
+
 | Document | Contents |
 |---|---|
 | [PRD](docs/PRD.md) | Product definition, problem, principles, goals, non-goals, success metrics |
@@ -53,15 +59,15 @@ least 3 providers continuously. The implementation order and the definition of d
 | [CONTRIBUTING](CONTRIBUTING.md) · [AGENTS](AGENTS.md) | How to contribute, and the rules for agents |
 
 The canonical project-management rules are kpubdata's
-[POLICY.md](https://github.com/yeongseon/kpubdata/blob/main/docs/governance/POLICY.md).
+[POLICY.md](https://github.com/kpubdata-lab/kpubdata/blob/main/docs/governance/POLICY.md).
 
 ## 제품군
 
 | Repository | Role |
 |---|---|
-| [kpubdata](https://github.com/yeongseon/kpubdata) | Public data collection and normalisation SDK — the only product Watch depends on |
-| [kpubdata-builder](https://github.com/yeongseon/kpubdata-builder) | Dataset pipeline and publishing — a sibling of Watch, not a dependency |
-| [kpubdata-studio](https://github.com/yeongseon/kpubdata-studio) | Screens and workflow for Builder |
+| [kpubdata](https://github.com/kpubdata-lab/kpubdata) | Public data collection and normalisation SDK — the only product Watch depends on |
+| [kpubdata-builder](https://github.com/kpubdata-lab/kpubdata-builder) | Dataset pipeline and publishing — a sibling of Watch, not a dependency |
+| [kpubdata-studio](https://github.com/kpubdata-lab/kpubdata-studio) | Screens and workflow for Builder |
 | **kpubdata-watch** | Public data reliability observation and Public Status — this repository |
 
 ## 라이선스

@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% import "components/primitives.html" as ui with context %}
+{#-
+  Overview (#84, issue 110): what is wrong right now, then what changed, then the
+  dataset x check matrix. Context: `counts`, `total`, `headline` and
+  `status_ratio` (the HealthSummary bar), `active_issues` (each with
+  `history_days`/`abnormal_days`, History's own count, ADR 0013) and
+  `recent_changes` (newest first), `datasets` (issues first, each with `checks`
+  for the matrix), `preview` (true when the full catalog exists and this page
+  shows only part of the list).
+-#}
+
+{% block title %}Public Data Health — KPubData Watch{% endblock %}
+{% block description %}KPubData Watch overview: active issues, recent changes and the health of every monitored Korean public dataset.{% endblock %}
+
+{% macro dataset_link(dataset_id, name) -%}
+{%- if "dataset" in built_pages -%}
+<a class="issue-dataset" href="{{ page_url('dataset', dataset_id) }}">{{ name }}</a>
+{%- else -%}
+<span class="issue-dataset">{{ name }}</span>
+{%- endif -%}
+{%- endmacro %}
+
+{% block content %}
+<section class="status-header">
+  <h1>Public Data Health</h1>
+  <p class="status-subtitle">{{ total }} monitored datasets</p>
+</section>
+
+<section class="summary" aria-label="Health summary">
+  {{ ui.health_summary(headline, status_ratio, counts) }}
+</section>
+
+{% call ui.panel("Active Issues", "active-issues", active_issues | length) %}
+{%- if active_issues %}
+<ul class="issue-list">
+  {%- for issue in active_issues %}
+  <li class="issue-row severity-{{ issue.severity }}">
+    <div class="issue-head">
+      {{ ui.status_badge(issue.health, issue.check_label) }}
+      {{ dataset_link(issue.dataset_id, issue.dataset_name) }}
+    </div>
+    <p class="issue-text"><strong>{{ issue.title }}</strong> · {{ issue.summary }}</p>
+    <p class="issue-meta">
+      First detected {{ issue.detected_at | kst_time }} · {{ issue.duration }}
+      {%- if "incident" in built_pages %} · <a href="{{ page_url('incident', issue.id) }}">View →</a>{% endif %}
+    </p>
+    <p class="issue-history">
+      최근 {{ issue.history_days }}일 중 비정상 {{ issue.abnormal_days }}일
+      {%- if "history" in built_pages %} · <a href="{{ page_url('history') }}">History 보기 →</a>{% endif %}
+    </p>
+  </li>
+  {%- endfor %}
+</ul>
+{%- else %}
+{{ ui.empty_state("현재 활성 문제가 없습니다.") }}
+{%- endif %}
+{% endcall %}
+
+{% call ui.panel("Recent Changes", "recent-changes", recent_changes | length) %}
+{%- if recent_changes %}
+<ul class="change-list">
+  {%- for change in recent_changes %}
+  <li class="change-row">
+    <div class="change-head">
+      {{ ui.change_badge(change.title) }}
+      {{ dataset_link(change.dataset_id, change.dataset_name) }}
+      {{ ui.timestamp(change.detected_at | kst_time, change.detected_at.isoformat()) }}
+    </div>
+    <p class="change-summary">
+      {{ change.summary }}
+      {%- if "change" in built_pages %} <a href="{{ page_url('change', change.id) }}">View →</a>{% endif %}
+    </p>
+  </li>
+  {%- endfor %}
+</ul>
+{%- else %}
+{{ ui.empty_state("최근 Change가 없습니다.") }}
+{%- endif %}
+{% endcall %}
+
+{% call ui.panel("Datasets", "datasets") %}
+<div class="table-scroll">
+  <table class="catalog-table">
+    <caption class="sr-only">Dataset health by check, {{ total }} datasets, sorted by current severity</caption>
+    <thead>
+      <tr>
+        <th scope="col">Dataset</th>
+        <th scope="col">Provider</th>
+        <th scope="col">Health</th>
+        <th scope="col" aria-label="Checks (Availability, Freshness, Contract, Quality)">Checks</th>
+      </tr>
+    </thead>
+    <tbody>
+      {%- for d in datasets %}
+      <tr>
+        <th scope="row">
+          {%- if "dataset" in built_pages -%}
+          <a class="dataset-name" href="{{ page_url('dataset', d.dataset_id) }}">{{ d.name }}</a>
+          {%- else -%}
+          {{ d.name }}
+          {%- endif -%}
+        </th>
+        <td>{{ d.provider }}</td>
+        <td>{{ ui.status_badge(d.health) }}</td>
+        <td>{{ ui.check_matrix(d.checks) }}</td>
+      </tr>
+      {%- endfor %}
+    </tbody>
+  </table>
+</div>
+<p class="sr-only">{{ matrix_summary }}</p>
+{%- if preview %}
+<p class="panel-note"><a class="view-all" href="{{ page_url('datasets') }}">View all datasets</a></p>
+{%- endif %}
+{% endcall %}
+{% endblock %}

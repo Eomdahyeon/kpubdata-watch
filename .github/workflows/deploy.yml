@@ -1,0 +1,75 @@
+name: Deploy demo + docs
+
+# Publishes two things to GitHub Pages:
+#   - root (/kpubdata-watch/)       : a fixture-based demo of the product pages
+#   - /kpubdata-watch/docs/         : the mkdocs documentation site
+# The demo renders the product snapshot in demo/fixtures/ (five files) through the
+# templates in src/kpubdata_watch/web/templates/ (scripts/build_demo.py). It
+# never calls a provider or holds a credential -- see the ADR in docs/decisions/.
+# The production service (watch-web + watch-worker + PostgreSQL) does not run here.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Pages deploys from main share one group and never cancel a deploy in progress.
+# A pull request run gets a group of its own ref instead: a PR run waiting behind
+# another run in the shared group was replaced and cancelled with no job, and
+# `build` is a required check, so the pull request stayed BLOCKED
+# (kpubdata-studio#586). A newer push to the same pull request still cancels the
+# older run, which reports on a head that is no longer the pull request's.
+concurrency:
+  group: ${{ github.event_name == 'push' && 'pages' || format('pages-{0}', github.ref) }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4  # v10.1.0
+        with:
+          enable-cache: true
+
+      # One sync covers both builds: the demo only needs jinja2, a base
+      # dependency, and the docs extra adds mkdocs on top of it.
+      - name: Install dependencies
+        run: uv sync --extra docs --no-sources
+
+      # --- Demo build: _site/ ---
+      - name: Build the Public Status demo
+        run: uv run --no-sources python scripts/build_demo.py --output _site
+
+      # --- Docs build: _site/docs/ ---
+      - name: Build docs (strict)
+        run: uv run --no-sources mkdocs build --strict --site-dir _site/docs
+
+      - name: Disable Jekyll processing
+        run: touch _site/.nojekyll
+
+      - if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9  # v5.0.0
+        with:
+          path: _site
+
+  deploy:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346  # v5.0.1

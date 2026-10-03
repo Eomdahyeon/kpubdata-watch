@@ -1,4 +1,4 @@
-# ADR 0013: Visual identity 는 KPubData Studio Brand v2 로 고정하고, UI Lab 은 layout 만 실험한다
+# ADR 0014: Visual identity 는 KPubData Studio Brand v2 로 고정하고, UI Lab 은 layout 만 실험한다
 
 ## 상태
 

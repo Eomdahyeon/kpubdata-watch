@@ -12,8 +12,8 @@
 
 설계 세부는 목적별 문서로 나뉘어 있다: [도메인 모델](DOMAIN_MODEL.md) · [Detectors](detectors/README.md) ·
 [아키텍처](architecture/README.md) · [Registry](REGISTRY.md) · [UI](UI.md) · [테스트](TESTING.md) ·
-[로드맵](ROADMAP.md) · [결정 기록](decisions/README.md) · [API 계약](https://github.com/yeongseon/kpubdata-watch/blob/main/API_CONTRACT.md) ·
-[보안](https://github.com/yeongseon/kpubdata-watch/blob/main/SECURITY.md).
+[로드맵](ROADMAP.md) · [결정 기록](decisions/README.md) · [API 계약](https://github.com/kpubdata-lab/kpubdata-watch/blob/main/API_CONTRACT.md) ·
+[보안](https://github.com/kpubdata-lab/kpubdata-watch/blob/main/SECURITY.md).
 
 ## Executive Summary
 

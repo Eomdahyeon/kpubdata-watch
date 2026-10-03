@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% import "components/primitives.html" as ui with context %}
+{#-
+  Change Detail (#87, PRD §49): a human-readable diff first, what it did to
+  Health, and the related incident; the raw diff is secondary. Context: `change`
+  (Change), `dataset` (DatasetRecord), `raw_diff` (pretty JSON).
+-#}
+
+{% block title %}{{ change.title }} · {{ dataset.name }} — KPubData Watch{% endblock %}
+{% block description %}{{ change.title }} on {{ dataset.provider.name }} {{ dataset.name }}: the diff, its health impact and any related incident.{% endblock %}
+
+{% block content %}
+<header class="page-header">
+  <p class="page-eyebrow"><a href="{{ page_url('dataset', dataset.id) }}">{{ dataset.name }}</a> · {{ dataset.provider.name }}</p>
+  <h1>{{ change.title }}</h1>
+  <p class="technical-id">{{ change.id }}</p>
+  <div class="page-status">
+    {{ ui.change_badge(severity_labels[change.severity]) }}
+    {{ ui.timestamp("Detected " ~ (change.detected_at | kst_time), change.detected_at.isoformat(), change.detected_at | kst_datetime) }}
+  </div>
+</header>
+
+<div class="detail-grid">
+  <div class="detail-main">
+    {% call ui.panel("Contract Diff", "diff") %}
+    <p class="issue-summary">{{ change.summary }}</p>
+    {{ ui.contract_diff(change.diff.added, change.diff.removed, change.diff.changed) }}
+    {% endcall %}
+
+    <details class="raw-evidence">
+      <summary>View raw diff</summary>
+      <pre><code>{{ raw_diff }}</code></pre>
+    </details>
+  </div>
+
+  <aside class="detail-side">
+    {% call ui.panel("Health Impact", "impact") %}
+    {%- if change.health_impact == "none" %}
+    <p>None — Dataset remained Healthy.</p>
+    {%- else %}
+    <p>{{ ui.status_badge(change.health_impact) }}</p>
+    {%- endif %}
+    {%- if change.related_incident_id %}
+    <p>Related incident: <a href="{{ page_url('incident', change.related_incident_id) }}">{{ change.related_incident_id }}</a></p>
+    {%- endif %}
+    {{ ui.metadata([
+      ("First observed", change.detected_at | kst_datetime, False),
+      ("Change type", change.change_type, False),
+    ]) }}
+    {% endcall %}
+  </aside>
+</div>
+{% endblock %}

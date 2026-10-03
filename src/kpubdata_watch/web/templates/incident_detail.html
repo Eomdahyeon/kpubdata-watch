@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% import "components/primitives.html" as ui with context %}
+{#-
+  Incident Detail (#87, PRD §48): the lifecycle, why the detector fired, the
+  observation timeline and the related change. Context: `incident` (Incident),
+  `dataset` (DatasetRecord), `change` (the related Change or none), `duration`,
+  `raw_evidence` (pretty JSON).
+-#}
+
+{% block title %}{{ incident.title }} · {{ dataset.name }} — KPubData Watch{% endblock %}
+{% block description %}Why KPubData Watch detected "{{ incident.title }}" on {{ dataset.provider.name }} {{ dataset.name }}: expected, observed, difference and rule.{% endblock %}
+
+{% macro evidence_block(values) -%}
+<ul class="evidence-values">
+  {%- for key, value in values.items() %}
+  <li><code>{{ key }}: {{ value | evidence_value }}</code></li>
+  {%- endfor %}
+</ul>
+{%- endmacro %}
+
+{% block content %}
+<header class="page-header">
+  <p class="page-eyebrow"><a href="{{ page_url('dataset', dataset.id) }}">{{ dataset.name }}</a> · {{ dataset.provider.name }}</p>
+  <h1>{{ incident.title }}</h1>
+  <p class="technical-id">{{ incident.id }}</p>
+  <div class="page-status">
+    {%- if severity_tone[incident.severity] %}
+    {{ ui.status_badge(severity_tone[incident.severity], severity_labels[incident.severity]) }}
+    {%- else %}
+    {{ ui.change_badge(severity_labels[incident.severity]) }}
+    {%- endif %}
+    <span class="incident-status incident-{{ incident.status }}">{{ incident_status_labels[incident.status] }}</span>
+    <span class="event-meta">{{ check_labels[incident.check] }}</span>
+  </div>
+</header>
+
+<div class="detail-grid">
+  <div class="detail-main">
+    {% call ui.panel("Why was this detected?", "why") %}
+    <p class="issue-summary">{{ incident.summary }}</p>
+    <dl class="metadata evidence">
+      <dt>Expected</dt>
+      <dd>{{ evidence_block(incident.evidence.expected) }}</dd>
+      <dt>Observed</dt>
+      <dd>{{ evidence_block(incident.evidence.observed) }}</dd>
+      <dt>Difference</dt>
+      <dd>{{ evidence_block(incident.evidence.difference) }}</dd>
+      <dt>Rule</dt>
+      <dd>{{ incident.evidence.rule.description }} <span class="technical-id">{{ incident.evidence.rule.id }}</span></dd>
+    </dl>
+    {%- if change %}
+    {{ ui.contract_diff(change.diff.added, change.diff.removed, change.diff.changed) }}
+    {%- endif %}
+    {% endcall %}
+
+    {% call ui.panel("Observation Timeline", "timeline") %}
+    {%- if incident.timeline %}
+    <ol class="event-list">
+      {%- for event in incident.timeline %}
+      <li class="event-row">
+        {{ ui.timestamp(event.at | kst_minute, event.at.isoformat()) }}
+        <span class="event-title">{{ event.summary }}</span>
+      </li>
+      {%- endfor %}
+    </ol>
+    {%- else %}
+    {{ ui.empty_state("기록된 관측이 없습니다.") }}
+    {%- endif %}
+    {% endcall %}
+
+    {% call ui.panel("Related Change", "related-change") %}
+    {%- if change %}
+    <p>{{ ui.change_badge(change.title) }} <a href="{{ page_url('change', change.id) }}">{{ change.summary }}</a></p>
+    {%- else %}
+    {{ ui.empty_state("관련 Change가 없습니다.") }}
+    {%- endif %}
+    {% endcall %}
+
+    <details class="raw-evidence">
+      <summary>View raw evidence</summary>
+      <pre><code>{{ raw_evidence }}</code></pre>
+    </details>
+  </div>
+
+  <aside class="detail-side">
+    {% call ui.panel("Lifecycle", "lifecycle") %}
+    {{ ui.metadata([
+      ("Started", incident.started_at | kst_minute, False),
+      ("Detected", incident.detected_at | kst_minute, False),
+      ("Confirmed", (incident.confirmed_at | kst_minute) if incident.confirmed_at else "—", False),
+      ("Resolved", (incident.resolved_at | kst_minute) if incident.resolved_at else "진행 중", False),
+      ("Duration", duration, False),
+    ]) }}
+    {% endcall %}
+  </aside>
+</div>
+{% endblock %}

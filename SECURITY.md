@@ -2,7 +2,7 @@
 
 ## Reporting a vulnerability
 
-**Do not open a public issue.** Use [Private Vulnerability Reporting](https://github.com/yeongseon/kpubdata-watch/security/advisories/new).
+**Do not open a public issue.** Use [Private Vulnerability Reporting](https://github.com/kpubdata-lab/kpubdata-watch/security/advisories/new).
 
 Please include, as far as you can:
 

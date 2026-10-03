@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% import "components/primitives.html" as ui with context %}
+{#-
+  Dataset Detail (#86, PRD §47): why this dataset is in its current Health.
+  Context: `dataset` (DatasetDetail), `incidents` and `changes` (this dataset's
+  Incident and Change details, newest first), `changes_by_id`, `history`
+  (DatasetHistory). Incident and change pages are linked only once they are built.
+-#}
+
+{% block title %}{{ dataset.name }} — KPubData Watch{% endblock %}
+{% block description %}{{ dataset.provider.name }} {{ dataset.name }}: current Health, the four checks, 30-day history, incidents and changes.{% endblock %}
+
+{% macro incident_title(incident) -%}
+{%- if "incident" in built_pages -%}
+<a href="{{ page_url('incident', incident.id) }}">{{ incident.title }}</a>
+{%- else -%}
+{{ incident.title }}
+{%- endif -%}
+{%- endmacro %}
+
+{% macro change_title(change) -%}
+{%- if "change" in built_pages -%}
+<a href="{{ page_url('change', change.id) }}">{{ change.title }}</a>
+{%- else -%}
+{{ change.title }}
+{%- endif -%}
+{%- endmacro %}
+
+{% block content %}
+<header class="page-header">
+  <p class="page-eyebrow">{{ dataset.provider.name }}</p>
+  <h1>{{ dataset.name }}</h1>
+  <p class="technical-id">{{ dataset.id }}</p>
+  <div class="page-status">
+    {{ ui.status_badge(dataset.health) }}
+    {{ ui.timestamp("Checked " ~ (dataset.last_checked_at | kst_time), dataset.last_checked_at.isoformat(), dataset.last_checked_at | kst_datetime) }}
+  </div>
+</header>
+
+<div class="detail-grid">
+  <div class="detail-main">
+    {% call ui.panel("Health Checks", "checks") %}
+    <ul class="check-list">
+      {%- for name, label in check_labels.items() %}
+      {%- set check = dataset.checks[name] %}
+      <li class="check-row">
+        <span class="check-name">{{ label }}</span>
+        {{ ui.check_status(check.status) }}
+        {%- if check.summary %}
+        <span class="check-summary">{{ check.summary }}</span>
+        {%- endif %}
+      </li>
+      {%- endfor %}
+    </ul>
+    {% endcall %}
+
+    {% if dataset.active_incidents %}
+    {% call ui.panel("Current Issue", "current-issue") %}
+    {%- for summary in dataset.active_incidents %}
+    {%- set incident = incidents | selectattr("id", "equalto", summary.id) | first %}
+    <article class="issue">
+      <h3 class="issue-title">
+        {{ ui.status_badge(dataset.health, check_labels[incident.check]) }}
+        {{ incident_title(incident) }}
+      </h3>
+      <p class="issue-summary">{{ incident.summary }}</p>
+      {%- if incident.related_change_id %}
+      {%- set change = changes_by_id[incident.related_change_id] %}
+      {{ ui.contract_diff(change.diff.added, change.diff.removed, change.diff.changed) }}
+      {%- endif %}
+      {{ ui.metadata([
+        ("First detected", incident.detected_at | kst_time, False),
+        ("Confirmed", (incident.confirmed_at | kst_time) if incident.confirmed_at else "—", False),
+      ]) }}
+    </article>
+    {%- endfor %}
+    {% endcall %}
+    {% endif %}
+
+    {% call ui.panel("Last 30 Days", "history") %}
+    {{ ui.history_strip(history.days) }}
+    <p class="panel-note">{{ history.days[0].date.isoformat() }} – {{ history.days[-1].date.isoformat() }}</p>
+    {% endcall %}
+
+    {% call ui.panel("Recent Incidents", "incidents") %}
+    {%- if incidents %}
+    <ul class="event-list">
+      {%- for incident in incidents %}
+      <li class="event-row">
+        {{ ui.timestamp(incident.detected_at | kst_minute, incident.detected_at.isoformat()) }}
+        <span class="event-title">{{ incident_title(incident) }}</span>
+        <span class="event-meta">{{ check_labels[incident.check] }} · {{ incident.status | replace("_", " ") | capitalize }}</span>
+      </li>
+      {%- endfor %}
+    </ul>
+    {%- else %}
+    {{ ui.empty_state("최근 Incident가 없습니다.") }}
+    {%- endif %}
+    {% endcall %}
+
+    {% call ui.panel("Recent Changes", "changes") %}
+    {%- if changes %}
+    <ul class="event-list">
+      {%- for change in changes %}
+      <li class="event-row">
+        {{ ui.timestamp(change.detected_at | kst_minute, change.detected_at.isoformat()) }}
+        <span class="event-title">{{ ui.change_badge() }} {{ change_title(change) }}</span>
+        <span class="event-meta">{{ change.summary }}</span>
+        {{ ui.contract_diff(change.diff.added, change.diff.removed, change.diff.changed) }}
+      </li>
+      {%- endfor %}
+    </ul>
+    {%- else %}
+    {{ ui.empty_state("최근 Change가 없습니다.") }}
+    {%- endif %}
+    {% endcall %}
+  </div>
+
+  <aside class="detail-side">
+    {% call ui.panel("Metadata", "metadata") %}
+    {{ ui.metadata([
+      ("Provider", dataset.provider.name, False),
+      ("Category", dataset.category, False),
+      ("Dataset ID", dataset.id, True),
+      ("Last checked", dataset.last_checked_at | kst_datetime, False),
+      ("Last successful", (dataset.last_successful_at | kst_datetime) if dataset.last_successful_at else "—", False),
+      ("Last healthy", (dataset.last_healthy_at | kst_datetime) if dataset.last_healthy_at else "—", False),
+      ("Latest data", (dataset.latest_data_at | kst_datetime) if dataset.latest_data_at else "알 수 없음", False),
+    ]) }}
+    {% endcall %}
+  </aside>
+</div>
+{% endblock %}

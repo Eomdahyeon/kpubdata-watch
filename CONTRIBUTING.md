@@ -5,7 +5,7 @@ their reliability with evidence; start with [docs/PRD.md](docs/PRD.md) for what 
 product is and [docs/ROADMAP.md](docs/ROADMAP.md) for what is in scope now.
 
 The project-management rules (labels, priority, review levels, releases) are
-kpubdata's [POLICY.md](https://github.com/yeongseon/kpubdata/blob/main/docs/governance/POLICY.md).
+kpubdata's [POLICY.md](https://github.com/kpubdata-lab/kpubdata/blob/main/docs/governance/POLICY.md).
 
 ## Language
 
@@ -64,7 +64,7 @@ uv run pytest -m live
 
 Every issue states the machine verification that proves it done — V0 static
 checks through V5-live product E2E, the levels of kpubdata
-[POLICY.md §18](https://github.com/yeongseon/kpubdata/blob/main/docs/governance/POLICY.md).
+[POLICY.md §18](https://github.com/kpubdata-lab/kpubdata/blob/main/docs/governance/POLICY.md).
 The issue templates ask for the level, and `scripts/check_governance.py` fails
 CI when a template stops asking. A pull request that closes an issue meets that
 level, or says why it cannot yet.

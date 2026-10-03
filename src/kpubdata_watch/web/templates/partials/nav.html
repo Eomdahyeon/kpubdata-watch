@@ -1,0 +1,18 @@
+{#-
+  Product navigation (#83). `built_pages` holds the pages this site has; a surface
+  that is not built yet stays visible as plain text instead of a link to nothing.
+  `active_nav` is the page being rendered and gets aria-current.
+-#}
+<nav class="primary-nav" aria-label="Product">
+  <ul>
+    {%- for key, label, _ in nav_items %}
+    <li>
+      {%- if key in built_pages -%}
+      <a class="nav-item" href="{{ page_url(key) }}"{% if key == active_nav %} aria-current="page"{% endif %}>{{ label }}</a>
+      {%- else -%}
+      <span class="nav-item is-pending" aria-disabled="true">{{ label }}</span>
+      {%- endif -%}
+    </li>
+    {%- endfor %}
+  </ul>
+</nav>

@@ -13,10 +13,10 @@ Studio 가 기준이고 Watch 는 따라간다. 아래 링크는 Watch 토큰을
 
 | 무엇 | Studio 문서 |
 |---|---|
-| 규칙 (색 값 · token · 크기 · 금지 사항) | [docs/brand/VISUAL_IDENTITY.md](https://github.com/yeongseon/kpubdata-studio/blob/1fbf57e41a32b3ef9cd353666beb1fcd0d6b97e9/docs/brand/VISUAL_IDENTITY.md) |
-| 의도 (왜 이렇게 생겼나) | [docs/brand/DESIGN_CONCEPT.md](https://github.com/yeongseon/kpubdata-studio/blob/1fbf57e41a32b3ef9cd353666beb1fcd0d6b97e9/docs/brand/DESIGN_CONCEPT.md) |
-| 토큰 값 | [src/globals.css](https://github.com/yeongseon/kpubdata-studio/blob/1fbf57e41a32b3ef9cd353666beb1fcd0d6b97e9/src/globals.css) |
-| 로고 자산 | [assets/logo/kpubdata-brand-assets/](https://github.com/yeongseon/kpubdata-studio/blob/1fbf57e41a32b3ef9cd353666beb1fcd0d6b97e9/assets/logo/kpubdata-brand-assets/README.md) |
+| 규칙 (색 값 · token · 크기 · 금지 사항) | [docs/brand/VISUAL_IDENTITY.md](https://github.com/kpubdata-lab/kpubdata-studio/blob/1fbf57e41a32b3ef9cd353666beb1fcd0d6b97e9/docs/brand/VISUAL_IDENTITY.md) |
+| 의도 (왜 이렇게 생겼나) | [docs/brand/DESIGN_CONCEPT.md](https://github.com/kpubdata-lab/kpubdata-studio/blob/1fbf57e41a32b3ef9cd353666beb1fcd0d6b97e9/docs/brand/DESIGN_CONCEPT.md) |
+| 토큰 값 | [src/globals.css](https://github.com/kpubdata-lab/kpubdata-studio/blob/1fbf57e41a32b3ef9cd353666beb1fcd0d6b97e9/src/globals.css) |
+| 로고 자산 | [assets/logo/kpubdata-brand-assets/](https://github.com/kpubdata-lab/kpubdata-studio/blob/1fbf57e41a32b3ef9cd353666beb1fcd0d6b97e9/assets/logo/kpubdata-brand-assets/README.md) |
 
 Watch 쪽에서 이 값을 담는 곳은 **한 파일**이다.
 

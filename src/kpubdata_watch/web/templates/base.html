@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}KPubData Watch{% endblock %}</title>
+    <meta
+      name="description"
+      content="{% block description %}KPubData Watch — public data reliability observation for Korean public data APIs.{% endblock %}"
+    />
+    <link rel="icon" href="{{ asset_url('favicon.svg') }}" type="image/svg+xml" />
+    {# Brand v2 is the single token source (kpubdata-watch#68). Everything below
+       reads colour only through var(--...) and never redefines a token here. #}
+    <link rel="stylesheet" href="{{ asset_url('brand-v2.css') }}" />
+    <link rel="stylesheet" href="{{ asset_url('components.css') }}" />
+    <link rel="stylesheet" href="{{ asset_url('demo.css') }}" />
+    {% block head_scripts %}{% endblock %}
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="shell-header">
+      <div class="product-shell shell-header-inner">
+        <a class="shell-brand" href="{{ page_url('overview') }}">
+          <img
+            class="brand-symbol"
+            src="{{ asset_url('kpubdata-symbol.svg') }}"
+            width="24"
+            height="24"
+            alt=""
+          />
+          <span class="brand-lockup">
+            <span class="brand-name">KPubData</span>
+            <span class="brand-suffix">Watch</span>
+          </span>
+        </a>
+        {% include "partials/nav.html" %}
+        <nav class="secondary-nav" aria-label="Resources">
+          <a href="{{ root }}docs/">Docs</a>
+          <a href="https://github.com/kpubdata-lab/kpubdata-watch">GitHub</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main" class="product-shell">
+      {%- if snapshot_at %}
+      <p class="preview-meta">
+        <strong>Preview data</strong> · 고정된 예시 데이터이며 실제 관측 결과가 아닙니다 ·
+        Snapshot {{ snapshot_at }}
+      </p>
+      {%- endif %}
+      {% block content %}{% endblock %}
+    </main>
+
+    <footer class="shell-footer product-shell">
+      <p>
+        KPubData Watch · <a href="{{ root }}docs/">Docs</a> ·
+        <a href="https://github.com/kpubdata-lab/kpubdata-watch">Source</a>
+      </p>
+    </footer>
+  </body>
+</html>

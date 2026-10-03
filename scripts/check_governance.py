@@ -33,7 +33,7 @@ TITLES_WORKFLOW = Path(".github") / "workflows" / "titles.yml"
 TEMPLATE_EXEMPT = ("config.yml",)
 
 # `config.yml` chooses templates; it is not one, so it carries no field.
-SHARED_TITLE_ACTION = "yeongseon/kpubdata/.github/actions/conventional-title"
+SHARED_TITLE_ACTION = "kpubdata-lab/kpubdata/.github/actions/conventional-title"
 _FAILING_STEP = "exit 1"
 
 _VERIFICATION_FIELD = re.compile(r"^\s*id:\s*verification\s*$", re.MULTILINE)

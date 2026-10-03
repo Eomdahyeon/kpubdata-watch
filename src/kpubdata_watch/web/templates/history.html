@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% import "components/primitives.html" as ui with context %}
+{#-
+  History (issue 109, ADR 0013): the last 30 days, the same rows (datasets) as the
+  Overview with different columns — "how reliable has this been" instead of
+  "can this be used right now". Context: `period_start`/`period_end` (ISO
+  dates), `daily_counts` (30 days, each with a px `heights` stack and a
+  `label`), `daily_summary`, `heatmap_rows` (one per dataset, sorted by
+  abnormal days then current severity, each with the dataset's `cells` —
+  its `HistoryDay` list), `heatmap_summary`, `timeline` (date groups, newest
+  first; each item is {kind, entity, dataset, duration}).
+-#}
+
+{% block title %}History — KPubData Watch{% endblock %}
+{% block description %}KPubData Watch history: 30 days of health for every monitored Korean public dataset.{% endblock %}
+
+{% macro dataset_link(dataset_id, name) -%}
+{%- if "dataset" in built_pages -%}
+<a href="{{ page_url('dataset', dataset_id) }}">{{ name }}</a>
+{%- else -%}
+{{ name }}
+{%- endif -%}
+{%- endmacro %}
+
+{% macro incident_title(incident) -%}
+{%- if "incident" in built_pages -%}
+<a href="{{ page_url('incident', incident.id) }}">{{ incident.title }}</a>
+{%- else -%}
+{{ incident.title }}
+{%- endif -%}
+{%- endmacro %}
+
+{% macro change_title(change) -%}
+{%- if "change" in built_pages -%}
+<a href="{{ page_url('change', change.id) }}">{{ change.title }}</a>
+{%- else -%}
+{{ change.title }}
+{%- endif -%}
+{%- endmacro %}
+
+{% block content %}
+<header class="page-header">
+  <h1>History</h1>
+  <p class="status-subtitle">{{ period_start }} – {{ period_end }} KST</p>
+</header>
+
+{% call ui.panel("Daily Abnormal Datasets", "daily-counts") %}
+{{ ui.daily_counts_bar(daily_counts) }}
+<p class="sr-only">{{ daily_summary }}</p>
+{% endcall %}
+
+{% call ui.panel("Dataset History", "history-grid") %}
+{{ ui.history_grid(heatmap_rows) }}
+<p class="sr-only">{{ heatmap_summary }}</p>
+{% endcall %}
+
+{% call ui.panel("Incidents and Changes", "timeline") %}
+{%- if timeline %}
+{%- for group in timeline %}
+<h3 class="timeline-date">{{ group.date.isoformat() }}</h3>
+<ul class="event-list">
+  {%- for item in group.events %}
+  {%- set dataset = item.dataset %}
+  <li class="event-row">
+    {%- if item.kind == "incident" %}
+    {%- set incident = item.entity %}
+    {{ ui.timestamp(incident.detected_at | kst_minute, incident.detected_at.isoformat()) }}
+    <span class="event-title">{{ incident_title(incident) }}</span>
+    <span class="event-meta">
+      {{ dataset_link(dataset.id, dataset.name) }} · {{ check_labels[incident.check] }} ·
+      {{ incident_status_labels[incident.status] }}
+      {%- if item.duration %} · {{ item.duration }}{% endif %}
+    </span>
+    {%- else %}
+    {%- set change = item.entity %}
+    {{ ui.timestamp(change.detected_at | kst_minute, change.detected_at.isoformat()) }}
+    <span class="event-title">{{ ui.change_badge() }} {{ change_title(change) }}</span>
+    <span class="event-meta">{{ dataset_link(dataset.id, dataset.name) }} · {{ change.summary }}</span>
+    {%- endif %}
+  </li>
+  {%- endfor %}
+</ul>
+{%- endfor %}
+{%- else %}
+{{ ui.empty_state("최근 30일 동안 기록된 Incident·Change가 없습니다.") }}
+{%- endif %}
+{% endcall %}
+{% endblock %}
