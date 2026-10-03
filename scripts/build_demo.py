@@ -1,12 +1,24 @@
 #!/usr/bin/env python3
-"""Render the Public Status page with fixture data into a static demo site (#78).
+"""Render the product pages with fixture data into a static demo site (#78, #88).
 
-GitHub Pages hosts a fixture-based demo of the Public Status page, not the live
-service (see docs/decisions — the production service stays FastAPI + worker +
-PostgreSQL and never runs on Pages). This script renders
-`src/kpubdata_watch/web/templates/public_status.html` with the product snapshot in
-`demo/fixtures/` (five files, loaded through the public read models, #82) into a
-self-contained output directory that `.github/workflows/deploy.yml` uploads to Pages.
+GitHub Pages hosts a fixture-based demo of the product, not the live service (see
+docs/decisions — the production service stays FastAPI + worker + PostgreSQL and
+never runs on Pages). This script renders the templates in
+`src/kpubdata_watch/web/templates/` with the product snapshot in `demo/fixtures/`
+(five files, loaded through the public read models, #82) into a self-contained
+output directory that `.github/workflows/deploy.yml` uploads to Pages:
+
+    index.html                    Overview
+    datasets/index.html           dataset catalog
+    datasets/<id>/index.html      Dataset Detail
+    incidents/index.html          incident list
+    incidents/<id>/index.html     Incident Detail
+    changes/index.html            change list
+    changes/<id>/index.html       Change Detail
+    static/                       CSS, script and images
+
+Every link is relative, so the site works under any base path such as
+`/kpubdata-watch/`, and the build fails if any internal link points at nothing.
 Times are shown as clock times in KST, never as "3m ago": a static page is read long
 after it is built.
 
@@ -18,6 +30,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import shutil
 from pathlib import Path
 from typing import Any
@@ -42,7 +55,9 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 FIXTURES_DIR = REPO_ROOT / "demo" / "fixtures"
 DEFAULT_OUTPUT = REPO_ROOT / "_site"
 # The product pages this demo builds; the navigation links only to these (#83).
-BUILT_PAGES = frozenset({"overview", "datasets", "dataset", "incident", "change"})
+BUILT_PAGES = frozenset(
+    {"overview", "datasets", "dataset", "incidents", "incident", "changes", "change"}
+)
 # With a full catalog, the Overview previews this many datasets, issues first (#84).
 PREVIEW_SIZE = 6
 _HEALTH_RANK = {"critical": 0, "degraded": 1, "unknown": 2, "healthy": 3}
@@ -265,11 +280,72 @@ def render_change(snapshot: ProductSnapshot, change_id: str) -> str:
     )
 
 
+def render_incident_list(snapshot: ProductSnapshot) -> str:
+    """Render the incident list (#88); it lives at `incidents/`."""
+    datasets = {d.id: d for d in snapshot.datasets}
+    ongoing = sorted(
+        (i for i in snapshot.incidents if i.status in {"open", "ongoing"}),
+        key=lambda i: (_SEVERITY_RANK[i.severity], i.detected_at),
+    )
+    resolved = sorted(
+        (i for i in snapshot.incidents if i.status not in {"open", "ongoing"}),
+        key=lambda i: i.detected_at,
+        reverse=True,
+    )
+    return (
+        environment(TEMPLATES_DIR)
+        .get_template("incidents.html")
+        .render(
+            ongoing=[{"incident": i, "dataset": datasets[i.dataset_id]} for i in ongoing],
+            resolved=[{"incident": i, "dataset": datasets[i.dataset_id]} for i in resolved],
+            **_shell(snapshot, root="../", active_nav="incidents"),
+        )
+    )
+
+
+def render_change_list(snapshot: ProductSnapshot) -> str:
+    """Render the change list (#88); it lives at `changes/`."""
+    datasets = {d.id: d for d in snapshot.datasets}
+    changes = sorted(snapshot.changes, key=lambda c: c.detected_at, reverse=True)
+    return (
+        environment(TEMPLATES_DIR)
+        .get_template("changes.html")
+        .render(
+            items=[{"change": c, "dataset": datasets[c.dataset_id]} for c in changes],
+            **_shell(snapshot, root="../", active_nav="changes"),
+        )
+    )
+
+
+_LINK = re.compile(r'(?:href|src)="([^"]+)"')
+
+
+def broken_links(output_dir: Path) -> list[str]:
+    """Every relative link in the built site that points at nothing.
+
+    External links, in-page anchors and the documentation site (`docs/`, built by
+    mkdocs into the same output by deploy.yml) are skipped.
+    """
+    problems = []
+    for page in sorted(output_dir.rglob("*.html")):
+        for target in _LINK.findall(page.read_text(encoding="utf-8")):
+            if target.startswith(("http://", "https://", "mailto:", "#")):
+                continue
+            path = target.split("#", 1)[0].split("?", 1)[0]
+            resolved = (page.parent / path).resolve()
+            if resolved == (output_dir / "docs").resolve():
+                continue
+            if not resolved.exists():
+                problems.append(f"{page.relative_to(output_dir)}: {target}")
+    return problems
+
+
 def _write_pages(output_dir: Path, kind: str, pages: dict[str, str]) -> None:
     """Write `<output_dir>/<kind>/<id>/index.html` for each page, replacing old ones."""
     directory = output_dir / kind
     if directory.exists():
         shutil.rmtree(directory)
+    directory.mkdir(parents=True)
     for identifier, html in pages.items():
         page = directory / identifier / "index.html"
         page.parent.mkdir(parents=True)
@@ -296,12 +372,21 @@ def build(output_dir: Path = DEFAULT_OUTPUT, fixtures_dir: Path = FIXTURES_DIR) 
     _write_pages(
         output_dir, "changes", {c.id: render_change(snapshot, c.id) for c in snapshot.changes}
     )
+    (output_dir / "incidents" / "index.html").write_text(
+        render_incident_list(snapshot), encoding="utf-8"
+    )
+    (output_dir / "changes" / "index.html").write_text(
+        render_change_list(snapshot), encoding="utf-8"
+    )
 
     static_out = output_dir / "static"
     if static_out.exists():
         shutil.rmtree(static_out)
     shutil.copytree(STATIC_DIR, static_out)
 
+    problems = broken_links(output_dir)
+    if problems:
+        raise SystemExit("broken internal links:\n" + "\n".join(problems))
     return output_dir
 
 

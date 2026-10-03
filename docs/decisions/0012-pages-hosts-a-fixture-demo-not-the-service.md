@@ -41,7 +41,8 @@ Pages 자리에 **Mock 데이터로 동작하는 실제 앱 데모**를 루트�
 
 1. **Pages 는 두 정적 산출물만 호스팅한다.** 루트는
    `scripts/build_demo.py` 가 `demo/fixtures/` 의 snapshot 을
-   `src/kpubdata_watch/web/templates/public_status.html` 로 렌더링한 결과,
+   `src/kpubdata_watch/web/templates/` 의 제품 화면(Overview, Datasets,
+   Dataset·Incident·Change 상세, Incident·Change 목록, #88)으로 렌더링한 결과,
    `/docs/` 는 `mkdocs build --strict` 결과다. 둘 다
    `.github/workflows/deploy.yml` ("Deploy demo + docs") 한 Workflow 가
    `main` push 에서만 배포하고, Pull Request 에서는 build 만 한다(Studio

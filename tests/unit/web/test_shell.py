@@ -63,11 +63,16 @@ def test_the_current_page_is_marked(html: str) -> None:
     assert '<a class="nav-item" href="./" aria-current="page">Overview</a>' in html
 
 
-def test_a_page_that_is_not_built_yet_is_not_a_link(html: str) -> None:
+def test_a_page_that_is_not_built_yet_is_not_a_link() -> None:
+    page = (
+        environment()
+        .from_string('{% include "partials/nav.html" %}')
+        .render(active_nav="overview", built_pages={"overview"}, root="")
+    )
     for key, label, _ in NAV_ITEMS:
-        if key in {"overview", "datasets"}:
+        if key == "overview":
             continue
-        assert f'<span class="nav-item is-pending" aria-disabled="true">{label}</span>' in html
+        assert f'<span class="nav-item is-pending" aria-disabled="true">{label}</span>' in page
 
 
 def test_a_built_page_becomes_a_link() -> None:

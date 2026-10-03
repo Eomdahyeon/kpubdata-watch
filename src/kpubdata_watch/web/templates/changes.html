@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% import "components/primitives.html" as ui with context %}
+{#-
+  Change list (#88): every observed change, newest first. A Change is an
+  observed fact, shown with the neutral badge; its health impact is on its page.
+  Context: `items` (list of {change, dataset}).
+-#}
+
+{% block title %}Changes — KPubData Watch{% endblock %}
+{% block description %}Every change KPubData Watch has observed on Korean public datasets, newest first.{% endblock %}
+
+{% block content %}
+<header class="page-header">
+  <h1>Changes</h1>
+  <p class="status-subtitle">{{ items | length }} observed changes</p>
+</header>
+
+{% call ui.panel("All Changes", "all-changes", items | length) %}
+{%- if items %}
+<ul class="change-list">
+  {%- for item in items %}
+  {%- set change = item.change %}
+  <li class="change-row">
+    <div class="change-head">
+      {{ ui.change_badge(severity_labels[change.severity]) }}
+      <a class="issue-dataset" href="{{ page_url('change', change.id) }}">{{ change.title }}</a>
+      <span class="event-meta">{{ item.dataset.name }}</span>
+      {{ ui.timestamp(change.detected_at | kst_minute, change.detected_at.isoformat()) }}
+    </div>
+    <p class="change-summary">{{ change.summary }}</p>
+  </li>
+  {%- endfor %}
+</ul>
+{%- else %}
+{{ ui.empty_state("관측된 Change가 없습니다.") }}
+{%- endif %}
+{% endcall %}
+{% endblock %}

@@ -1,10 +1,10 @@
 name: Deploy demo + docs
 
 # Publishes two things to GitHub Pages:
-#   - root (/kpubdata-watch/)       : a fixture-based demo of the Public Status page
+#   - root (/kpubdata-watch/)       : a fixture-based demo of the product pages
 #   - /kpubdata-watch/docs/         : the mkdocs documentation site
-# The demo renders the product snapshot in demo/fixtures/ (five files) through
-# src/kpubdata_watch/web/templates/public_status.html (scripts/build_demo.py). It
+# The demo renders the product snapshot in demo/fixtures/ (five files) through the
+# templates in src/kpubdata_watch/web/templates/ (scripts/build_demo.py). It
 # never calls a provider or holds a credential -- see the ADR in docs/decisions/.
 # The production service (watch-web + watch-worker + PostgreSQL) does not run here.
 
