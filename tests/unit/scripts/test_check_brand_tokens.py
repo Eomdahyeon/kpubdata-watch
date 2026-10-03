@@ -29,9 +29,7 @@ DOC = Path("docs") / "VISUAL_IDENTITY.md"
 PINNED_SHA = "1fbf57e41a32b3ef9cd353666beb1fcd0d6b97e9"
 
 
-def _run(
-    root: Path, studio: Path | None, *args: str
-) -> subprocess.CompletedProcess[str]:
+def _run(root: Path, studio: Path | None, *args: str) -> subprocess.CompletedProcess[str]:
     """Run the script against `root`, with `studio` as `--studio` unless it is None."""
     base = {k: v for k, v in os.environ.items() if k != "STUDIO_GLOBALS_CSS"}
     extra = ["--studio", str(studio)] if studio is not None else []
@@ -275,9 +273,7 @@ def test_a_studio_file_without_the_theme_blocks_fails(tmp_path: Path) -> None:
     assert "drift from Studio: light: Studio's stylesheet has no such block" in result.stderr
 
 
-def test_a_missing_token_file_fails_rather_than_passing_empty(
-    tmp_path: Path, studio: Path
-) -> None:
+def test_a_missing_token_file_fails_rather_than_passing_empty(tmp_path: Path, studio: Path) -> None:
     root = _repo(tmp_path)
     (root / TOKEN_FILE).unlink()
     result = _run(root, studio)
