@@ -65,7 +65,7 @@ def test_the_current_page_is_marked(html: str) -> None:
 
 def test_a_page_that_is_not_built_yet_is_not_a_link(html: str) -> None:
     for key, label, _ in NAV_ITEMS:
-        if key == "overview":
+        if key in {"overview", "datasets"}:
             continue
         assert f'<span class="nav-item is-pending" aria-disabled="true">{label}</span>' in html
 

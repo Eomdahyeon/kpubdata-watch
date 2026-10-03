@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% import "components/primitives.html" as ui with context %}
+{#-
+  Dataset catalog (#85): every dataset as a table row; the whole row leads to its
+  detail page. The filters are a progressive enhancement: static/catalog.js
+  reveals the form and filters rows on their data attributes. Context: `rows`,
+  `providers` ((id, name) pairs, sorted), `total`.
+-#}
+
+{% block title %}Datasets — KPubData Watch{% endblock %}
+{% block description %}Every Korean public dataset KPubData Watch observes, with its health, active issue and latest change.{% endblock %}
+{% block head_scripts %}<script src="{{ asset_url('catalog.js') }}" defer></script>{% endblock %}
+
+{% block content %}
+<header class="page-header">
+  <h1>Datasets</h1>
+  <p class="status-subtitle" aria-live="polite"><span data-count>{{ total }}</span> of {{ total }} datasets</p>
+</header>
+
+<form class="catalog-filters" role="search" aria-label="Filter datasets" hidden>
+  <label class="filter filter-search">
+    <span class="filter-label">Search</span>
+    <input type="search" name="q" placeholder="Dataset, Provider, ID" autocomplete="off" />
+  </label>
+  <label class="filter">
+    <span class="filter-label">Provider</span>
+    <select name="provider">
+      <option value="">All</option>
+      {%- for id, name in providers %}
+      <option value="{{ id }}">{{ name }}</option>
+      {%- endfor %}
+    </select>
+  </label>
+  <label class="filter">
+    <span class="filter-label">Health</span>
+    <select name="health">
+      <option value="">All</option>
+      {%- for key in health_order %}
+      <option value="{{ key }}">{{ health_meta[key].label }}</option>
+      {%- endfor %}
+    </select>
+  </label>
+  <label class="filter">
+    <span class="filter-label">Check</span>
+    <select name="check">
+      <option value="">All</option>
+      {%- for key, label in check_labels.items() %}
+      <option value="{{ key }}">{{ label }}</option>
+      {%- endfor %}
+    </select>
+  </label>
+  <label class="filter filter-toggle">
+    <input type="checkbox" name="active" value="1" />
+    <span>Active issues only</span>
+  </label>
+</form>
+
+<div class="table-scroll">
+  <table class="catalog-table">
+    <thead>
+      <tr>
+        <th scope="col">Dataset</th>
+        <th scope="col">Provider</th>
+        <th scope="col">Health</th>
+        <th scope="col">Active issue</th>
+        <th scope="col">Latest change</th>
+        <th scope="col">Last checked</th>
+      </tr>
+    </thead>
+    <tbody>
+      {%- for row in rows %}
+      <tr class="catalog-row" data-id="{{ row.id }}" data-provider="{{ row.provider_id }}" data-health="{{ row.health }}" data-checks="{{ row.checks | join(' ') }}" data-active="{{ 'true' if row.incident else 'false' }}" data-search="{{ row.search }}">
+        <td>
+          <a class="row-link" href="{{ page_url('dataset', row.id) }}">{{ row.name }}</a>
+          <span class="technical-id">{{ row.id }}</span>
+        </td>
+        <td>{{ row.provider_name }}</td>
+        <td>{{ ui.status_badge(row.health) }}</td>
+        <td>
+          {%- if row.incident %}
+          <a class="cell-link" href="{{ page_url('incident', row.incident.id) }}">{{ row.incident.title }}</a>
+          {%- else %}<span class="muted">—</span>{% endif -%}
+        </td>
+        <td>
+          {%- if row.change %}
+          <a class="cell-link" href="{{ page_url('change', row.change.id) }}">{{ row.change.title }}</a>
+          {%- else %}<span class="muted">—</span>{% endif -%}
+        </td>
+        <td>{{ ui.timestamp(row.last_checked_at | kst_time, row.last_checked_at.isoformat(), row.last_checked_at | kst_datetime) }}</td>
+      </tr>
+      {%- endfor %}
+    </tbody>
+  </table>
+</div>
+<p class="empty-state" data-empty hidden>조건에 맞는 Dataset이 없습니다.</p>
+{% endblock %}

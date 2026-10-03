@@ -42,11 +42,13 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 FIXTURES_DIR = REPO_ROOT / "demo" / "fixtures"
 DEFAULT_OUTPUT = REPO_ROOT / "_site"
 # The product pages this demo builds; the navigation links only to these (#83).
-BUILT_PAGES = frozenset({"overview", "dataset", "incident", "change"})
+BUILT_PAGES = frozenset({"overview", "datasets", "dataset", "incident", "change"})
 # With a full catalog, the Overview previews this many datasets, issues first (#84).
 PREVIEW_SIZE = 6
 _HEALTH_RANK = {"critical": 0, "degraded": 1, "unknown": 2, "healthy": 3}
 _SEVERITY_RANK = {"critical": 0, "warning": 1, "info": 2}
+# A check counts toward the catalog's "Check" filter when it is not a plain pass.
+_NOT_PASSING = {"warn", "fail", "unknown"}
 
 # The health vocabulary and the Jinja environment come from the package
 # (kpubdata_watch.web.presentation, #73); HEALTH_META, HEALTH_ORDER and
@@ -184,6 +186,48 @@ def render_dataset(snapshot: ProductSnapshot, dataset_id: str) -> str:
     )
 
 
+def render_catalog(snapshot: ProductSnapshot) -> str:
+    """Render the dataset catalog (#85); it lives at `datasets/`."""
+    rows = []
+    for dataset in sorted(
+        snapshot.datasets, key=lambda d: (_HEALTH_RANK[d.health], d.provider.name, d.name)
+    ):
+        failing = [
+            name for name in CHECK_NAMES if getattr(dataset.checks, name).status in _NOT_PASSING
+        ]
+        rows.append(
+            {
+                "id": dataset.id,
+                "name": dataset.name,
+                "provider_id": dataset.provider.id,
+                "provider_name": dataset.provider.name,
+                "health": dataset.health,
+                "checks": failing,
+                "incident": snapshot.incident(dataset.active_incident_ids[0])
+                if dataset.active_incident_ids
+                else None,
+                "change": snapshot.change(dataset.latest_change_ids[0])
+                if dataset.latest_change_ids
+                else None,
+                "last_checked_at": dataset.last_checked_at,
+                "search": f"{dataset.name} {dataset.provider.name} {dataset.id}",
+            }
+        )
+    providers = sorted(
+        {(d.provider.id, d.provider.name) for d in snapshot.datasets}, key=lambda p: p[1]
+    )
+    return (
+        environment(TEMPLATES_DIR)
+        .get_template("catalog.html")
+        .render(
+            rows=rows,
+            providers=providers,
+            total=len(rows),
+            **_shell(snapshot, root="../", active_nav="datasets"),
+        )
+    )
+
+
 def render_incident(snapshot: ProductSnapshot, incident_id: str) -> str:
     """Render one Incident Detail page (#87); it lives at `incidents/<id>/`."""
     incident = snapshot.incident(incident_id)
@@ -243,6 +287,7 @@ def build(output_dir: Path = DEFAULT_OUTPUT, fixtures_dir: Path = FIXTURES_DIR) 
         "datasets",
         {d.id: render_dataset(snapshot, d.id) for d in snapshot.datasets},
     )
+    (output_dir / "datasets" / "index.html").write_text(render_catalog(snapshot), encoding="utf-8")
     _write_pages(
         output_dir,
         "incidents",

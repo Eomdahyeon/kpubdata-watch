@@ -83,10 +83,13 @@ def test_the_issue_count_matches_the_active_incidents(html: str) -> None:
     assert f'<span class="panel-count">{len(active)}</span>' in html
 
 
-def test_issues_come_before_healthy_datasets(html: str) -> None:
-    assert html.index(">Active Issues</h2>") < html.index(
-        "Healthy</span>", html.index(">Datasets</h2>")
-    )
+def test_issues_come_before_healthy_datasets(build_demo: ModuleType) -> None:
+    html = build_demo.render(built_pages=build_demo.BUILT_PAGES - {"datasets"})
+    datasets = html.index(">Datasets</h2>")
+    assert html.index(">Active Issues</h2>") < html.index("Healthy</span>", datasets)
+    rows = re.findall(r'<li class="dataset-row status-(\w+)"', html[datasets:])
+    rank = ["critical", "degraded", "unknown", "healthy"]
+    assert rows == sorted(rows, key=rank.index)
 
 
 def test_changes_look_different_from_incidents(html: str) -> None:
@@ -97,15 +100,15 @@ def test_changes_look_different_from_incidents(html: str) -> None:
     assert "물품목록정보" in changes and "productEngName" in changes
 
 
-def test_without_a_catalog_the_overview_keeps_every_dataset(html: str) -> None:
-    datasets = panel(html, "Datasets")
+def test_without_a_catalog_the_overview_keeps_every_dataset(build_demo: ModuleType) -> None:
+    page = build_demo.render(built_pages=build_demo.BUILT_PAGES - {"datasets"})
+    datasets = panel(page, "Datasets")
     assert len(re.findall(r'<li class="dataset-row ', datasets)) == 15
     assert "View all datasets" not in datasets
 
 
 def test_with_a_catalog_the_overview_previews_and_links_to_it(build_demo: ModuleType) -> None:
-    built = build_demo.BUILT_PAGES | {"datasets"}
-    page = build_demo.render(built_pages=built)
+    page = build_demo.render()
     datasets = panel(page, "Datasets")
     rows = re.findall(r'<li class="dataset-row status-(\w+)"', datasets)
     assert len(rows) == build_demo.PREVIEW_SIZE < 15

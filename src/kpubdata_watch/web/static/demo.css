@@ -473,3 +473,118 @@ main {
   font-size: var(--text-technical);
   line-height: var(--text-technical--line-height);
 }
+
+/* ---- Dataset catalog (#85): filters above a table whose whole row is a link. ---- */
+
+.catalog-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 12px;
+  margin: 0 0 16px;
+}
+
+.catalog-filters[hidden] {
+  display: none;
+}
+
+.filter {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: var(--text-table);
+  line-height: var(--text-table--line-height);
+}
+
+.filter-search {
+  flex: 1 1 240px;
+}
+
+.filter-label {
+  color: var(--muted-foreground);
+}
+
+.filter input[type="search"],
+.filter select {
+  min-height: 36px;
+  padding: 6px 10px;
+  border: 1px solid var(--input);
+  border-radius: var(--radius);
+  background: var(--card);
+  color: var(--foreground);
+  font: inherit;
+  font-size: var(--text-body);
+}
+
+.filter-toggle {
+  flex-direction: row;
+  align-items: center;
+  min-height: 36px;
+}
+
+.filter input:focus-visible,
+.filter select:focus-visible,
+.row-link:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* A wide table scrolls inside itself; the page never scrolls sideways. */
+.table-scroll {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--card);
+}
+
+.catalog-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-table);
+  line-height: var(--text-table--line-height);
+}
+
+.catalog-table th {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--muted-foreground);
+  font-weight: 600;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.catalog-table td {
+  height: var(--density-table-row);
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+.catalog-row:last-child td {
+  border-bottom: 0;
+}
+
+.catalog-row:hover {
+  background: var(--muted);
+  cursor: pointer;
+}
+
+.row-link {
+  color: var(--foreground);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.catalog-row .technical-id {
+  display: block;
+  color: var(--muted-foreground);
+}
+
+.muted {
+  color: var(--muted-foreground);
+}
+
+.catalog-table + .empty-state,
+.table-scroll + .empty-state {
+  margin-top: 16px;
+}
