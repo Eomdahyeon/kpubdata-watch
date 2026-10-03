@@ -1,152 +1,528 @@
 [
   {
-    "dataset_id": "visitkorea-tourism",
+    "id": "visitkorea-tourism",
     "name": "국문 관광정보",
-    "provider": "한국관광공사",
+    "provider": {
+      "id": "visitkorea",
+      "name": "한국관광공사"
+    },
+    "category": "tourism",
     "health": "healthy",
-    "checked_label": "Checked 3m ago",
-    "checked_exact": "2026-10-02 21:12:43 KST",
-    "issue": null,
-    "change": null
+    "checks": {
+      "availability": {
+        "status": "pass",
+        "summary": null
+      },
+      "freshness": {
+        "status": "pass",
+        "summary": null
+      },
+      "contract": {
+        "status": "pass",
+        "summary": null
+      },
+      "quality": {
+        "status": "pass",
+        "summary": null
+      }
+    },
+    "last_checked_at": "2026-10-02T21:12:43+09:00",
+    "last_successful_at": "2026-10-02T21:12:43+09:00",
+    "last_healthy_at": "2026-10-02T21:12:43+09:00",
+    "latest_data_at": null,
+    "active_incident_ids": [],
+    "latest_change_ids": []
   },
   {
-    "dataset_id": "datago.apt_trade",
+    "id": "datago.apt_trade",
     "name": "아파트 매매 실거래가",
-    "provider": "국토교통부",
+    "provider": {
+      "id": "molit",
+      "name": "국토교통부"
+    },
+    "category": "real-estate",
     "health": "healthy",
-    "checked_label": "Checked 8m ago",
-    "checked_exact": "2026-10-02 21:07:10 KST",
-    "issue": null,
-    "change": null
+    "checks": {
+      "availability": {
+        "status": "pass",
+        "summary": null
+      },
+      "freshness": {
+        "status": "pass",
+        "summary": null
+      },
+      "contract": {
+        "status": "pass",
+        "summary": null
+      },
+      "quality": {
+        "status": "pass",
+        "summary": null
+      }
+    },
+    "last_checked_at": "2026-10-02T21:07:10+09:00",
+    "last_successful_at": "2026-10-02T21:07:10+09:00",
+    "last_healthy_at": "2026-10-02T21:07:10+09:00",
+    "latest_data_at": null,
+    "active_incident_ids": [],
+    "latest_change_ids": []
   },
   {
-    "dataset_id": "datago.apt_basic_info",
+    "id": "datago.apt_basic_info",
     "name": "공동주택 기본정보",
-    "provider": "국토교통부",
+    "provider": {
+      "id": "molit",
+      "name": "국토교통부"
+    },
+    "category": "real-estate",
     "health": "healthy",
-    "checked_label": "Checked 12m ago",
-    "checked_exact": "2026-10-02 21:03:02 KST",
-    "issue": null,
-    "change": null
+    "checks": {
+      "availability": {
+        "status": "pass",
+        "summary": null
+      },
+      "freshness": {
+        "status": "pass",
+        "summary": null
+      },
+      "contract": {
+        "status": "pass",
+        "summary": null
+      },
+      "quality": {
+        "status": "pass",
+        "summary": null
+      }
+    },
+    "last_checked_at": "2026-10-02T21:03:02+09:00",
+    "last_successful_at": "2026-10-02T21:03:02+09:00",
+    "last_healthy_at": "2026-10-02T21:03:02+09:00",
+    "latest_data_at": null,
+    "active_incident_ids": [],
+    "latest_change_ids": []
   },
   {
-    "dataset_id": "datago.underground_safety",
+    "id": "datago.underground_safety",
     "name": "지하안전정보",
-    "provider": "국토교통부",
+    "provider": {
+      "id": "molit",
+      "name": "국토교통부"
+    },
+    "category": "safety",
     "health": "degraded",
-    "checked_label": "Checked 2m ago",
-    "checked_exact": "2026-10-02 21:13:51 KST",
-    "issue": "Freshness delayed 1h 12m",
-    "change": null
+    "checks": {
+      "availability": {
+        "status": "pass",
+        "summary": null
+      },
+      "freshness": {
+        "status": "warn",
+        "summary": "예상 갱신 시각보다 1시간 12분 지연"
+      },
+      "contract": {
+        "status": "pass",
+        "summary": null
+      },
+      "quality": {
+        "status": "pass",
+        "summary": null
+      }
+    },
+    "last_checked_at": "2026-10-02T21:13:51+09:00",
+    "last_successful_at": "2026-10-02T21:13:51+09:00",
+    "last_healthy_at": "2026-10-02T20:29:00+09:00",
+    "latest_data_at": "2026-10-02T18:48:00+09:00",
+    "active_incident_ids": [
+      "inc-freshness-underground-001"
+    ],
+    "latest_change_ids": []
   },
   {
-    "dataset_id": "datago.apt_rent",
+    "id": "datago.apt_rent",
     "name": "아파트 전월세 실거래가",
-    "provider": "국토교통부",
+    "provider": {
+      "id": "molit",
+      "name": "국토교통부"
+    },
+    "category": "real-estate",
     "health": "critical",
-    "checked_label": "Checked 1m ago",
-    "checked_exact": "2026-10-02 21:14:40 KST",
-    "issue": "Breaking contract change — field removed",
-    "change": null
+    "checks": {
+      "availability": {
+        "status": "pass",
+        "summary": null
+      },
+      "freshness": {
+        "status": "pass",
+        "summary": null
+      },
+      "contract": {
+        "status": "fail",
+        "summary": "필드 1개 삭제 (breaking)"
+      },
+      "quality": {
+        "status": "pass",
+        "summary": null
+      }
+    },
+    "last_checked_at": "2026-10-02T21:14:40+09:00",
+    "last_successful_at": "2026-10-02T21:14:40+09:00",
+    "last_healthy_at": "2026-10-02T20:42:00+09:00",
+    "latest_data_at": null,
+    "active_incident_ids": [
+      "inc-contract-apt-rent-001"
+    ],
+    "latest_change_ids": [
+      "chg-contract-apt-rent-001"
+    ]
   },
   {
-    "dataset_id": "seoul.bus_realtime",
+    "id": "seoul.bus_realtime",
     "name": "버스정보(실시간 위치)",
-    "provider": "서울특별시",
+    "provider": {
+      "id": "seoul",
+      "name": "서울특별시"
+    },
+    "category": "transport",
     "health": "degraded",
-    "checked_label": "Checked 2m ago",
-    "checked_exact": "2026-10-02 21:13:22 KST",
-    "issue": "Freshness delayed 42m",
-    "change": null
+    "checks": {
+      "availability": {
+        "status": "pass",
+        "summary": null
+      },
+      "freshness": {
+        "status": "warn",
+        "summary": "예상 갱신 시각보다 42분 지연"
+      },
+      "contract": {
+        "status": "pass",
+        "summary": null
+      },
+      "quality": {
+        "status": "pass",
+        "summary": null
+      }
+    },
+    "last_checked_at": "2026-10-02T21:13:22+09:00",
+    "last_successful_at": "2026-10-02T21:13:22+09:00",
+    "last_healthy_at": "2026-10-02T20:53:00+09:00",
+    "latest_data_at": "2026-10-02T20:31:00+09:00",
+    "active_incident_ids": [
+      "inc-freshness-bus-002"
+    ],
+    "latest_change_ids": []
   },
   {
-    "dataset_id": "seoul.public_bike",
+    "id": "seoul.public_bike",
     "name": "공공자전거(따릉이) 대여소 현황",
-    "provider": "서울특별시",
+    "provider": {
+      "id": "seoul",
+      "name": "서울특별시"
+    },
+    "category": "transport",
     "health": "critical",
-    "checked_label": "Checked 4m ago",
-    "checked_exact": "2026-10-02 21:11:05 KST",
-    "issue": "Availability failure — HTTP 500 (3 consecutive)",
-    "change": null
+    "checks": {
+      "availability": {
+        "status": "fail",
+        "summary": "HTTP 500, 3회 연속 실패"
+      },
+      "freshness": {
+        "status": "pass",
+        "summary": null
+      },
+      "contract": {
+        "status": "pass",
+        "summary": null
+      },
+      "quality": {
+        "status": "pass",
+        "summary": null
+      }
+    },
+    "last_checked_at": "2026-10-02T21:11:05+09:00",
+    "last_successful_at": "2026-10-02T20:43:00+09:00",
+    "last_healthy_at": "2026-10-02T20:43:00+09:00",
+    "latest_data_at": null,
+    "active_incident_ids": [
+      "inc-availability-bike-001"
+    ],
+    "latest_change_ids": []
   },
   {
-    "dataset_id": "pps.product_list",
+    "id": "pps.product_list",
     "name": "물품목록정보",
-    "provider": "조달청",
+    "provider": {
+      "id": "pps",
+      "name": "조달청"
+    },
+    "category": "procurement",
     "health": "healthy",
-    "checked_label": "Checked 5m ago",
-    "checked_exact": "2026-10-02 21:10:18 KST",
-    "issue": null,
-    "change": "Contract changed"
+    "checks": {
+      "availability": {
+        "status": "pass",
+        "summary": null
+      },
+      "freshness": {
+        "status": "pass",
+        "summary": null
+      },
+      "contract": {
+        "status": "pass",
+        "summary": "필드 1개 추가 (호환)"
+      },
+      "quality": {
+        "status": "pass",
+        "summary": null
+      }
+    },
+    "last_checked_at": "2026-10-02T21:10:18+09:00",
+    "last_successful_at": "2026-10-02T21:10:18+09:00",
+    "last_healthy_at": "2026-10-02T21:10:18+09:00",
+    "latest_data_at": null,
+    "active_incident_ids": [],
+    "latest_change_ids": [
+      "chg-contract-pps-001"
+    ]
   },
   {
-    "dataset_id": "localdata.general_restaurant",
+    "id": "localdata.general_restaurant",
     "name": "일반음식점 인허가 정보",
-    "provider": "행정안전부(지방행정인허가)",
+    "provider": {
+      "id": "mois-localdata",
+      "name": "행정안전부(지방행정인허가)"
+    },
+    "category": "licensing",
     "health": "healthy",
-    "checked_label": "Checked 6m ago",
-    "checked_exact": "2026-10-02 21:09:47 KST",
-    "issue": null,
-    "change": null
+    "checks": {
+      "availability": {
+        "status": "pass",
+        "summary": null
+      },
+      "freshness": {
+        "status": "pass",
+        "summary": null
+      },
+      "contract": {
+        "status": "pass",
+        "summary": null
+      },
+      "quality": {
+        "status": "pass",
+        "summary": null
+      }
+    },
+    "last_checked_at": "2026-10-02T21:09:47+09:00",
+    "last_successful_at": "2026-10-02T21:09:47+09:00",
+    "last_healthy_at": "2026-10-02T21:09:47+09:00",
+    "latest_data_at": null,
+    "active_incident_ids": [],
+    "latest_change_ids": []
   },
   {
-    "dataset_id": "datago.air_quality",
+    "id": "datago.air_quality",
     "name": "대기오염정보",
-    "provider": "한국환경공단",
+    "provider": {
+      "id": "keco",
+      "name": "한국환경공단"
+    },
+    "category": "environment",
     "health": "healthy",
-    "checked_label": "Checked 14m ago",
-    "checked_exact": "2026-10-02 21:01:09 KST",
-    "issue": null,
-    "change": null
+    "checks": {
+      "availability": {
+        "status": "pass",
+        "summary": null
+      },
+      "freshness": {
+        "status": "pass",
+        "summary": null
+      },
+      "contract": {
+        "status": "pass",
+        "summary": null
+      },
+      "quality": {
+        "status": "pass",
+        "summary": null
+      }
+    },
+    "last_checked_at": "2026-10-02T21:01:09+09:00",
+    "last_successful_at": "2026-10-02T21:01:09+09:00",
+    "last_healthy_at": "2026-10-02T21:01:09+09:00",
+    "latest_data_at": null,
+    "active_incident_ids": [],
+    "latest_change_ids": []
   },
   {
-    "dataset_id": "datago.airkorea_station_realtime",
+    "id": "datago.airkorea_station_realtime",
     "name": "에어코리아 측정소 실시간",
-    "provider": "한국환경공단",
+    "provider": {
+      "id": "keco",
+      "name": "한국환경공단"
+    },
+    "category": "environment",
     "health": "degraded",
-    "checked_label": "Checked 9m ago",
-    "checked_exact": "2026-10-02 21:06:25 KST",
-    "issue": "Freshness delayed 55m",
-    "change": null
+    "checks": {
+      "availability": {
+        "status": "pass",
+        "summary": null
+      },
+      "freshness": {
+        "status": "warn",
+        "summary": "예상 갱신 시각보다 55분 지연"
+      },
+      "contract": {
+        "status": "pass",
+        "summary": null
+      },
+      "quality": {
+        "status": "pass",
+        "summary": null
+      }
+    },
+    "last_checked_at": "2026-10-02T21:06:25+09:00",
+    "last_successful_at": "2026-10-02T21:06:25+09:00",
+    "last_healthy_at": "2026-10-02T20:43:00+09:00",
+    "latest_data_at": "2026-10-02T19:20:00+09:00",
+    "active_incident_ids": [
+      "inc-freshness-airkorea-001"
+    ],
+    "latest_change_ids": []
   },
   {
-    "dataset_id": "datago.social_enterprise",
+    "id": "datago.social_enterprise",
     "name": "사회적기업 현황",
-    "provider": "고용노동부",
+    "provider": {
+      "id": "moel",
+      "name": "고용노동부"
+    },
+    "category": "employment",
     "health": "healthy",
-    "checked_label": "Checked 18m ago",
-    "checked_exact": "2026-10-02 20:57:30 KST",
-    "issue": null,
-    "change": null
+    "checks": {
+      "availability": {
+        "status": "pass",
+        "summary": null
+      },
+      "freshness": {
+        "status": "pass",
+        "summary": null
+      },
+      "contract": {
+        "status": "pass",
+        "summary": null
+      },
+      "quality": {
+        "status": "pass",
+        "summary": null
+      }
+    },
+    "last_checked_at": "2026-10-02T20:57:30+09:00",
+    "last_successful_at": "2026-10-02T20:57:30+09:00",
+    "last_healthy_at": "2026-10-02T20:57:30+09:00",
+    "latest_data_at": null,
+    "active_incident_ids": [],
+    "latest_change_ids": []
   },
   {
-    "dataset_id": "datago.hospital_info",
+    "id": "datago.hospital_info",
     "name": "병원정보",
-    "provider": "건강보험심사평가원",
+    "provider": {
+      "id": "hira",
+      "name": "건강보험심사평가원"
+    },
+    "category": "health",
     "health": "healthy",
-    "checked_label": "Checked 21m ago",
-    "checked_exact": "2026-10-02 20:54:02 KST",
-    "issue": null,
-    "change": null
+    "checks": {
+      "availability": {
+        "status": "pass",
+        "summary": null
+      },
+      "freshness": {
+        "status": "not_applicable",
+        "summary": "레코드에서 갱신 시점을 알 수 없음 (Registry: freshness.enabled = false)"
+      },
+      "contract": {
+        "status": "pass",
+        "summary": null
+      },
+      "quality": {
+        "status": "pass",
+        "summary": null
+      }
+    },
+    "last_checked_at": "2026-10-02T20:54:02+09:00",
+    "last_successful_at": "2026-10-02T20:54:02+09:00",
+    "last_healthy_at": "2026-10-02T20:54:02+09:00",
+    "latest_data_at": null,
+    "active_incident_ids": [],
+    "latest_change_ids": []
   },
   {
-    "dataset_id": "kma.ultra_srt_ncst",
+    "id": "kma.ultra_srt_ncst",
     "name": "초단기실황조회",
-    "provider": "기상청",
+    "provider": {
+      "id": "kma",
+      "name": "기상청"
+    },
+    "category": "weather",
     "health": "unknown",
-    "checked_label": "Checked 7m ago",
-    "checked_exact": "2026-10-02 21:08:03 KST",
-    "issue": "Probe failed — APPLICATION_ERROR, not a dataset outage (D-009)",
-    "change": null
+    "checks": {
+      "availability": {
+        "status": "unknown",
+        "summary": "Probe 실패 (APPLICATION_ERROR) — 데이터셋 장애가 아님 (D-009)"
+      },
+      "freshness": {
+        "status": "unknown",
+        "summary": null
+      },
+      "contract": {
+        "status": "unknown",
+        "summary": null
+      },
+      "quality": {
+        "status": "unknown",
+        "summary": null
+      }
+    },
+    "last_checked_at": "2026-10-02T21:08:03+09:00",
+    "last_successful_at": "2026-10-02T20:58:00+09:00",
+    "last_healthy_at": "2026-10-02T20:58:00+09:00",
+    "latest_data_at": null,
+    "active_incident_ids": [],
+    "latest_change_ids": []
   },
   {
-    "dataset_id": "kostat.population_census",
+    "id": "kostat.population_census",
     "name": "인구총조사",
-    "provider": "통계청",
+    "provider": {
+      "id": "kostat",
+      "name": "통계청"
+    },
+    "category": "statistics",
     "health": "degraded",
-    "checked_label": "Checked 34m ago",
-    "checked_exact": "2026-10-02 20:41:16 KST",
-    "issue": "Volume 40% below expected range",
-    "change": null
+    "checks": {
+      "availability": {
+        "status": "pass",
+        "summary": null
+      },
+      "freshness": {
+        "status": "pass",
+        "summary": null
+      },
+      "contract": {
+        "status": "pass",
+        "summary": null
+      },
+      "quality": {
+        "status": "warn",
+        "summary": "레코드 수가 예상 범위보다 40% 적음"
+      }
+    },
+    "last_checked_at": "2026-10-02T20:41:16+09:00",
+    "last_successful_at": "2026-10-02T20:41:16+09:00",
+    "last_healthy_at": "2026-10-02T19:28:00+09:00",
+    "latest_data_at": null,
+    "active_incident_ids": [
+      "inc-volume-kostat-001"
+    ],
+    "latest_change_ids": []
   }
 ]

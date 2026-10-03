@@ -10,7 +10,7 @@
 > demo of the Public Status page at the root
 > (`https://kpubdata-lab.github.io/kpubdata-watch/`), and the mkdocs
 > documentation site at `/docs/`. The demo renders
-> `demo/fixtures/datasets.json` through the same Jinja template a future
+> the snapshot in `demo/fixtures/` through the same Jinja template a future
 > FastAPI route will reuse (`scripts/build_demo.py`), clearly labelled as
 > fixed sample data, never a live observation. It calls no provider, opens no
 > database connection and holds no credential. The production service stays
@@ -40,7 +40,7 @@ Pages 자리에 **Mock 데이터로 동작하는 실제 앱 데모**를 루트�
 ## 결정
 
 1. **Pages 는 두 정적 산출물만 호스팅한다.** 루트는
-   `scripts/build_demo.py` 가 `demo/fixtures/datasets.json` 을
+   `scripts/build_demo.py` 가 `demo/fixtures/` 의 snapshot 을
    `src/kpubdata_watch/web/templates/public_status.html` 로 렌더링한 결과,
    `/docs/` 는 `mkdocs build --strict` 결과다. 둘 다
    `.github/workflows/deploy.yml` ("Deploy demo + docs") 한 Workflow 가
@@ -57,8 +57,8 @@ Pages 자리에 **Mock 데이터로 동작하는 실제 앱 데모**를 루트�
    만드는 대신 가짜 Mock 데이터 생성기를 새로 만들지 않는다 —
    `web/templates/public_status.html` 은 향후 FastAPI Route
    (`GET /`) 가 Read Model 을 넣어 그대로 재사용할 Template 이고,
-   `demo/fixtures/datasets.json` 의 각 행은 §18(Observation)·§35(UI Read
-   Model) 모양을 따른다. 그래서 데모와 실제 서비스 UI 가 따로 벌어지지
+   `demo/fixtures/` 의 snapshot 은 공개 Read Model
+   (`kpubdata_watch.api.read_models.public`, #82) 모양을 그대로 따른다. 그래서 데모와 실제 서비스 UI 가 따로 벌어지지
    않는다.
 4. **데모는 Provider 를 호출하지 않고 Credential 을 갖지 않는다.** 빌드는
    `demo/fixtures/*.json` 을 읽는 순수 함수이고, 네트워크 호출이 없다.

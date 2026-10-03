@@ -21,8 +21,10 @@ import json
 import re
 import subprocess
 import sys
+from datetime import date, timedelta
 from pathlib import Path
 from types import ModuleType
+from typing import Any
 
 import pytest
 
@@ -55,63 +57,96 @@ def build_demo() -> ModuleType:
 
 
 def _all_health_fixtures(tmp_path: Path) -> Path:
-    """A minimal fixture file covering every health state, including a
+    """A minimal five-file snapshot covering every health state, including a
     Change-only Healthy row, independent of the real demo data."""
-    rows = [
-        {
-            "dataset_id": "fixture-healthy",
-            "name": "Healthy Dataset",
-            "provider": "Example Provider",
-            "health": "healthy",
-            "checked_label": "Checked 1m ago",
-            "checked_exact": "2026-10-02 00:00:00 KST",
-            "issue": None,
-            "change": None,
-        },
-        {
-            "dataset_id": "fixture-healthy-change",
-            "name": "Changed Dataset",
-            "provider": "Example Provider",
-            "health": "healthy",
-            "checked_label": "Checked 2m ago",
-            "checked_exact": "2026-10-02 00:00:00 KST",
-            "issue": None,
-            "change": "Contract changed",
-        },
-        {
-            "dataset_id": "fixture-degraded",
-            "name": "Degraded Dataset",
-            "provider": "Example Provider",
-            "health": "degraded",
-            "checked_label": "Checked 3m ago",
-            "checked_exact": "2026-10-02 00:00:00 KST",
-            "issue": "Freshness delayed 42m",
-            "change": None,
-        },
-        {
-            "dataset_id": "fixture-critical",
-            "name": "Critical Dataset",
-            "provider": "Example Provider",
-            "health": "critical",
-            "checked_label": "Checked 4m ago",
-            "checked_exact": "2026-10-02 00:00:00 KST",
-            "issue": "Breaking contract change",
-            "change": None,
-        },
-        {
-            "dataset_id": "fixture-unknown",
-            "name": "Unknown Dataset",
-            "provider": "Example Provider",
-            "health": "unknown",
-            "checked_label": "Checked 5m ago",
-            "checked_exact": "2026-10-02 00:00:00 KST",
-            "issue": "Probe failed — not a dataset outage (D-009)",
-            "change": None,
-        },
+    now = "2026-10-02T21:15:00+09:00"
+    ok = {"status": "pass", "summary": None}
+
+    def dataset(key: str, health: str, **extra: Any) -> dict[str, Any]:
+        checks = {name: dict(ok) for name in ("availability", "freshness", "contract", "quality")}
+        checks.update(extra.pop("checks", {}))
+        return {
+            "id": f"fixture-{key}",
+            "name": f"{key.capitalize()} Dataset",
+            "provider": {"id": "example", "name": "Example Provider"},
+            "category": "example",
+            "health": health,
+            "checks": checks,
+            "last_checked_at": now,
+            **extra,
+        }
+
+    def incident(key: str, check: str, severity: str, title: str) -> dict[str, Any]:
+        return {
+            "id": f"inc-{key}",
+            "dataset_id": f"fixture-{key}",
+            "check": check,
+            "severity": severity,
+            "status": "ongoing",
+            "title": title,
+            "summary": title,
+            "started_at": now,
+            "detected_at": now,
+            "evidence": {
+                "expected": {"x": 1},
+                "observed": {"x": 2},
+                "difference": {"x": 1},
+                "rule": {"id": "example.rule", "description": "Example rule"},
+                "first_seen_at": now,
+            },
+            "timeline": [],
+        }
+
+    datasets = [
+        dataset("healthy", "healthy"),
+        dataset("changed", "healthy", latest_change_ids=["chg-changed"]),
+        dataset("degraded", "degraded", active_incident_ids=["inc-degraded"]),
+        dataset("critical", "critical", active_incident_ids=["inc-critical"]),
+        dataset(
+            "unknown",
+            "unknown",
+            checks={"availability": {"status": "unknown", "summary": "Probe failed (D-009)"}},
+        ),
     ]
-    path = tmp_path / "datasets.json"
-    path.write_text(json.dumps(rows), encoding="utf-8")
-    return path
+    files: dict[str, Any] = {
+        "snapshot": {"generated_at": now},
+        "datasets": datasets,
+        "incidents": [
+            incident("degraded", "freshness", "warning", "Freshness delayed"),
+            incident("critical", "contract", "critical", "Breaking contract change"),
+        ],
+        "changes": [
+            {
+                "id": "chg-changed",
+                "dataset_id": "fixture-changed",
+                "change_type": "contract",
+                "severity": "info",
+                "title": "Contract changed",
+                "summary": "A field was added.",
+                "detected_at": now,
+                "diff": {"added": ["x:string"]},
+                "health_impact": "none",
+            }
+        ],
+        "histories": [
+            {
+                "dataset_id": row["id"],
+                "days": [
+                    {
+                        "date": (date(2026, 10, 2) - timedelta(days=n)).isoformat(),
+                        "health": "healthy",
+                    }
+                    for n in range(29, -1, -1)
+                ],
+            }
+            for row in datasets
+        ],
+    }
+    directory = tmp_path / "fixtures"
+    directory.mkdir()
+    for name, content in files.items():
+        (directory / f"{name}.json").write_text(json.dumps(content), encoding="utf-8")
+    return directory
 
 
 def test_cli_renders_without_error(tmp_path: Path) -> None:

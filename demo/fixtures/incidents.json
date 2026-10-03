@@ -1,0 +1,312 @@
+[
+  {
+    "id": "inc-freshness-underground-001",
+    "dataset_id": "datago.underground_safety",
+    "check": "freshness",
+    "severity": "warning",
+    "status": "ongoing",
+    "title": "Freshness delayed",
+    "summary": "예상 갱신 시각(20:00 ± 30분)이 지났는데 새 데이터가 없습니다.",
+    "started_at": "2026-10-02T20:00:00+09:00",
+    "detected_at": "2026-10-02T20:31:00+09:00",
+    "confirmed_at": "2026-10-02T20:33:00+09:00",
+    "resolved_at": null,
+    "evidence": {
+      "expected": {
+        "update_at": "2026-10-02T20:00:00+09:00",
+        "tolerance_minutes": 30
+      },
+      "observed": {
+        "latest_data_at": "2026-10-02T18:48:00+09:00"
+      },
+      "difference": {
+        "delay_minutes": 72
+      },
+      "rule": {
+        "id": "freshness.expected_window",
+        "description": "Expected update window exceeded"
+      },
+      "first_seen_at": "2026-10-02T20:31:00+09:00",
+      "confirmed_at": "2026-10-02T20:33:00+09:00"
+    },
+    "timeline": [
+      {
+        "at": "2026-10-02T20:31:00+09:00",
+        "summary": "갱신 지연 처음 관측"
+      },
+      {
+        "at": "2026-10-02T20:33:00+09:00",
+        "summary": "재관측으로 지연 확인 (Degraded)"
+      }
+    ],
+    "related_change_id": null
+  },
+  {
+    "id": "inc-contract-apt-rent-001",
+    "dataset_id": "datago.apt_rent",
+    "check": "contract",
+    "severity": "critical",
+    "status": "ongoing",
+    "title": "Breaking contract change",
+    "summary": "응답에서 필드 addr2가 사라졌습니다.",
+    "started_at": "2026-10-02T21:03:00+09:00",
+    "detected_at": "2026-10-02T21:03:00+09:00",
+    "confirmed_at": "2026-10-02T21:05:00+09:00",
+    "resolved_at": null,
+    "evidence": {
+      "expected": {
+        "fields": [
+          "addr1:string",
+          "addr2:string"
+        ]
+      },
+      "observed": {
+        "fields": [
+          "addr1:string"
+        ]
+      },
+      "difference": {
+        "removed": [
+          "addr2:string"
+        ]
+      },
+      "rule": {
+        "id": "contract.field_removed",
+        "description": "A field present in the accepted schema was removed"
+      },
+      "first_seen_at": "2026-10-02T21:03:00+09:00",
+      "confirmed_at": "2026-10-02T21:05:00+09:00"
+    },
+    "timeline": [
+      {
+        "at": "2026-10-02T20:42:00+09:00",
+        "summary": "마지막 Healthy 관측"
+      },
+      {
+        "at": "2026-10-02T21:03:00+09:00",
+        "summary": "필드 addr2 삭제 관측"
+      },
+      {
+        "at": "2026-10-02T21:05:00+09:00",
+        "summary": "Breaking contract change 확인 (Critical)"
+      }
+    ],
+    "related_change_id": "chg-contract-apt-rent-001"
+  },
+  {
+    "id": "inc-freshness-bus-002",
+    "dataset_id": "seoul.bus_realtime",
+    "check": "freshness",
+    "severity": "warning",
+    "status": "ongoing",
+    "title": "Freshness delayed",
+    "summary": "실시간 데이터가 42분째 갱신되지 않았습니다.",
+    "started_at": "2026-10-02T20:25:00+09:00",
+    "detected_at": "2026-10-02T20:55:00+09:00",
+    "confirmed_at": "2026-10-02T20:57:00+09:00",
+    "resolved_at": null,
+    "evidence": {
+      "expected": {
+        "max_age_minutes": 10
+      },
+      "observed": {
+        "latest_data_at": "2026-10-02T20:31:00+09:00"
+      },
+      "difference": {
+        "delay_minutes": 42
+      },
+      "rule": {
+        "id": "freshness.max_age",
+        "description": "Data older than the allowed age"
+      },
+      "first_seen_at": "2026-10-02T20:55:00+09:00",
+      "confirmed_at": "2026-10-02T20:57:00+09:00"
+    },
+    "timeline": [
+      {
+        "at": "2026-10-02T20:55:00+09:00",
+        "summary": "갱신 지연 처음 관측"
+      },
+      {
+        "at": "2026-10-02T20:57:00+09:00",
+        "summary": "재관측으로 지연 확인 (Degraded)"
+      }
+    ],
+    "related_change_id": null
+  },
+  {
+    "id": "inc-availability-bike-001",
+    "dataset_id": "seoul.public_bike",
+    "check": "availability",
+    "severity": "critical",
+    "status": "ongoing",
+    "title": "API unavailable",
+    "summary": "HTTP 500 응답이 3회 연속 관측됐습니다.",
+    "started_at": "2026-10-02T20:44:00+09:00",
+    "detected_at": "2026-10-02T20:46:00+09:00",
+    "confirmed_at": "2026-10-02T20:50:00+09:00",
+    "resolved_at": null,
+    "evidence": {
+      "expected": {
+        "http_status": 200
+      },
+      "observed": {
+        "http_status": 500,
+        "consecutive_failures": 3
+      },
+      "difference": {
+        "consecutive_failures": 3
+      },
+      "rule": {
+        "id": "availability.consecutive_failures",
+        "description": "Three consecutive failed probes"
+      },
+      "first_seen_at": "2026-10-02T20:46:00+09:00",
+      "confirmed_at": "2026-10-02T20:50:00+09:00"
+    },
+    "timeline": [
+      {
+        "at": "2026-10-02T20:43:00+09:00",
+        "summary": "마지막 성공 관측"
+      },
+      {
+        "at": "2026-10-02T20:46:00+09:00",
+        "summary": "HTTP 500 처음 관측"
+      },
+      {
+        "at": "2026-10-02T20:50:00+09:00",
+        "summary": "3회 연속 실패로 장애 확인 (Critical)"
+      }
+    ],
+    "related_change_id": null
+  },
+  {
+    "id": "inc-freshness-airkorea-001",
+    "dataset_id": "datago.airkorea_station_realtime",
+    "check": "freshness",
+    "severity": "warning",
+    "status": "ongoing",
+    "title": "Freshness delayed",
+    "summary": "측정소 실시간 데이터가 55분째 갱신되지 않았습니다.",
+    "started_at": "2026-10-02T20:15:00+09:00",
+    "detected_at": "2026-10-02T20:45:00+09:00",
+    "confirmed_at": "2026-10-02T20:47:00+09:00",
+    "resolved_at": null,
+    "evidence": {
+      "expected": {
+        "max_age_minutes": 60
+      },
+      "observed": {
+        "latest_data_at": "2026-10-02T19:20:00+09:00"
+      },
+      "difference": {
+        "delay_minutes": 55
+      },
+      "rule": {
+        "id": "freshness.max_age",
+        "description": "Data older than the allowed age"
+      },
+      "first_seen_at": "2026-10-02T20:45:00+09:00",
+      "confirmed_at": "2026-10-02T20:47:00+09:00"
+    },
+    "timeline": [
+      {
+        "at": "2026-10-02T20:45:00+09:00",
+        "summary": "갱신 지연 처음 관측"
+      },
+      {
+        "at": "2026-10-02T20:47:00+09:00",
+        "summary": "재관측으로 지연 확인 (Degraded)"
+      }
+    ],
+    "related_change_id": null
+  },
+  {
+    "id": "inc-volume-kostat-001",
+    "dataset_id": "kostat.population_census",
+    "check": "quality",
+    "severity": "warning",
+    "status": "ongoing",
+    "title": "Volume anomaly",
+    "summary": "레코드 수가 예상 범위보다 40% 적습니다.",
+    "started_at": "2026-10-02T19:30:00+09:00",
+    "detected_at": "2026-10-02T19:30:00+09:00",
+    "confirmed_at": "2026-10-02T19:32:00+09:00",
+    "resolved_at": null,
+    "evidence": {
+      "expected": {
+        "record_count_min": 10000,
+        "record_count_max": 10500
+      },
+      "observed": {
+        "record_count": 6000
+      },
+      "difference": {
+        "below_minimum_percent": 40
+      },
+      "rule": {
+        "id": "quality.volume.range",
+        "description": "Record count outside the expected range"
+      },
+      "first_seen_at": "2026-10-02T19:30:00+09:00",
+      "confirmed_at": "2026-10-02T19:32:00+09:00"
+    },
+    "timeline": [
+      {
+        "at": "2026-10-02T19:30:00+09:00",
+        "summary": "레코드 수 감소 처음 관측"
+      },
+      {
+        "at": "2026-10-02T19:32:00+09:00",
+        "summary": "재관측으로 이상 확인 (Degraded)"
+      }
+    ],
+    "related_change_id": null
+  },
+  {
+    "id": "inc-freshness-bus-001",
+    "dataset_id": "seoul.bus_realtime",
+    "check": "freshness",
+    "severity": "warning",
+    "status": "resolved",
+    "title": "Freshness delayed",
+    "summary": "오전 갱신이 1시간 9분 동안 지연됐다가 복구됐습니다.",
+    "started_at": "2026-10-01T08:12:00+09:00",
+    "detected_at": "2026-10-01T08:44:00+09:00",
+    "confirmed_at": "2026-10-01T08:46:00+09:00",
+    "resolved_at": "2026-10-01T09:21:00+09:00",
+    "evidence": {
+      "expected": {
+        "update_at": "2026-10-01T09:00:00+09:00",
+        "tolerance_minutes": 30
+      },
+      "observed": {
+        "latest_data_at": "2026-10-01T07:58:00+09:00"
+      },
+      "difference": {
+        "delay_minutes": 92
+      },
+      "rule": {
+        "id": "freshness.expected_window",
+        "description": "Expected update window exceeded"
+      },
+      "first_seen_at": "2026-10-01T08:44:00+09:00",
+      "confirmed_at": "2026-10-01T08:46:00+09:00"
+    },
+    "timeline": [
+      {
+        "at": "2026-10-01T08:44:00+09:00",
+        "summary": "갱신 지연 처음 관측"
+      },
+      {
+        "at": "2026-10-01T08:46:00+09:00",
+        "summary": "재관측으로 지연 확인 (Degraded)"
+      },
+      {
+        "at": "2026-10-01T09:21:00+09:00",
+        "summary": "새 데이터 관측, 복구 (Healthy)"
+      }
+    ],
+    "related_change_id": null
+  }
+]

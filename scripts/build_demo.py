@@ -4,22 +4,25 @@
 GitHub Pages hosts a fixture-based demo of the Public Status page, not the live
 service (see docs/decisions — the production service stays FastAPI + worker +
 PostgreSQL and never runs on Pages). This script renders
-`src/kpubdata_watch/web/templates/public_status.html` with
-`demo/fixtures/datasets.json` into a self-contained output directory that
-`.github/workflows/deploy.yml` uploads to Pages.
+`src/kpubdata_watch/web/templates/public_status.html` with the product snapshot in
+`demo/fixtures/` (five files, loaded through the public read models, #82) into a
+self-contained output directory that `.github/workflows/deploy.yml` uploads to Pages.
+Times are shown as clock times in KST, never as "3m ago": a static page is read long
+after it is built.
 
 Usage:
-    python scripts/build_demo.py [--output _site] [--fixtures demo/fixtures/datasets.json]
+    python scripts/build_demo.py [--output _site] [--fixtures demo/fixtures]
 """
 
 from __future__ import annotations
 
 import argparse
-import json
 import shutil
 from pathlib import Path
 from typing import Any
 
+from kpubdata_watch.api.read_models.public import CHECK_NAMES
+from kpubdata_watch.api.read_models.snapshot import ProductSnapshot
 from kpubdata_watch.web.presentation import (
     CHANGE_ICON,
     HEALTH_META,
@@ -27,10 +30,12 @@ from kpubdata_watch.web.presentation import (
     STATIC_DIR,
     TEMPLATES_DIR,
     environment,
+    kst_datetime,
+    kst_time,
 )
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-FIXTURES_PATH = REPO_ROOT / "demo" / "fixtures" / "datasets.json"
+FIXTURES_DIR = REPO_ROOT / "demo" / "fixtures"
 DEFAULT_OUTPUT = REPO_ROOT / "_site"
 
 # The health vocabulary and the Jinja environment come from the package
@@ -39,16 +44,48 @@ DEFAULT_OUTPUT = REPO_ROOT / "_site"
 __all__ = ["CHANGE_ICON", "HEALTH_META", "HEALTH_ORDER", "build", "render"]
 
 
-def load_datasets(path: Path = FIXTURES_PATH) -> list[dict[str, Any]]:
-    """Load the fixture datasets, rejecting a health state the page cannot show.
+def load_datasets(fixtures_dir: Path = FIXTURES_DIR) -> list[dict[str, Any]]:
+    """Load the snapshot and shape one row per dataset for the Public Status page.
 
-    The icons and labels come from the template primitives, so a row needs no
-    display fields of its own.
+    `ProductSnapshot` rejects any reference that does not resolve. A row's issue is
+    its first active incident, or, for Unknown, the check that could not run; its
+    change is its latest change.
     """
-    rows: list[dict[str, Any]] = json.loads(path.read_text(encoding="utf-8"))
-    for row in rows:
-        if row["health"] not in HEALTH_META:
-            raise ValueError(f"{row['dataset_id']}: unknown health {row['health']!r}")
+    snapshot = ProductSnapshot.from_directory(fixtures_dir)
+    rows: list[dict[str, Any]] = []
+    for dataset in snapshot.datasets:
+        issue = None
+        if dataset.active_incident_ids:
+            incident = snapshot.incident(dataset.active_incident_ids[0])
+            check = getattr(dataset.checks, incident.check)
+            issue = f"{incident.title} · {check.summary}" if check.summary else incident.title
+        elif dataset.health == "unknown":
+            issue = next(
+                (
+                    getattr(dataset.checks, name).summary
+                    for name in CHECK_NAMES
+                    if getattr(dataset.checks, name).summary
+                ),
+                None,
+            )
+        change = (
+            snapshot.change(dataset.latest_change_ids[0]).title
+            if dataset.latest_change_ids
+            else None
+        )
+        rows.append(
+            {
+                "dataset_id": dataset.id,
+                "name": dataset.name,
+                "provider": dataset.provider.name,
+                "health": dataset.health,
+                "checked_label": f"Checked {kst_time(dataset.last_checked_at)}",
+                "checked_at": dataset.last_checked_at.isoformat(),
+                "checked_exact": kst_datetime(dataset.last_checked_at),
+                "issue": issue,
+                "change": change,
+            }
+        )
     return rows
 
 
@@ -60,10 +97,10 @@ def health_counts(datasets: list[dict[str, Any]]) -> dict[str, int]:
     return counts
 
 
-def render(fixtures_path: Path = FIXTURES_PATH) -> str:
+def render(fixtures_dir: Path = FIXTURES_DIR) -> str:
     """Render the Public Status page to a single HTML string."""
     template = environment(TEMPLATES_DIR).get_template("public_status.html")
-    datasets = load_datasets(fixtures_path)
+    datasets = load_datasets(fixtures_dir)
     return template.render(
         datasets=datasets,
         counts=health_counts(datasets),
@@ -71,10 +108,10 @@ def render(fixtures_path: Path = FIXTURES_PATH) -> str:
     )
 
 
-def build(output_dir: Path = DEFAULT_OUTPUT, fixtures_path: Path = FIXTURES_PATH) -> Path:
+def build(output_dir: Path = DEFAULT_OUTPUT, fixtures_dir: Path = FIXTURES_DIR) -> Path:
     """Render the demo site into `output_dir`, including its static assets."""
     output_dir.mkdir(parents=True, exist_ok=True)
-    html = render(fixtures_path)
+    html = render(fixtures_dir)
     (output_dir / "index.html").write_text(html, encoding="utf-8")
 
     static_out = output_dir / "static"
@@ -88,7 +125,7 @@ def build(output_dir: Path = DEFAULT_OUTPUT, fixtures_path: Path = FIXTURES_PATH
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
-    parser.add_argument("--fixtures", type=Path, default=FIXTURES_PATH)
+    parser.add_argument("--fixtures", type=Path, default=FIXTURES_DIR)
     args = parser.parse_args(argv)
 
     out = build(args.output, args.fixtures)

@@ -72,7 +72,7 @@
   </div>
   <div class="dataset-status-line">
     {{ status_badge(d.health) }}
-    {{ timestamp(d.checked_label, title=d.checked_exact) }}
+    {{ timestamp(d.checked_label, d.checked_at, d.checked_exact) }}
   </div>
   {%- if d.issue %}
   <p class="dataset-issue">

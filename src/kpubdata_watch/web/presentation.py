@@ -9,7 +9,9 @@ never colour alone (docs/UI.md, PRD §53).
 
 from __future__ import annotations
 
+from datetime import datetime
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
@@ -27,6 +29,18 @@ HEALTH_META: dict[str, dict[str, str]] = {
 # A Change is informational: the neutral "info" glyph, never a health colour
 # (PRD §46, §53).
 CHANGE_ICON = "ⓘ"
+
+KST = ZoneInfo("Asia/Seoul")
+
+
+def kst_time(moment: datetime) -> str:
+    """`21:12 KST`: a clock time, which stays true however late a static page is read."""
+    return moment.astimezone(KST).strftime("%H:%M KST")
+
+
+def kst_datetime(moment: datetime) -> str:
+    """`2026-10-02 21:12:43 KST`: the exact time, for a title or tooltip."""
+    return moment.astimezone(KST).strftime("%Y-%m-%d %H:%M:%S KST")
 
 
 def environment(templates_dir: Path = TEMPLATES_DIR) -> Environment:

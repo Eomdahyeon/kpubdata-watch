@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Public read models (`kpubdata_watch.api.read_models.public`) for dataset detail, check results with a summary, incidents with evidence and timeline, changes with a human-readable diff and health impact, and 30-day history; `ProductSnapshot` loads a snapshot and rejects references that do not resolve. The demo fixture is now five files in `demo/fixtures/` (`snapshot`, `datasets`, `incidents`, `changes`, `histories`) with timestamps instead of relative labels, and `API_CONTRACT.md` documents the response shapes.
 - Brand v2 UI primitives as Jinja macros in `templates/components/primitives.html`, styled by `static/components.css`: StatusBadge, ChangeBadge, HealthSummary, Panel, DatasetRow, Metadata, Timestamp, ContractDiff and EmptyState. The health labels, icons and Jinja environment live in `kpubdata_watch.web.presentation`, shared by the demo builder and the service. A Change uses the neutral surface tokens and the ⓘ glyph rather than a new informational token. The Public Status page is rebuilt from these primitives with the same content; the checked time's class is now `timestamp` (was `checked-at`).
 - The documentation site shows the KPubData symbol as its logo and favicon (`docs/assets/kpubdata-symbol.svg`, byte-identical to the demo's). `tests/unit/test_brand_assets.py` keeps the favicon, the demo header and the docs on that one file and keeps the `KPubData` > `Watch` text lockup with a neutral, lighter suffix; CI compares the symbol and favicon with KPubData Studio's approved files.
 - `scripts/check_brand_tokens.py` fails CI when `brand-v2.css` drifts from KPubData Studio: a token missing from the light, dark or OS-dark block, a value that differs, Fresh Mint used for Healthy, or Brand Blue used for a status. CI reads Studio's `src/globals.css` from a sparse checkout of kpubdata-studio `main`; this is a text comparison, not a dependency on Studio.
@@ -19,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- The demo shows when each dataset was checked as a KST clock time (`Checked 21:12 KST`) instead of a stored relative label that went stale on a static page.
 - The repository moved from `yeongseon/kpubdata-watch` to `kpubdata-lab/kpubdata-watch`. Links, the documentation site (`https://kpubdata-lab.github.io/kpubdata-watch/`) and the shared GitHub Actions references now use the new owner.
 - The documentation site moved from the GitHub Pages root to `/docs/`; the root now hosts the Public Status demo instead (`mkdocs.yml`'s `site_url`, `.github/workflows/deploy.yml` replacing `docs.yml`).
 
