@@ -56,9 +56,14 @@ INCIDENT_STATUS_LABELS = {
 # (PRD §46, §53).
 CHANGE_ICON = "ⓘ"
 
-# The product navigation (#83): (key, label, path below the site root).
+# The product navigation (#83, #109): (key, label, path below the site root).
+# Overview answers "can this be used right now"; History answers "how reliable
+# has this been" over the last 30 days (ADR 0013). History sits right after
+# Overview because both answer a question about every dataset at once, before
+# the per-entity lists.
 NAV_ITEMS: tuple[tuple[str, str, str], ...] = (
     ("overview", "Overview", ""),
+    ("history", "History", "history/"),
     ("datasets", "Datasets", "datasets/"),
     ("changes", "Changes", "changes/"),
     ("incidents", "Incidents", "incidents/"),

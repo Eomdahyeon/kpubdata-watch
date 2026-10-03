@@ -1,6 +1,6 @@
 """The product shell every Watch page shares (#83).
 
-The header leads with product navigation (Overview, Datasets, Changes,
+The header leads with product navigation (Overview, History, Datasets, Changes,
 Incidents), marks where the reader is, and keeps Docs and GitHub secondary.
 A page that is not built yet stays in the navigation as plain text rather than
 a link that goes nowhere. The demo states that it shows preview data as neutral
@@ -52,8 +52,14 @@ def test_the_page_language_is_korean(html: str) -> None:
     assert '<html lang="ko">' in html
 
 
-def test_primary_navigation_lists_the_four_surfaces_in_order(html: str) -> None:
-    assert [label for _, label, _ in NAV_ITEMS] == ["Overview", "Datasets", "Changes", "Incidents"]
+def test_primary_navigation_lists_the_five_surfaces_in_order(html: str) -> None:
+    assert [label for _, label, _ in NAV_ITEMS] == [
+        "Overview",
+        "History",
+        "Datasets",
+        "Changes",
+        "Incidents",
+    ]
     nav = html[html.index('<nav class="primary-nav"') : html.index("</nav>")]
     positions = [nav.index(f">{label}<") for _, label, _ in NAV_ITEMS]
     assert positions == sorted(positions)
@@ -130,5 +136,5 @@ def test_every_link_in_the_shell_uses_the_url_helpers(html: str) -> None:
         if target.startswith(("https://", "#")):
             continue
         assert target in {"./", "docs/"} or target.startswith(
-            ("static/", "datasets/", "incidents/", "changes/")
+            ("static/", "history/", "datasets/", "incidents/", "changes/")
         ), target

@@ -588,3 +588,17 @@ main {
 .table-scroll + .empty-state {
   margin-top: 16px;
 }
+
+/* ---- History (issue 109): date-grouped timeline below the heatmap. ---- */
+
+.timeline-date {
+  margin: 20px 0 4px;
+  font-size: var(--text-table);
+  line-height: var(--text-table--line-height);
+  color: var(--muted-foreground);
+  font-weight: 600;
+}
+
+.timeline-date:first-child {
+  margin-top: 0;
+}

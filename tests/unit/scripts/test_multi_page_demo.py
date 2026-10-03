@@ -46,7 +46,13 @@ def _ids(name: str) -> set[str]:
 
 def test_the_site_has_every_product_page(site: Path) -> None:
     pages = {str(p.relative_to(site)) for p in site.rglob("index.html")}
-    expected = {"index.html", "datasets/index.html", "incidents/index.html", "changes/index.html"}
+    expected = {
+        "index.html",
+        "history/index.html",
+        "datasets/index.html",
+        "incidents/index.html",
+        "changes/index.html",
+    }
     expected |= {f"datasets/{i}/index.html" for i in _ids("datasets")}
     expected |= {f"incidents/{i}/index.html" for i in _ids("incidents")}
     expected |= {f"changes/{i}/index.html" for i in _ids("changes")}
@@ -67,6 +73,7 @@ def test_every_navigation_item_is_a_link_on_every_page(site: Path) -> None:
     ("path", "label"),
     [
         ("index.html", "Overview"),
+        ("history/index.html", "History"),
         ("datasets/index.html", "Datasets"),
         ("incidents/index.html", "Incidents"),
         ("changes/index.html", "Changes"),

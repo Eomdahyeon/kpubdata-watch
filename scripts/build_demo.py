@@ -9,6 +9,7 @@ never runs on Pages). This script renders the templates in
 output directory that `.github/workflows/deploy.yml` uploads to Pages:
 
     index.html                    Overview
+    history/index.html            History (30-day status grid, ADR 0013)
     datasets/index.html           dataset catalog
     datasets/<id>/index.html      Dataset Detail
     incidents/index.html          incident list
@@ -32,6 +33,7 @@ import argparse
 import json
 import re
 import shutil
+from datetime import date
 from pathlib import Path
 from typing import Any
 
@@ -42,6 +44,7 @@ from kpubdata_watch.web.presentation import (
     CHECK_LABELS,
     HEALTH_META,
     HEALTH_ORDER,
+    KST,
     STATIC_DIR,
     TEMPLATES_DIR,
     duration,
@@ -56,7 +59,16 @@ FIXTURES_DIR = REPO_ROOT / "demo" / "fixtures"
 DEFAULT_OUTPUT = REPO_ROOT / "_site"
 # The product pages this demo builds; the navigation links only to these (#83).
 BUILT_PAGES = frozenset(
-    {"overview", "datasets", "dataset", "incidents", "incident", "changes", "change"}
+    {
+        "overview",
+        "history",
+        "datasets",
+        "dataset",
+        "incidents",
+        "incident",
+        "changes",
+        "change",
+    }
 )
 # With a full catalog, the Overview previews this many datasets, issues first (#84).
 PREVIEW_SIZE = 6
@@ -64,6 +76,12 @@ _HEALTH_RANK = {"critical": 0, "degraded": 1, "unknown": 2, "healthy": 3}
 _SEVERITY_RANK = {"critical": 0, "warning": 1, "info": 2}
 # A check counts toward the catalog's "Check" filter when it is not a plain pass.
 _NOT_PASSING = {"warn", "fail", "unknown"}
+# Non-Healthy health states a day can carry, stacked bottom-to-top in the History
+# page's daily bar (#109): Degraded, then Critical, then Unknown.
+_ABNORMAL_TONES = ("degraded", "critical", "unknown")
+# The daily bar's tallest possible column, in pixels; a derived display value, not
+# a read-model field (ADR 0013, docs/UI.md "Charts").
+_DAILY_BAR_HEIGHT_PX = 64
 
 # The health vocabulary and the Jinja environment come from the package
 # (kpubdata_watch.web.presentation, #73); HEALTH_META, HEALTH_ORDER and
@@ -172,6 +190,127 @@ def overview_context(snapshot: ProductSnapshot, built_pages: frozenset[str]) -> 
         "counts": health_counts(rows),
         "total": len(rows),
     }
+
+
+def history_context(snapshot: ProductSnapshot) -> dict[str, Any]:
+    """Derive the History page's three views from the snapshot's histories (#109).
+
+    Overview and History are symmetric: the same dataset rows, different columns
+    (ADR 0013). This computes every number and layout value the templates need —
+    the daily abnormal-count bar, the dataset x 30-day heatmap (sorted by abnormal
+    days, then current severity) and the date-grouped incident/change timeline —
+    so `templates/history.html` only draws what it is given.
+    """
+    days = snapshot.histories[0].days
+    period_start, period_end = days[0].date, days[-1].date
+
+    # One stacked bar per day: how many datasets were Degraded, Critical or
+    # Unknown that day (the status-history visualisation ADR 0013 (a) allows).
+    daily_raw: list[dict[str, Any]] = []
+    for index in range(len(days)):
+        counts = dict.fromkeys(_ABNORMAL_TONES, 0)
+        for history in snapshot.histories:
+            health = history.days[index].health
+            if health in counts:
+                counts[health] += 1
+        daily_raw.append({"date": days[index].date, **counts, "total": sum(counts.values())})
+    max_total = max((day["total"] for day in daily_raw), default=0) or 1
+    daily_counts: list[dict[str, Any]] = []
+    for day in daily_raw:
+        heights = {
+            tone: max(1, round(day[tone] / max_total * _DAILY_BAR_HEIGHT_PX)) if day[tone] else 0
+            for tone in _ABNORMAL_TONES
+        }
+        breakdown = ", ".join(
+            f"{HEALTH_META[tone]['label']} {day[tone]}" for tone in _ABNORMAL_TONES if day[tone]
+        )
+        label = f"{day['date'].isoformat()} · {day['total']} abnormal"
+        if breakdown:
+            label += f" ({breakdown})"
+        daily_counts.append({**day, "heights": heights, "label": label})
+    daily_summary = (
+        f"최근 {len(days)}일 동안 데이터셋 × 일 조합 기준으로 비정상이었던 경우는 총 "
+        f"{sum(day['total'] for day in daily_raw)}건입니다."
+    )
+
+    # One row per dataset, each with its own 30-day strip; sorted by how many of
+    # those days were not Healthy, ties broken by the dataset's current severity.
+    heatmap_rows: list[dict[str, Any]] = []
+    for history in snapshot.histories:
+        dataset = snapshot.dataset(history.dataset_id)
+        abnormal_days = sum(1 for day in history.days if day.health != "healthy")
+        heatmap_rows.append(
+            {
+                "dataset_id": dataset.id,
+                "name": dataset.name,
+                "provider": dataset.provider.name,
+                "health": dataset.health,
+                "abnormal_days": abnormal_days,
+                "cells": history.days,
+            }
+        )
+    heatmap_rows.sort(key=lambda row: (-row["abnormal_days"], _HEALTH_RANK[row["health"]]))
+    affected = sum(1 for row in heatmap_rows if row["abnormal_days"] > 0)
+    heatmap_summary = (
+        f"최근 {len(days)}일 중 비정상인 날이 있었던 데이터셋은 {len(heatmap_rows)}개 중 "
+        f"{affected}개입니다."
+    )
+
+    # Every incident and change detected within the window, grouped by its KST
+    # date and newest first; a resolved incident carries how long it lasted.
+    groups: dict[date, list[dict[str, Any]]] = {}
+    for incident in snapshot.incidents:
+        event_date = incident.detected_at.astimezone(KST).date()
+        if not (period_start <= event_date <= period_end):
+            continue
+        entry: dict[str, Any] = {
+            "kind": "incident",
+            "entity": incident,
+            "dataset": snapshot.dataset(incident.dataset_id),
+            "duration": None,
+        }
+        if incident.status == "resolved" and incident.resolved_at is not None:
+            entry["duration"] = duration(incident.started_at, incident.resolved_at)
+        groups.setdefault(event_date, []).append(entry)
+    for change in snapshot.changes:
+        event_date = change.detected_at.astimezone(KST).date()
+        if not (period_start <= event_date <= period_end):
+            continue
+        groups.setdefault(event_date, []).append(
+            {
+                "kind": "change",
+                "entity": change,
+                "dataset": snapshot.dataset(change.dataset_id),
+                "duration": None,
+            }
+        )
+    # "events", not "items": a plain dict's `.items` is its own method in Jinja's
+    # attribute lookup, which would shadow a same-named key instead of the list.
+    timeline = [
+        {
+            "date": event_date,
+            "events": sorted(entries, key=lambda item: item["entity"].detected_at, reverse=True),
+        }
+        for event_date, entries in sorted(groups.items(), reverse=True)
+    ]
+
+    return {
+        "period_start": period_start.isoformat(),
+        "period_end": period_end.isoformat(),
+        "daily_counts": daily_counts,
+        "daily_summary": daily_summary,
+        "heatmap_rows": heatmap_rows,
+        "heatmap_summary": heatmap_summary,
+        "timeline": timeline,
+    }
+
+
+def render_history(snapshot: ProductSnapshot) -> str:
+    """Render the History page (#109); it lives at `history/`."""
+    template = environment(TEMPLATES_DIR).get_template("history.html")
+    return template.render(
+        **history_context(snapshot), **_shell(snapshot, root="../", active_nav="history")
+    )
 
 
 def render(fixtures_dir: Path = FIXTURES_DIR, built_pages: frozenset[str] = BUILT_PAGES) -> str:
@@ -358,6 +497,8 @@ def build(output_dir: Path = DEFAULT_OUTPUT, fixtures_dir: Path = FIXTURES_DIR) 
     (output_dir / "index.html").write_text(render(fixtures_dir), encoding="utf-8")
 
     snapshot = ProductSnapshot.from_directory(fixtures_dir)
+    (output_dir / "history").mkdir(parents=True, exist_ok=True)
+    (output_dir / "history" / "index.html").write_text(render_history(snapshot), encoding="utf-8")
     _write_pages(
         output_dir,
         "datasets",

@@ -27,6 +27,73 @@
 </ol>
 {%- endmacro %}
 
+{% macro history_grid(rows) -%}
+{#-
+  History's dataset x 30-day heatmap (issue 109): one row per dataset, each day a
+  cell reusing HistoryStrip's own class (`history-day status-<health>`), so the
+  same colour and icon rules apply. The column header shows only the first and
+  last date (docs/UI.md History UX); every cell still carries its own date in
+  `title`/`aria-label`.
+-#}
+{%- set day_count = rows[0].cells | length if rows else 0 %}
+{%- set period = (rows[0].cells[0].date.isoformat() ~ " – " ~ rows[0].cells[-1].date.isoformat()) if rows else "" %}
+<div class="table-scroll">
+  <table class="history-grid">
+    <caption class="sr-only">Dataset health by day, {{ period }}</caption>
+    <thead>
+      <tr>
+        <th scope="col">Dataset</th>
+        <th scope="col">Provider</th>
+        <th scope="col" colspan="{{ day_count }}">{{ period }}</th>
+        <th scope="col">비정상</th>
+      </tr>
+    </thead>
+    <tbody>
+      {%- for row in rows %}
+      <tr>
+        <th scope="row">
+          {%- if "dataset" in built_pages -%}
+          <a href="{{ page_url('dataset', row.dataset_id) }}">{{ row.name }}</a>
+          {%- else -%}
+          {{ row.name }}
+          {%- endif -%}
+        </th>
+        <td>{{ row.provider }}</td>
+        {%- for day in row.cells %}
+        {%- set label = day.date.isoformat() ~ " " ~ health_meta[day.health].label %}
+        <td class="history-day status-{{ day.health }}" tabindex="0" title="{{ label }}" aria-label="{{ label }}"><span aria-hidden="true">{{ health_meta[day.health].icon }}</span></td>
+        {%- endfor %}
+        <td class="history-grid-count">비정상 {{ row.abnormal_days }}일</td>
+      </tr>
+      {%- endfor %}
+    </tbody>
+  </table>
+</div>
+{%- endmacro %}
+
+{% macro daily_counts_bar(days) -%}
+{#-
+  History's daily abnormal-count bar (issue 109): one stacked column per day, scaled
+  to that day's own tallest neighbour. Only Degraded/Critical/Unknown stack here
+  (Healthy never appears) — a count of datasets, not a derived metric (ADR 0013).
+-#}
+<div class="table-scroll daily-bar">
+  <ol class="daily-bar-list">
+    {%- for day in days %}
+    <li class="daily-bar-day" tabindex="0" title="{{ day.label }}" aria-label="{{ day.label }}">
+      <span class="daily-bar-stack">
+        {%- for tone in ("degraded", "critical", "unknown") %}
+        {%- if day.heights[tone] %}
+        <span class="daily-bar-segment daily-bar-segment--{{ tone }}" style="height: {{ day.heights[tone] }}px" aria-hidden="true"></span>
+        {%- endif %}
+        {%- endfor %}
+      </span>
+    </li>
+    {%- endfor %}
+  </ol>
+</div>
+{%- endmacro %}
+
 {% macro health_summary(counts) -%}
 <ul class="summary-counts">
   {%- for key in health_order %}

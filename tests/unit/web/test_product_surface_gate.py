@@ -134,7 +134,9 @@ def time_problems(html: str) -> list[str]:
 
 
 def test_the_gate_sees_every_page(pages: dict[str, str]) -> None:
-    assert len(pages) == 1 + 1 + 15 + 1 + 7 + 1 + 2
+    # overview + history + (datasets index + 15 dataset details) + (incidents
+    # index + 7 incident details) + (changes index + 2 change details).
+    assert len(pages) == 1 + 1 + 1 + 15 + 1 + 7 + 1 + 2
 
 
 @pytest.mark.parametrize(

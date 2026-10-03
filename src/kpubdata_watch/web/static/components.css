@@ -410,3 +410,125 @@ a.dataset-name {
 a.dataset-name:hover {
   text-decoration: underline;
 }
+
+/* ---- HistoryGrid (issue 109): the dataset x 30-day heatmap, built on HistoryDay. ---- */
+
+.history-grid {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-table);
+  line-height: var(--text-table--line-height);
+}
+
+.history-grid th,
+.history-grid td {
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.history-grid thead th {
+  color: var(--muted-foreground);
+  font-weight: 600;
+  text-align: left;
+}
+
+.history-grid tbody th[scope="row"] {
+  text-align: left;
+  font-weight: 600;
+}
+
+.history-grid tbody th[scope="row"] a {
+  color: var(--foreground);
+  text-decoration: none;
+}
+
+.history-grid tbody th[scope="row"] a:hover {
+  text-decoration: underline;
+}
+
+.history-grid tbody tr:last-child th,
+.history-grid tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+/* A HistoryDay cell keeps its colour rules but lays out as a table cell here,
+   not the HistoryStrip's inline-flex box. */
+.history-grid td.history-day {
+  display: table-cell;
+  text-align: center;
+  vertical-align: middle;
+}
+
+/* Healthy keeps HistoryDay's subtle fill; only an abnormal day takes the solid
+   fill, so the eye finds trouble without colour being the only signal. */
+.history-grid td.history-day.status-degraded {
+  background: var(--status-warning-solid);
+  color: var(--status-warning-subtle);
+  border-color: var(--status-warning-solid);
+}
+
+.history-grid td.history-day.status-critical {
+  background: var(--status-failure-solid);
+  color: var(--status-failure-subtle);
+  border-color: var(--status-failure-solid);
+}
+
+.history-grid td.history-day.status-unknown {
+  background: var(--status-unknown-solid);
+  color: var(--status-unknown-subtle);
+  border-color: var(--status-unknown-solid);
+}
+
+.history-grid-count {
+  text-align: right;
+  color: var(--muted-foreground);
+}
+
+/* ---- DailyCountsBar (issue 109): one stacked column per day, no library or SVG. ---- */
+
+.daily-bar-list {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  height: 64px;
+  min-width: max-content;
+}
+
+.daily-bar-day {
+  display: flex;
+  align-items: flex-end;
+  height: 100%;
+  width: 16px;
+  flex: none;
+}
+
+.daily-bar-day:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.daily-bar-stack {
+  display: flex;
+  flex-direction: column-reverse;
+  width: 100%;
+}
+
+.daily-bar-segment {
+  width: 100%;
+}
+
+.daily-bar-segment--degraded {
+  background: var(--status-warning-solid);
+}
+
+.daily-bar-segment--critical {
+  background: var(--status-failure-solid);
+}
+
+.daily-bar-segment--unknown {
+  background: var(--status-unknown-solid);
+}

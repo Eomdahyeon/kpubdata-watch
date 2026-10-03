@@ -164,3 +164,71 @@ def test_change_icon_is_the_info_glyph() -> None:
 def test_module_paths_point_into_the_package() -> None:
     assert Path(TEMPLATES_DIR).name == "templates"
     assert Path(STATIC_DIR).name == "static"
+
+
+def _history_day(iso: str, health: str) -> object:
+    from datetime import date as _date
+
+    from kpubdata_watch.api.read_models.public import HistoryDay
+
+    return HistoryDay(date=_date.fromisoformat(iso), health=health)
+
+
+def test_history_grid_reuses_history_day_markup_with_a_date_and_health_label() -> None:
+    rows = [
+        {
+            "dataset_id": "x",
+            "name": "X",
+            "provider": "Y",
+            "health": "degraded",
+            "abnormal_days": 1,
+            "cells": [
+                _history_day("2026-09-21", "healthy"),
+                _history_day("2026-09-22", "degraded"),
+            ],
+        }
+    ]
+    html = render("{{ ui.history_grid(rows) }}", rows=rows, built_pages={"dataset"})
+    assert '<a href="datasets/x/">X</a>' in html
+    assert '<td class="history-day status-degraded"' in html
+    assert 'aria-label="2026-09-22 Degraded"' in html
+    assert "비정상 1일" in html
+    assert 'colspan="2"' in html
+
+
+def test_history_grid_without_the_dataset_page_is_not_a_link() -> None:
+    rows = [
+        {
+            "dataset_id": "x",
+            "name": "X",
+            "provider": "Y",
+            "health": "healthy",
+            "abnormal_days": 0,
+            "cells": [_history_day("2026-09-21", "healthy")],
+        }
+    ]
+    html = render("{{ ui.history_grid(rows) }}", rows=rows, built_pages=frozenset())
+    assert "<a href=" not in html
+    assert '<th scope="row">X</th>' in html
+
+
+def test_daily_counts_bar_renders_one_column_per_day_with_a_label() -> None:
+    days = [
+        {
+            "date": "2026-09-21",
+            "heights": {"degraded": 10, "critical": 0, "unknown": 0},
+            "label": "d1",
+        },
+        {
+            "date": "2026-09-22",
+            "heights": {"degraded": 0, "critical": 0, "unknown": 0},
+            "label": "d2",
+        },
+    ]
+    html = render("{{ ui.daily_counts_bar(days) }}", days=days)
+    assert html.count('class="daily-bar-day"') == 2
+    assert 'title="d1"' in html and 'aria-label="d1"' in html
+    assert 'class="daily-bar-segment daily-bar-segment--degraded"' in html
+    assert "height: 10px" in html
+    # A day with nothing abnormal draws no segment at all.
+    assert html.count("daily-bar-segment--") == 1
