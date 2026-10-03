@@ -3,10 +3,12 @@
  *
  * Copied verbatim from kpubdata-lab/kpubdata-studio src/globals.css lines 19-178 at commit
  * 1fbf57e41a32b3ef9cd353666beb1fcd0d6b97e9 (the light, dark and OS-dark custom-property
- * blocks). Studio Brand v2 is canonical: do not edit a value here. To follow a Studio change,
- * copy the blocks again, update the commit above and the table in docs/VISUAL_IDENTITY.md,
- * and run `python scripts/check_brand_tokens.py`. Public Status (web/static) and every
- * UI Lab prototype link this file; neither defines these properties itself.
+ * blocks); Studio's src/globals.css has not changed those blocks since. Studio Brand v2 is
+ * canonical: do not edit a colour value here. To follow a Studio change, copy the blocks
+ * again and update the commit above. This path is the canonical Watch token file (#70).
+ * Public Status (web/static) and every UI Lab prototype link this file; neither defines
+ * these properties itself. The last block, after Studio's, holds the type scale, radius and
+ * density, which Studio keeps in Tailwind `@theme` blocks that plain CSS cannot read.
  * The references to #628, #631, #667 and __tests__/ in the comments below are Studio's.
  */
 
@@ -169,4 +171,42 @@
     --status-failure-solid: #dc2626;
     --status-unknown-solid: #71717a;
   }
+}
+
+/*
+ * Type scale, radius and density (#70). Watch has no Tailwind, so the values Studio keeps in
+ * its `@theme` blocks (src/globals.css: --font-sans, --font-mono, --radius-*, --text-page-title,
+ * --text-meta) are repeated here as plain custom properties with Studio's names. The other
+ * sizes are Watch's scale from #70: section title 14/20/600, body 14/20/400, table 13/18/400,
+ * technical identifier 13/18 monospace, 8px radius, 36px table rows, 12px card gap, no shadow.
+ */
+:root {
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, "Noto Sans KR", sans-serif;
+  --font-mono: ui-monospace, "SFMono-Regular", "SF Mono", Consolas, "Liberation Mono", Menlo,
+    monospace;
+
+  --radius: 0.5rem;
+  --radius-lg: 0.625rem;
+  --radius-xl: 0.875rem;
+  --radius-2xl: 1.125rem;
+
+  --text-page-title: 1.25rem;
+  --text-page-title--line-height: 1.75rem;
+  --text-page-title--font-weight: 600;
+  --text-section-title: 0.875rem;
+  --text-section-title--line-height: 1.25rem;
+  --text-section-title--font-weight: 600;
+  --text-body: 0.875rem;
+  --text-body--line-height: 1.25rem;
+  --text-table: 0.8125rem;
+  --text-table--line-height: 1.125rem;
+  --text-meta: 0.75rem;
+  --text-meta--line-height: 1rem;
+  --text-technical: 0.8125rem;
+  --text-technical--line-height: 1.125rem;
+
+  --density-table-row: 2.25rem;
+  --density-card-gap: 0.75rem;
+  --shadow-card: none;
 }
