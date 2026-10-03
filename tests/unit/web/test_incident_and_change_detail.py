@@ -76,6 +76,28 @@ def test_the_raw_evidence_is_secondary(site: Path) -> None:
     assert "<summary>View raw evidence</summary>" in html
 
 
+def test_the_evidence_chart_sits_above_the_expected_observed_table(site: Path) -> None:
+    """The mini chart and the text table both render; the chart comes first (#111)."""
+    why = section(read(site, "incidents", "inc-availability-bike-001"), "Why was this detected?")
+    chart = why.index('<div class="evidence-chart">')
+    table = why.index('<dl class="metadata evidence">')
+    assert chart < table
+    assert 'role="img"' in why
+    assert "<title>" in why
+    assert "<dt>Expected</dt>" in why and "<dt>Observed</dt>" in why
+
+
+def test_the_contract_incident_chart_reuses_the_contract_diff_chips(site: Path) -> None:
+    why = section(read(site, "incidents", "inc-contract-apt-rent-001"), "Why was this detected?")
+    chart = why.index('<div class="evidence-chart">')
+    table = why.index('<dl class="metadata evidence">')
+    assert chart < table
+    # Once inside the evidence chart (above the table) and once more for the
+    # related change's own ContractDiff further down the same panel.
+    assert why.count('<li class="diff-removed">') == 2
+    assert why.index('<div class="evidence-chart">') < why.index('<ul class="contract-diff">')
+
+
 def test_the_timeline_and_related_change_are_shown(site: Path) -> None:
     html = read(site, "incidents", "inc-contract-apt-rent-001")
     timeline = section(html, "Observation Timeline")

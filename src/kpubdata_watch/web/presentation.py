@@ -9,7 +9,7 @@ never colour alone (docs/UI.md, PRD §53).
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any
 from zoneinfo import ZoneInfo
@@ -102,16 +102,20 @@ def kst_minute(moment: datetime) -> str:
     return moment.astimezone(KST).strftime("%Y-%m-%d %H:%M KST")
 
 
-def duration(start: datetime, end: datetime) -> str:
-    """`29m`, `1h 15m`, `1d 1h`: how long something has lasted, at a glance."""
-    minutes = max(0, int((end - start).total_seconds() // 60))
-    days, minutes = divmod(minutes, 24 * 60)
+def _format_minutes(total_minutes: int) -> str:
+    """`29m`, `1h 15m`, `1d 1h`: a minute count, at a glance."""
+    days, minutes = divmod(max(0, total_minutes), 24 * 60)
     hours, minutes = divmod(minutes, 60)
     if days:
         return f"{days}d {hours}h"
     if hours:
         return f"{hours}h {minutes}m"
     return f"{minutes}m"
+
+
+def duration(start: datetime, end: datetime) -> str:
+    """`29m`, `1h 15m`, `1d 1h`: how long something has lasted, at a glance."""
+    return _format_minutes(int((end - start).total_seconds() // 60))
 
 
 def evidence_value(value: Any) -> str:
@@ -131,6 +135,342 @@ def evidence_value(value: Any) -> str:
     if isinstance(value, dict):
         return ", ".join(f"{key}: {evidence_value(item)}" for key, item in value.items())
     return str(value)
+
+
+# evidence_view's mini charts share one 0-300 SVG canvas: every coordinate below
+# is computed here, in Python, so `evidence_chart` in primitives.html only draws
+# the numbers it is given (issue 111, mirroring the read-model/template split
+# section 2 of the owner spec asks for).
+_CANVAS_LEFT = 10.0
+_CANVAS_RIGHT = 290.0
+_CANVAS_WIDTH = _CANVAS_RIGHT - _CANVAS_LEFT
+# A pathological `consecutive_failures` still renders, but capped so the bars
+# stay legible instead of becoming hairlines; the real count is always in the
+# accessible summary and in the existing Observed table below the chart.
+_MAX_FAILURE_BARS = 60
+
+
+def _canvas_x(percent: float) -> float:
+    """Map a 0-100 percent position onto the shared evidence-chart canvas."""
+    return round(_CANVAS_LEFT + max(0.0, min(100.0, percent)) / 100.0 * _CANVAS_WIDTH, 1)
+
+
+def _axis_percent(value: float, low: float, high: float) -> float:
+    """Where `value` sits between `low` and `high`, as a 0-100 percent, clamped."""
+    span = high - low
+    if span <= 0:
+        return 50.0
+    return max(0.0, min(100.0, (value - low) / span * 100.0))
+
+
+def _seconds_percent(moment: datetime, start: datetime, end: datetime) -> float:
+    span = (end - start).total_seconds()
+    if span <= 0:
+        return 50.0
+    return max(0.0, min(100.0, (moment - start).total_seconds() / span * 100.0))
+
+
+def _as_number(value: Any) -> float | None:
+    """`value` as a plain number, rejecting bools (`isinstance(True, int)` is true)."""
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, (int, float)):
+        return float(value)
+    return None
+
+
+def _as_aware_datetime(value: Any) -> datetime | None:
+    """An evidence string as a timezone-aware moment, or `None` when it is not one."""
+    if not isinstance(value, str):
+        return None
+    try:
+        moment = datetime.fromisoformat(value)
+    except ValueError:
+        return None
+    return moment if moment.tzinfo is not None else None
+
+
+def _format_count(value: float) -> str:
+    """`10,124` for a whole number, `10,124.50` otherwise -- a reader-facing count."""
+    if value == int(value):
+        return f"{int(value):,}"
+    return f"{value:,.2f}"
+
+
+def _signed_percent(value: int) -> str:
+    """`+12%`, `−40%`, `0%` -- U+2212 MINUS SIGN, never a hyphen, for the negative case."""
+    if value > 0:
+        return f"+{value}%"
+    if value < 0:
+        return f"−{abs(value)}%"
+    return "0%"
+
+
+def _quality_volume_view(
+    expected: dict[str, Any], observed: dict[str, Any], tone: str
+) -> dict[str, Any] | None:
+    """quality/volume: the expected count band, the observed dot, a signed percent.
+
+    The percent is relative to the nearest bound when the observed count falls
+    outside `[record_count_min, record_count_max]` (e.g. 40% under the minimum),
+    or to the band's midpoint when it falls inside the band (e.g. 2% over the
+    middle of an otherwise passing range). Either way it is one number: how far
+    the observed count sits from what the band calls normal.
+    """
+    low = _as_number(expected.get("record_count_min"))
+    high = _as_number(expected.get("record_count_max"))
+    value = _as_number(observed.get("record_count"))
+    if low is None or high is None or value is None or low > high:
+        return None
+    if value < low:
+        base = low
+    elif value > high:
+        base = high
+    else:
+        base = (low + high) / 2
+    if base == 0:
+        return None
+    percent = round((value - base) / base * 100)
+    percent_label = _signed_percent(percent)
+
+    axis_low = min(low, value)
+    axis_high = max(high, value)
+    pad = (axis_high - axis_low) * 0.15 or max(abs(axis_high), 1.0) * 0.15
+    axis_low -= pad
+    axis_high += pad
+
+    band_start = _canvas_x(_axis_percent(low, axis_low, axis_high))
+    band_end = _canvas_x(_axis_percent(high, axis_low, axis_high))
+    in_band = low <= value <= high
+    return {
+        "kind": "quality_volume",
+        "band_x": band_start,
+        "band_width": round(band_end - band_start, 1),
+        "dot_x": _canvas_x(_axis_percent(value, axis_low, axis_high)),
+        "dot_tone": "healthy" if in_band else tone,
+        "percent_label": percent_label,
+        "summary": (
+            f"Expected {_format_count(low)}–{_format_count(high)} records, observed "
+            f"{_format_count(value)} ({percent_label})."
+        ),
+    }
+
+
+def _freshness_window_view(
+    expected: dict[str, Any], observed: dict[str, Any], generated_at: datetime, tone: str
+) -> dict[str, Any] | None:
+    """freshness (A): the expected update window, latest data, snapshot time, delay.
+
+    The expected window is `update_at` plus and minus `tolerance_minutes` (the
+    incident summaries read it the same way: "20:00 +/- 30 min"). The delay
+    segment spans the window's end to the snapshot time -- how long the
+    deadline has been missed, measured against `generated_at`, never wall
+    clock -- and is omitted when the snapshot arrived before the window closed.
+    """
+    update_at = _as_aware_datetime(expected.get("update_at"))
+    tolerance = _as_number(expected.get("tolerance_minutes"))
+    latest = _as_aware_datetime(observed.get("latest_data_at"))
+    if update_at is None or tolerance is None or tolerance < 0 or latest is None:
+        return None
+    window_start = update_at - timedelta(minutes=tolerance)
+    window_end = update_at + timedelta(minutes=tolerance)
+
+    axis_start = min(window_start, latest, generated_at)
+    axis_end = max(window_end, latest, generated_at)
+    span = (axis_end - axis_start).total_seconds()
+    if span <= 0:
+        return None
+    pad = timedelta(seconds=span * 0.08)
+    axis_start -= pad
+    axis_end += pad
+
+    def pct(moment: datetime) -> float:
+        return _canvas_x(_seconds_percent(moment, axis_start, axis_end))
+
+    has_delay = generated_at > window_end
+    window_x = pct(window_start)
+    window_end_x = pct(window_end)
+    return {
+        "kind": "freshness_window",
+        "window_x": window_x,
+        "window_width": round(window_end_x - window_x, 1),
+        "delay_x": window_end_x if has_delay else 0.0,
+        "delay_width": round(pct(generated_at) - window_end_x, 1) if has_delay else 0.0,
+        "latest_x": pct(latest),
+        "snapshot_x": pct(generated_at),
+        "tone": tone,
+        "summary": (
+            f"Expected update by {kst_minute(window_end)} (window "
+            f"{kst_minute(window_start)}–{kst_minute(window_end)}), latest data at "
+            f"{kst_minute(latest)}, snapshot at {kst_minute(generated_at)}."
+        ),
+        "caption": (
+            f"Expected {kst_minute(update_at)} ± {int(tolerance)} min "
+            f"· Latest data {kst_minute(latest)} · Snapshot {kst_minute(generated_at)}"
+        ),
+    }
+
+
+def _freshness_age_view(
+    expected: dict[str, Any], observed: dict[str, Any], generated_at: datetime, tone: str
+) -> dict[str, Any] | None:
+    """freshness (B): the allowed age against the current age, both against `generated_at`.
+
+    "Current age" is the snapshot time minus `latest_data_at`, never wall clock --
+    a static page read long after it was built must show the same bar it showed
+    on the day it was built.
+    """
+    allowed = _as_number(expected.get("max_age_minutes"))
+    latest = _as_aware_datetime(observed.get("latest_data_at"))
+    if allowed is None or allowed <= 0 or latest is None:
+        return None
+    current_minutes = max(0, int((generated_at - latest).total_seconds() // 60))
+    scale = max(allowed, current_minutes) or 1.0
+    over = current_minutes > allowed
+    allowed_width = round(allowed / scale * _CANVAS_WIDTH, 1)
+    return {
+        "kind": "freshness_age",
+        "allowed_width": allowed_width,
+        "current_width": round(current_minutes / scale * _CANVAS_WIDTH, 1),
+        "boundary_x": round(_CANVAS_LEFT + allowed_width, 1),
+        "over": over,
+        "tone": tone,
+        "summary": (
+            f"Allowed age {_format_minutes(int(allowed))}, current age "
+            f"{_format_minutes(current_minutes)}."
+        ),
+        "caption": (
+            f"Allowed {_format_minutes(int(allowed))} · Current "
+            f"{_format_minutes(current_minutes)} (as of {kst_minute(generated_at)})"
+        ),
+    }
+
+
+def _availability_view(
+    expected: dict[str, Any],
+    observed: dict[str, Any],
+    timeline: list[Any],
+    started_at: Any,
+    tone: str,
+) -> dict[str, Any] | None:
+    """availability: one failure bar per consecutive failure; no healthy probes drawn.
+
+    The last success time is not an evidence key (`expected`/`observed` only
+    carry the failing probe); it comes from the incident's own observation
+    timeline -- the latest recorded event before `started_at` -- and is shown
+    as text only, next to the bars, never as a probe mark (there is no
+    timestamp per healthy probe in the data, so none is drawn).
+    """
+    expected_status = expected.get("http_status")
+    observed_status = observed.get("http_status")
+    failures = observed.get("consecutive_failures")
+    if (
+        not isinstance(expected_status, int)
+        or isinstance(expected_status, bool)
+        or not isinstance(observed_status, int)
+        or isinstance(observed_status, bool)
+        or not isinstance(failures, int)
+        or isinstance(failures, bool)
+        or failures < 1
+    ):
+        return None
+
+    last_success_at: datetime | None = None
+    if isinstance(timeline, list) and isinstance(started_at, datetime):
+        candidates = [
+            event.at
+            for event in timeline
+            if isinstance(getattr(event, "at", None), datetime) and event.at < started_at
+        ]
+        if candidates:
+            last_success_at = max(candidates)
+
+    count = min(failures, _MAX_FAILURE_BARS)
+    step = _CANVAS_WIDTH / count
+    bar_width = round(min(18.0, step * 0.7), 1)
+    bars = [round(_CANVAS_LEFT + i * step + (step - bar_width) / 2, 1) for i in range(count)]
+    summary = (
+        f"Expected HTTP {expected_status}, observed HTTP {observed_status} across "
+        f"{failures} consecutive failed probe(s)."
+    )
+    if last_success_at is not None:
+        summary += f" Last success at {kst_minute(last_success_at)}."
+    return {
+        "kind": "availability",
+        "bars": bars,
+        "bar_width": bar_width,
+        "tone": tone,
+        "last_success_label": kst_minute(last_success_at) if last_success_at else None,
+        "summary": summary,
+    }
+
+
+def _contract_view(expected: dict[str, Any], observed: dict[str, Any]) -> dict[str, Any] | None:
+    """contract: added/removed fields, reusing `contract_diff`'s own chips."""
+    expected_fields = expected.get("fields")
+    observed_fields = observed.get("fields")
+    if not isinstance(expected_fields, list) or not isinstance(observed_fields, list):
+        return None
+    if not all(isinstance(field, str) for field in (*expected_fields, *observed_fields)):
+        return None
+    expected_set = set(expected_fields)
+    observed_set = set(observed_fields)
+    added = [field for field in observed_fields if field not in expected_set]
+    removed = [field for field in expected_fields if field not in observed_set]
+    return {
+        "kind": "contract",
+        "added": added,
+        "removed": removed,
+        "summary": f"{len(added)} field(s) added, {len(removed)} field(s) removed.",
+    }
+
+
+def evidence_view(incident: Any, generated_at: datetime) -> dict[str, Any] | None:
+    """A template-ready dict for `evidence_chart`, or `None` to fall back to the table.
+
+    Branches on `incident.check` and the evidence keys actually present
+    (docs/UI.md "Evidence-based"; ADR 0013 (b)):
+
+    - quality + `record_count_min`/`record_count_max`/`record_count` -> the
+      expected band, the observed dot and a signed percent (`_quality_volume_view`).
+    - freshness + `update_at`/`tolerance_minutes` -> the expected window, latest
+      data, snapshot time and the delay segment (`_freshness_window_view`).
+    - freshness + `max_age_minutes` (no `update_at`) -> allowed age vs current
+      age (`_freshness_age_view`).
+    - availability + `http_status`/`consecutive_failures` -> one failure bar per
+      consecutive failure, last success as text (`_availability_view`).
+    - contract + `fields` -> added/removed chips (`_contract_view`).
+    - anything else, or a required key missing or the wrong type for its shape
+      (a reversed band, a non-numeric status, a naive timestamp, ...) -> `None`,
+      so the caller keeps the existing Expected/Observed/Difference/Rule table.
+
+    This never guesses a value evidence does not have: a view is built only from
+    `incident.evidence.expected`/`observed` (plus `generated_at` for an age or a
+    delay, and the timeline for availability's last-success text).
+    """
+    expected = incident.evidence.expected
+    observed = incident.evidence.observed
+    if not isinstance(expected, dict) or not isinstance(observed, dict):
+        return None
+    tone = SEVERITY_TONE.get(incident.severity) or "unknown"
+    try:
+        if incident.check == "quality":
+            return _quality_volume_view(expected, observed, tone)
+        if incident.check == "freshness":
+            if "update_at" in expected and "tolerance_minutes" in expected:
+                return _freshness_window_view(expected, observed, generated_at, tone)
+            if "max_age_minutes" in expected:
+                return _freshness_age_view(expected, observed, generated_at, tone)
+            return None
+        if incident.check == "availability":
+            return _availability_view(
+                expected, observed, incident.timeline, incident.started_at, tone
+            )
+        if incident.check == "contract":
+            return _contract_view(expected, observed)
+    except (TypeError, ValueError, ZeroDivisionError, OverflowError):
+        return None
+    return None
 
 
 @pass_context

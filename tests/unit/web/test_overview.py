@@ -81,6 +81,15 @@ def test_an_issue_shows_dataset_check_summary_first_detected_and_duration(html: 
     assert 'href="history/"' in row
 
 
+def test_an_issue_with_evidence_shows_its_mini_chart_above_the_meta_line(html: str) -> None:
+    """#111: the chart sits between the issue text and "First detected ..."."""
+    issues = panel(html, "Active Issues")
+    name = "공공자전거(따릉이) 대여소 현황"
+    row = next(item for item in issues.split('<li class="issue-row ')[1:] if name in item)
+    assert '<div class="evidence-chart">' in row
+    assert row.index('<div class="evidence-chart">') < row.index("First detected")
+
+
 def test_the_issue_count_matches_the_active_incidents(html: str) -> None:
     incidents = json.loads((FIXTURES / "incidents.json").read_text(encoding="utf-8"))
     active = [i for i in incidents if i["status"] in {"open", "ongoing"}]

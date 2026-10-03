@@ -4,7 +4,8 @@
   Overview (#84, issue 110): what is wrong right now, then what changed, then the
   dataset x check matrix. Context: `counts`, `total`, `headline` and
   `status_ratio` (the HealthSummary bar), `active_issues` (each with
-  `history_days`/`abnormal_days`, History's own count, ADR 0013) and
+  `history_days`/`abnormal_days`, History's own count, ADR 0013, and `evidence`,
+  an `evidence_chart`-ready dict or `None`, issue 111) and
   `recent_changes` (newest first), `datasets` (issues first, each with `checks`
   for the matrix), `preview` (true when the full catalog exists and this page
   shows only part of the list).
@@ -41,6 +42,7 @@
       {{ dataset_link(issue.dataset_id, issue.dataset_name) }}
     </div>
     <p class="issue-text"><strong>{{ issue.title }}</strong> · {{ issue.summary }}</p>
+    {{ ui.evidence_chart(issue.evidence) }}
     <p class="issue-meta">
       First detected {{ issue.detected_at | kst_time }} · {{ issue.duration }}
       {%- if "incident" in built_pages %} · <a href="{{ page_url('incident', issue.id) }}">View →</a>{% endif %}

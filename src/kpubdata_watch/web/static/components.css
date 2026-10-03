@@ -389,6 +389,86 @@
   font-weight: 500;
 }
 
+/* ---- EvidenceChart (issue 111): expected-vs-observed mini charts, server-rendered
+   inline SVG on a shared 0-300 viewBox (see presentation.py). No JS, no chart
+   library, no animation -- `width: 100%` plus each SVG's own viewBox is what
+   keeps every shape inside a 390px viewport. Colour is never the only signal: a
+   tone always pairs with the accessible summary carried as the SVG's own
+   role="img"/aria-label/title (quality/freshness/availability), or with
+   ContractDiff's own sign-and-word chips (contract). ---- */
+
+.evidence-chart {
+  margin: 0 0 12px;
+}
+
+.evidence-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.evidence-axis {
+  stroke: var(--border);
+  stroke-width: 2;
+}
+
+/* The expected range or window: the same subtle fill HistoryGrid and CheckMatrix
+   give a passing/healthy cell, so "expected" reads the same way everywhere. */
+.evidence-band {
+  fill: var(--status-success-subtle);
+  stroke: var(--status-success-border);
+  stroke-width: 1;
+}
+
+/* The "now" line (freshness window's snapshot time, freshness age's allowed-age
+   boundary): neutral and dashed, never a status colour -- it marks a reference
+   point, not a health state. */
+.evidence-now {
+  stroke: var(--foreground);
+  stroke-width: 2;
+  stroke-dasharray: 4 3;
+}
+
+.evidence-text {
+  font-family: var(--font-mono);
+  font-size: var(--text-meta);
+  font-weight: 600;
+}
+
+.evidence-caption {
+  margin: 4px 0 0;
+  color: var(--muted-foreground);
+  font-size: var(--text-table);
+  line-height: var(--text-table--line-height);
+}
+
+/* A mark's tone borrows the health vocabulary (never Unknown mistaken for
+   Critical): healthy is the observed dot landing inside the expected band,
+   the rest are the incident's own severity tone (SEVERITY_TONE). */
+.evidence-mark.tone-healthy,
+.evidence-text.tone-healthy {
+  fill: var(--status-success-solid);
+  stroke: var(--status-success-solid);
+}
+
+.evidence-mark.tone-degraded,
+.evidence-text.tone-degraded {
+  fill: var(--status-warning-solid);
+  stroke: var(--status-warning-solid);
+}
+
+.evidence-mark.tone-critical,
+.evidence-text.tone-critical {
+  fill: var(--status-failure-solid);
+  stroke: var(--status-failure-solid);
+}
+
+.evidence-mark.tone-unknown,
+.evidence-text.tone-unknown {
+  fill: var(--status-unknown-solid);
+  stroke: var(--status-unknown-solid);
+}
+
 /* ---- CheckMatrix (issue 110): A/F/C/Q as four small cells, reused in catalog.html. ---- */
 
 .check-matrix {

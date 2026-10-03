@@ -4,7 +4,8 @@
   Incident Detail (#87, PRD §48): the lifecycle, why the detector fired, the
   observation timeline and the related change. Context: `incident` (Incident),
   `dataset` (DatasetRecord), `change` (the related Change or none), `duration`,
-  `raw_evidence` (pretty JSON).
+  `evidence` (`evidence_chart`-ready dict or `None`, issue 111), `raw_evidence`
+  (pretty JSON).
 -#}
 
 {% block title %}{{ incident.title }} · {{ dataset.name }} — KPubData Watch{% endblock %}
@@ -38,6 +39,7 @@
   <div class="detail-main">
     {% call ui.panel("Why was this detected?", "why") %}
     <p class="issue-summary">{{ incident.summary }}</p>
+    {{ ui.evidence_chart(evidence) }}
     <dl class="metadata evidence">
       <dt>Expected</dt>
       <dd>{{ evidence_block(incident.evidence.expected) }}</dd>

@@ -269,6 +269,36 @@ def test_history_grid_without_the_dataset_page_is_not_a_link() -> None:
     assert '<th scope="row">X</th>' in html
 
 
+def test_evidence_chart_renders_nothing_when_the_view_is_none() -> None:
+    assert render("{{ ui.evidence_chart(view) }}", view=None).strip() == ""
+
+
+def test_evidence_chart_svg_carries_role_img_aria_label_and_a_title() -> None:
+    view = {
+        "kind": "quality_volume",
+        "band_x": 50.0,
+        "band_width": 20.0,
+        "dot_x": 30.0,
+        "dot_tone": "degraded",
+        "percent_label": "−40%",
+        "summary": "Expected 10,000–10,500 records, observed 6,000 (−40%).",
+    }
+    html = render("{{ ui.evidence_chart(view) }}", view=view)
+    assert 'role="img"' in html
+    assert f'aria-label="{view["summary"]}"' in html
+    assert f"<title>{view['summary']}</title>" in html
+    assert 'class="evidence-mark tone-degraded"' in html
+    assert "−40%" in html
+
+
+def test_evidence_chart_for_contract_reuses_contract_diff_chips() -> None:
+    view = {"kind": "contract", "added": ["a:string"], "removed": ["b:string"], "summary": "s"}
+    html = render("{{ ui.evidence_chart(view) }}", view=view)
+    assert '<li class="diff-added">' in html and "a:string" in html
+    assert '<li class="diff-removed">' in html and "b:string" in html
+    assert "<svg" not in html
+
+
 def test_daily_counts_bar_renders_one_column_per_day_with_a_label() -> None:
     days = [
         {

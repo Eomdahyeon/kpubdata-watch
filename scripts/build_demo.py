@@ -49,6 +49,7 @@ from kpubdata_watch.web.presentation import (
     TEMPLATES_DIR,
     duration,
     environment,
+    evidence_view,
     kst_datetime,
     kst_minute,
     kst_time,
@@ -173,7 +174,9 @@ def overview_context(snapshot: ProductSnapshot, built_pages: frozenset[str]) -> 
     Overview and History are symmetric (ADR 0013): the same dataset rows, but
     Overview's own column is the current check matrix, not the 30-day heatmap.
     An active issue's abnormal-day line reuses History's own count
-    (`_dataset_abnormal_days`) instead of re-deriving it here.
+    (`_dataset_abnormal_days`) instead of re-deriving it here. Each issue also
+    carries `evidence`, `evidence_view`'s dict for `evidence_chart` or `None`
+    when the shape falls back to the existing key/value table (#111).
     """
     datasets = {d.id: d for d in snapshot.datasets}
     history_days = len(snapshot.histories[0].days) if snapshot.histories else 0
@@ -194,6 +197,7 @@ def overview_context(snapshot: ProductSnapshot, built_pages: frozenset[str]) -> 
             "duration": duration(i.started_at, snapshot.generated_at),
             "history_days": history_days,
             "abnormal_days": abnormal_by_dataset.get(i.dataset_id, 0),
+            "evidence": evidence_view(i, snapshot.generated_at),
         }
         for i in active
     ]
@@ -421,7 +425,7 @@ def render_catalog(snapshot: ProductSnapshot) -> str:
 
 
 def render_incident(snapshot: ProductSnapshot, incident_id: str) -> str:
-    """Render one Incident Detail page (#87); it lives at `incidents/<id>/`."""
+    """Render one Incident Detail page (#87, #111); it lives at `incidents/<id>/`."""
     incident = snapshot.incident(incident_id)
     end = incident.resolved_at or snapshot.generated_at
     return (
@@ -434,6 +438,7 @@ def render_incident(snapshot: ProductSnapshot, incident_id: str) -> str:
             if incident.related_change_id
             else None,
             duration=duration(incident.started_at, end),
+            evidence=evidence_view(incident, snapshot.generated_at),
             raw_evidence=json.dumps(
                 incident.evidence.model_dump(mode="json"), ensure_ascii=False, indent=2
             ),
