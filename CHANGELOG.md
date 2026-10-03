@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- The demo is a product shell (#83): `lang="ko"`, a top navigation for Overview, Datasets, Changes and Incidents ahead of Docs and GitHub, with the current page marked (`aria-current`) and pages that are not built yet shown as plain text rather than broken links; a 1180px content width instead of 720px; and the warning-coloured demo banner replaced by neutral `Preview data` metadata with the snapshot time. `asset_url` and `page_url` (Jinja globals in `kpubdata_watch.web.presentation`) build URLs from any page depth.
 - The demo shows when each dataset was checked as a KST clock time (`Checked 21:12 KST`) instead of a stored relative label that went stale on a static page.
 - The repository moved from `yeongseon/kpubdata-watch` to `kpubdata-lab/kpubdata-watch`. Links, the documentation site (`https://kpubdata-lab.github.io/kpubdata-watch/`) and the shared GitHub Actions references now use the new owner.
 - The documentation site moved from the GitHub Pages root to `/docs/`; the root now hosts the Public Status demo instead (`mkdocs.yml`'s `site_url`, `.github/workflows/deploy.yml` replacing `docs.yml`).

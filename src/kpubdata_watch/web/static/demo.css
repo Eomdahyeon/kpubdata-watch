@@ -43,22 +43,33 @@ a {
   color: var(--brand-text);
 }
 
-/* ---- Shell header: the brand shows once, at the top of the page. ---- */
+/* ---- Product shell (#83): one content width for header, page and footer. ---- */
+
+.product-shell {
+  width: min(1180px, calc(100% - 48px));
+  margin: 0 auto;
+}
+
+/* ---- Shell header: brand once, product navigation first, resources last. ---- */
 
 .shell-header {
+  border-bottom: 1px solid var(--border);
+}
+
+.shell-header-inner {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 16px;
-  border-bottom: 1px solid var(--border);
-  flex-wrap: wrap;
+  gap: 24px;
+  padding: 12px 0;
 }
 
 .shell-brand {
   display: flex;
   align-items: center;
   gap: 8px;
+  color: inherit;
+  text-decoration: none;
+  flex: none;
 }
 
 .brand-symbol {
@@ -83,40 +94,71 @@ a {
   margin-left: 4px;
 }
 
-.shell-nav {
+.primary-nav {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-x: auto;
+}
+
+.primary-nav ul {
+  display: flex;
+  gap: 4px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-item {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: var(--radius);
+  color: var(--muted-foreground);
+  font-size: var(--text-body);
+  line-height: var(--text-body--line-height);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+a.nav-item:hover {
+  color: var(--foreground);
+  background: var(--muted);
+}
+
+.nav-item[aria-current="page"] {
+  color: var(--foreground);
+  background: var(--muted);
+  font-weight: 600;
+}
+
+/* A surface that is not built yet: visible, but not a link. */
+.nav-item.is-pending {
+  cursor: default;
+}
+
+.secondary-nav {
   display: flex;
   gap: 16px;
-  font-size: 14px;
+  flex: none;
+  font-size: var(--text-body);
 }
 
-.shell-nav a {
-  text-decoration: none;
+.secondary-nav a {
+  color: var(--muted-foreground);
 }
 
-.shell-nav a:hover {
-  text-decoration: underline;
-}
+/* ---- Preview data: stated plainly as metadata, never styled as a warning. ---- */
 
-/* ---- Demo banner: always visible, never mistaken for a live status. ---- */
-
-.demo-banner {
-  background: var(--status-warning-subtle);
-  border-bottom: 1px solid var(--status-warning-border);
-  color: var(--foreground);
-  padding: 8px 16px;
-  font-size: 13px;
-}
-
-.demo-banner p {
-  margin: 0;
+.preview-meta {
+  margin: 0 0 16px;
+  color: var(--muted-foreground);
+  font-size: var(--text-meta);
+  line-height: var(--text-meta--line-height);
 }
 
 /* ---- Page body ---- */
 
 main {
-  max-width: 720px;
-  margin: 0 auto;
-  padding: 24px 16px 48px;
+  padding: 24px 0 48px;
 }
 
 .status-header h1 {
@@ -138,22 +180,39 @@ main {
 }
 
 .shell-footer {
-  max-width: 720px;
-  margin: 0 auto;
-  padding: 16px;
+  padding: 16px 0;
+  border-top: 1px solid var(--border);
   color: var(--muted-foreground);
-  font-size: 13px;
-  text-align: center;
+  font-size: var(--text-meta);
+  line-height: var(--text-meta--line-height);
+}
+
+.shell-footer p {
+  margin: 0;
+}
+
+/* ---- Narrow screens: navigation gets its own row and scrolls inside itself. ---- */
+
+@media (max-width: 768px) {
+  .shell-header-inner {
+    flex-wrap: wrap;
+    gap: 8px 16px;
+  }
+
+  .primary-nav {
+    order: 3;
+    flex-basis: 100%;
+  }
 }
 
 /* ---- No page-level horizontal scroll at 390px. ---- */
 
 @media (max-width: 390px) {
-  .shell-header {
-    padding: 12px;
+  .product-shell {
+    width: calc(100% - 24px);
   }
 
   main {
-    padding: 16px 12px 32px;
+    padding: 16px 0 32px;
   }
 }

@@ -170,10 +170,10 @@ def test_build_copies_static_assets(build_demo: ModuleType, tmp_path: Path) -> N
         assert (static_dir / name).is_file(), f"{name} missing from built static/"
 
 
-def test_demo_banner_is_present_in_both_languages(build_demo: ModuleType) -> None:
+def test_preview_data_is_always_labelled(build_demo: ModuleType) -> None:
     html = build_demo.render()
-    assert "데모" in html
-    assert "fixed sample data" in html
+    assert "Preview data" in html
+    assert "고정된 예시 데이터이며 실제 관측 결과가 아닙니다" in html
 
 
 def test_every_health_state_renders_with_icon_and_text(

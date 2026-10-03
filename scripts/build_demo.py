@@ -31,12 +31,15 @@ from kpubdata_watch.web.presentation import (
     TEMPLATES_DIR,
     environment,
     kst_datetime,
+    kst_minute,
     kst_time,
 )
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 FIXTURES_DIR = REPO_ROOT / "demo" / "fixtures"
 DEFAULT_OUTPUT = REPO_ROOT / "_site"
+# The product pages this demo builds; the navigation links only to these (#83).
+BUILT_PAGES = frozenset({"overview"})
 
 # The health vocabulary and the Jinja environment come from the package
 # (kpubdata_watch.web.presentation, #73); HEALTH_META, HEALTH_ORDER and
@@ -51,7 +54,11 @@ def load_datasets(fixtures_dir: Path = FIXTURES_DIR) -> list[dict[str, Any]]:
     its first active incident, or, for Unknown, the check that could not run; its
     change is its latest change.
     """
-    snapshot = ProductSnapshot.from_directory(fixtures_dir)
+    return dataset_rows(ProductSnapshot.from_directory(fixtures_dir))
+
+
+def dataset_rows(snapshot: ProductSnapshot) -> list[dict[str, Any]]:
+    """Shape one Public Status row per dataset from a loaded snapshot."""
     rows: list[dict[str, Any]] = []
     for dataset in snapshot.datasets:
         issue = None
@@ -100,11 +107,16 @@ def health_counts(datasets: list[dict[str, Any]]) -> dict[str, int]:
 def render(fixtures_dir: Path = FIXTURES_DIR) -> str:
     """Render the Public Status page to a single HTML string."""
     template = environment(TEMPLATES_DIR).get_template("public_status.html")
-    datasets = load_datasets(fixtures_dir)
+    snapshot = ProductSnapshot.from_directory(fixtures_dir)
+    datasets = dataset_rows(snapshot)
     return template.render(
         datasets=datasets,
         counts=health_counts(datasets),
         total=len(datasets),
+        root="",
+        active_nav="overview",
+        built_pages=BUILT_PAGES,
+        snapshot_at=kst_minute(snapshot.generated_at),
     )
 
 

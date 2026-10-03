@@ -13,7 +13,8 @@ from datetime import datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
-from jinja2 import Environment, FileSystemLoader, select_autoescape
+from jinja2 import Environment, FileSystemLoader, pass_context, select_autoescape
+from jinja2.runtime import Context
 
 WEB_DIR = Path(__file__).resolve().parent
 TEMPLATES_DIR = WEB_DIR / "templates"
@@ -30,6 +31,17 @@ HEALTH_META: dict[str, dict[str, str]] = {
 # (PRD §46, §53).
 CHANGE_ICON = "ⓘ"
 
+# The product navigation (#83): (key, label, path below the site root).
+NAV_ITEMS: tuple[tuple[str, str, str], ...] = (
+    ("overview", "Overview", ""),
+    ("datasets", "Datasets", "datasets/"),
+    ("changes", "Changes", "changes/"),
+    ("incidents", "Incidents", "incidents/"),
+)
+# Pages that take an identifier live one directory deeper.
+_ENTITY_PATHS = {"dataset": "datasets/{}/", "incident": "incidents/{}/", "change": "changes/{}/"}
+_PAGE_PATHS = {key: path for key, _, path in NAV_ITEMS}
+
 KST = ZoneInfo("Asia/Seoul")
 
 
@@ -43,6 +55,29 @@ def kst_datetime(moment: datetime) -> str:
     return moment.astimezone(KST).strftime("%Y-%m-%d %H:%M:%S KST")
 
 
+def kst_minute(moment: datetime) -> str:
+    """`2026-10-02 21:15 KST`: a date and clock time to the minute."""
+    return moment.astimezone(KST).strftime("%Y-%m-%d %H:%M KST")
+
+
+@pass_context
+def asset_url(context: Context, name: str) -> str:
+    """A static asset's URL from the page being rendered.
+
+    Every page passes `root`, the relative path back to the site root ("" for the
+    overview, "../../" for a dataset detail), so the same templates work at any
+    depth and under any base path, such as GitHub Pages' `/kpubdata-watch/`.
+    """
+    return f"{context.get('root', '')}static/{name}"
+
+
+@pass_context
+def page_url(context: Context, kind: str, identifier: str | None = None) -> str:
+    """A product page's URL from the page being rendered, for example `datasets/<id>/`."""
+    path = _ENTITY_PATHS[kind].format(identifier) if identifier else _PAGE_PATHS[kind]
+    return f"{context.get('root', '')}{path}" or "./"
+
+
 def environment(templates_dir: Path = TEMPLATES_DIR) -> Environment:
     """Return a Jinja environment with the presentation vocabulary as globals."""
     env = Environment(
@@ -53,5 +88,8 @@ def environment(templates_dir: Path = TEMPLATES_DIR) -> Environment:
         health_order=HEALTH_ORDER,
         health_meta=HEALTH_META,
         change_icon=CHANGE_ICON,
+        nav_items=NAV_ITEMS,
+        asset_url=asset_url,
+        page_url=page_url,
     )
     return env
