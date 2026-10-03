@@ -39,7 +39,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 FIXTURES_DIR = REPO_ROOT / "demo" / "fixtures"
 DEFAULT_OUTPUT = REPO_ROOT / "_site"
 # The product pages this demo builds; the navigation links only to these (#83).
-BUILT_PAGES = frozenset({"overview"})
+BUILT_PAGES = frozenset({"overview", "dataset"})
 
 # The health vocabulary and the Jinja environment come from the package
 # (kpubdata_watch.web.presentation, #73); HEALTH_META, HEALTH_ORDER and
@@ -104,6 +104,16 @@ def health_counts(datasets: list[dict[str, Any]]) -> dict[str, int]:
     return counts
 
 
+def _shell(snapshot: ProductSnapshot, root: str, active_nav: str) -> dict[str, Any]:
+    """The context every page's shell needs (#83)."""
+    return {
+        "root": root,
+        "active_nav": active_nav,
+        "built_pages": BUILT_PAGES,
+        "snapshot_at": kst_minute(snapshot.generated_at),
+    }
+
+
 def render(fixtures_dir: Path = FIXTURES_DIR) -> str:
     """Render the Public Status page to a single HTML string."""
     template = environment(TEMPLATES_DIR).get_template("public_status.html")
@@ -113,18 +123,41 @@ def render(fixtures_dir: Path = FIXTURES_DIR) -> str:
         datasets=datasets,
         counts=health_counts(datasets),
         total=len(datasets),
-        root="",
-        active_nav="overview",
-        built_pages=BUILT_PAGES,
-        snapshot_at=kst_minute(snapshot.generated_at),
+        **_shell(snapshot, root="", active_nav="overview"),
+    )
+
+
+def render_dataset(snapshot: ProductSnapshot, dataset_id: str) -> str:
+    """Render one Dataset Detail page (#86); it lives at `datasets/<id>/`."""
+    template = environment(TEMPLATES_DIR).get_template("dataset_detail.html")
+    newest_first = {"key": lambda item: item.detected_at, "reverse": True}
+    incidents = sorted(
+        (i for i in snapshot.incidents if i.dataset_id == dataset_id), **newest_first
+    )
+    changes = sorted((c for c in snapshot.changes if c.dataset_id == dataset_id), **newest_first)
+    return template.render(
+        dataset=snapshot.dataset_detail(dataset_id),
+        incidents=incidents,
+        changes=changes,
+        changes_by_id={c.id: c for c in snapshot.changes},
+        history=snapshot.history(dataset_id),
+        **_shell(snapshot, root="../../", active_nav="datasets"),
     )
 
 
 def build(output_dir: Path = DEFAULT_OUTPUT, fixtures_dir: Path = FIXTURES_DIR) -> Path:
     """Render the demo site into `output_dir`, including its static assets."""
     output_dir.mkdir(parents=True, exist_ok=True)
-    html = render(fixtures_dir)
-    (output_dir / "index.html").write_text(html, encoding="utf-8")
+    (output_dir / "index.html").write_text(render(fixtures_dir), encoding="utf-8")
+
+    snapshot = ProductSnapshot.from_directory(fixtures_dir)
+    datasets_out = output_dir / "datasets"
+    if datasets_out.exists():
+        shutil.rmtree(datasets_out)
+    for dataset in snapshot.datasets:
+        page = datasets_out / dataset.id / "index.html"
+        page.parent.mkdir(parents=True)
+        page.write_text(render_dataset(snapshot, dataset.id), encoding="utf-8")
 
     static_out = output_dir / "static"
     if static_out.exists():

@@ -191,6 +191,143 @@ main {
   margin: 0;
 }
 
+/* ---- Detail pages (#86): a header, then main panels beside a metadata column. ---- */
+
+.page-header {
+  margin: 0 0 24px;
+}
+
+.page-eyebrow {
+  margin: 0 0 4px;
+  color: var(--muted-foreground);
+  font-size: var(--text-body);
+  line-height: var(--text-body--line-height);
+}
+
+.page-header h1 {
+  margin: 0;
+  font-size: var(--text-page-title);
+  line-height: var(--text-page-title--line-height);
+  font-weight: var(--text-page-title--font-weight);
+}
+
+.page-header .technical-id {
+  margin: 4px 0 12px;
+  color: var(--muted-foreground);
+}
+
+.page-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 24px;
+  align-items: start;
+}
+
+.check-list,
+.event-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.check-row {
+  display: grid;
+  grid-template-columns: 120px auto minmax(0, 1fr);
+  align-items: baseline;
+  gap: 4px 12px;
+  min-height: var(--density-table-row);
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.check-row:last-child,
+.event-row:last-child {
+  border-bottom: 0;
+}
+
+.check-name {
+  font-weight: 600;
+}
+
+.check-summary,
+.event-meta,
+.panel-note {
+  color: var(--muted-foreground);
+  font-size: var(--text-table);
+  line-height: var(--text-table--line-height);
+}
+
+.panel-note {
+  margin: 8px 0 0;
+}
+
+.issue + .issue {
+  margin-top: 16px;
+}
+
+.issue-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 4px;
+  font-size: var(--text-body);
+  line-height: var(--text-body--line-height);
+}
+
+.issue-summary {
+  margin: 0 0 12px;
+}
+
+.issue .contract-diff {
+  margin-bottom: 12px;
+}
+
+.event-row {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 4px 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.event-row .event-meta,
+.event-row .contract-diff {
+  grid-column: 2;
+}
+
+@media (max-width: 900px) {
+  .detail-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .check-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .check-summary {
+    grid-column: 1 / -1;
+  }
+
+  .event-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .event-row .event-meta,
+  .event-row .contract-diff {
+    grid-column: 1;
+  }
+}
+
 /* ---- Narrow screens: navigation gets its own row and scrolls inside itself. ---- */
 
 @media (max-width: 768px) {

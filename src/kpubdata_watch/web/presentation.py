@@ -27,6 +27,21 @@ HEALTH_META: dict[str, dict[str, str]] = {
     "critical": {"label": "Critical", "icon": "✕"},
     "unknown": {"label": "Unknown", "icon": "?"},
 }
+# A check result (pass, warn, fail, unknown, not_applicable) borrows the health
+# colour it implies and always carries its own icon and label (#86).
+CHECK_META: dict[str, dict[str, str]] = {
+    "pass": {"label": "Pass", "icon": "●", "tone": "healthy"},
+    "warn": {"label": "Warn", "icon": "▲", "tone": "degraded"},
+    "fail": {"label": "Fail", "icon": "✕", "tone": "critical"},
+    "unknown": {"label": "Unknown", "icon": "?", "tone": "unknown"},
+    "not_applicable": {"label": "Not applicable", "icon": "–", "tone": "neutral"},
+}
+CHECK_LABELS = {
+    "availability": "Availability",
+    "freshness": "Freshness",
+    "contract": "Contract",
+    "quality": "Quality",
+}
 # A Change is informational: the neutral "info" glyph, never a health colour
 # (PRD §46, §53).
 CHANGE_ICON = "ⓘ"
@@ -88,8 +103,11 @@ def environment(templates_dir: Path = TEMPLATES_DIR) -> Environment:
         health_order=HEALTH_ORDER,
         health_meta=HEALTH_META,
         change_icon=CHANGE_ICON,
+        check_meta=CHECK_META,
+        check_labels=CHECK_LABELS,
         nav_items=NAV_ITEMS,
         asset_url=asset_url,
         page_url=page_url,
     )
+    env.filters.update(kst_time=kst_time, kst_minute=kst_minute, kst_datetime=kst_datetime)
     return env

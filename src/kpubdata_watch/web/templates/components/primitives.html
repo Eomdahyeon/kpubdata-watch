@@ -14,6 +14,19 @@
 <span class="change-badge"><span class="change-icon" aria-hidden="true">{{ change_icon }}</span><span class="change-text">{{ label }}</span></span>
 {%- endmacro %}
 
+{% macro check_status(status) -%}
+<span class="check-status check-{{ status }}"><span class="status-icon" aria-hidden="true">{{ check_meta[status].icon }}</span><span class="status-text">{{ check_meta[status].label }}</span></span>
+{%- endmacro %}
+
+{% macro history_strip(days) -%}
+<ol class="history-strip">
+  {%- for day in days %}
+  {%- set label = day.date.isoformat() ~ " · " ~ health_meta[day.health].label ~ (" · " ~ day.summary if day.summary else "") %}
+  <li class="history-day status-{{ day.health }}" tabindex="0" title="{{ label }}" aria-label="{{ label }}"><span aria-hidden="true">{{ health_meta[day.health].icon }}</span></li>
+  {%- endfor %}
+</ol>
+{%- endmacro %}
+
 {% macro health_summary(counts) -%}
 <ul class="summary-counts">
   {%- for key in health_order %}
@@ -67,7 +80,11 @@
 {% macro dataset_row(d) -%}
 <li class="dataset-row status-{{ d.health }}">
   <div class="dataset-main">
+    {%- if "dataset" in built_pages %}
+    <a class="dataset-name" href="{{ page_url('dataset', d.dataset_id) }}">{{ d.name }}</a>
+    {%- else %}
     <span class="dataset-name">{{ d.name }}</span>
+    {%- endif %}
     <span class="dataset-provider">{{ d.provider }}</span>
   </div>
   <div class="dataset-status-line">

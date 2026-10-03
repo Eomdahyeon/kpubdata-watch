@@ -317,3 +317,96 @@
     overflow-wrap: anywhere;
   }
 }
+
+/* ---- CheckStatus (#86): a check result, with its own icon and label. ---- */
+
+.check-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--text-table);
+  line-height: var(--text-table--line-height);
+  font-weight: 600;
+}
+
+.check-pass {
+  color: var(--status-success);
+}
+
+.check-warn {
+  color: var(--status-warning);
+}
+
+.check-fail {
+  color: var(--status-failure);
+}
+
+.check-unknown {
+  color: var(--status-unknown);
+}
+
+.check-not_applicable {
+  color: var(--muted-foreground);
+  font-weight: 500;
+}
+
+/* ---- HistoryStrip (#86): one mark per day; focus or hover gives the detail. ---- */
+
+.history-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.history-day {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  font-size: var(--text-meta);
+  line-height: 1;
+}
+
+.history-day:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.history-day.status-healthy {
+  color: var(--status-success);
+  background: var(--status-success-subtle);
+  border-color: var(--status-success-border);
+}
+
+.history-day.status-degraded {
+  color: var(--status-warning);
+  background: var(--status-warning-subtle);
+  border-color: var(--status-warning-border);
+}
+
+.history-day.status-critical {
+  color: var(--status-failure);
+  background: var(--status-failure-subtle);
+  border-color: var(--status-failure-border);
+}
+
+.history-day.status-unknown {
+  color: var(--status-unknown);
+  background: var(--status-unknown-subtle);
+  border-color: var(--status-unknown-border);
+}
+
+a.dataset-name {
+  color: var(--foreground);
+  text-decoration: none;
+}
+
+a.dataset-name:hover {
+  text-decoration: underline;
+}

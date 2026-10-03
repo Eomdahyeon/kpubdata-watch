@@ -124,4 +124,4 @@ def test_every_link_in_the_shell_uses_the_url_helpers(html: str) -> None:
     for target in re.findall(r'(?:href|src)="([^"]+)"', html):
         if target.startswith(("https://", "#")):
             continue
-        assert target in {"./", "docs/"} or target.startswith("static/"), target
+        assert target in {"./", "docs/"} or target.startswith(("static/", "datasets/")), target
