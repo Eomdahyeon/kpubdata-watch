@@ -39,9 +39,14 @@
 </ul>
 {%- endmacro %}
 
-{% macro panel(title, id) -%}
+{% macro panel(title, id, count=None) -%}
 <section class="panel" aria-labelledby="{{ id }}">
-  <h2 class="panel-title" id="{{ id }}">{{ title }}</h2>
+  <div class="panel-head">
+    <h2 class="panel-title" id="{{ id }}">{{ title }}</h2>
+    {%- if count is not none %}
+    <span class="panel-count">{{ count }}</span>
+    {%- endif %}
+  </div>
   {{ caller() }}
 </section>
 {%- endmacro %}

@@ -25,10 +25,12 @@ from kpubdata_watch.api.read_models.public import CHECK_NAMES
 from kpubdata_watch.api.read_models.snapshot import ProductSnapshot
 from kpubdata_watch.web.presentation import (
     CHANGE_ICON,
+    CHECK_LABELS,
     HEALTH_META,
     HEALTH_ORDER,
     STATIC_DIR,
     TEMPLATES_DIR,
+    duration,
     environment,
     kst_datetime,
     kst_minute,
@@ -40,6 +42,10 @@ FIXTURES_DIR = REPO_ROOT / "demo" / "fixtures"
 DEFAULT_OUTPUT = REPO_ROOT / "_site"
 # The product pages this demo builds; the navigation links only to these (#83).
 BUILT_PAGES = frozenset({"overview", "dataset"})
+# With a full catalog, the Overview previews this many datasets, issues first (#84).
+PREVIEW_SIZE = 6
+_HEALTH_RANK = {"critical": 0, "degraded": 1, "unknown": 2, "healthy": 3}
+_SEVERITY_RANK = {"critical": 0, "warning": 1, "info": 2}
 
 # The health vocabulary and the Jinja environment come from the package
 # (kpubdata_watch.web.presentation, #73); HEALTH_META, HEALTH_ORDER and
@@ -114,17 +120,48 @@ def _shell(snapshot: ProductSnapshot, root: str, active_nav: str) -> dict[str, A
     }
 
 
-def render(fixtures_dir: Path = FIXTURES_DIR) -> str:
-    """Render the Public Status page to a single HTML string."""
+def overview_context(snapshot: ProductSnapshot, built_pages: frozenset[str]) -> dict[str, Any]:
+    """Active issues, recent changes and the dataset list for the Overview (#84)."""
+    datasets = {d.id: d for d in snapshot.datasets}
+    active = [i for i in snapshot.incidents if i.status in {"open", "ongoing"}]
+    active.sort(key=lambda i: (_SEVERITY_RANK[i.severity], i.detected_at))
+    issues = [
+        {
+            "dataset_id": i.dataset_id,
+            "dataset_name": datasets[i.dataset_id].name,
+            "health": datasets[i.dataset_id].health,
+            "check_label": CHECK_LABELS[i.check],
+            "severity": i.severity,
+            "title": i.title,
+            "summary": i.summary,
+            "detected_at": i.detected_at,
+            "duration": duration(i.started_at, snapshot.generated_at),
+        }
+        for i in active
+    ]
+    changes = [
+        {**c.model_dump(), "dataset_name": datasets[c.dataset_id].name}
+        for c in sorted(snapshot.changes, key=lambda c: c.detected_at, reverse=True)
+    ]
+    rows = sorted(dataset_rows(snapshot), key=lambda row: _HEALTH_RANK[row["health"]])
+    preview = "datasets" in built_pages
+    return {
+        "active_issues": issues,
+        "recent_changes": changes,
+        "datasets": rows[:PREVIEW_SIZE] if preview else rows,
+        "preview": preview,
+        "counts": health_counts(rows),
+        "total": len(rows),
+    }
+
+
+def render(fixtures_dir: Path = FIXTURES_DIR, built_pages: frozenset[str] = BUILT_PAGES) -> str:
+    """Render the Overview (Public Status) page to a single HTML string."""
     template = environment(TEMPLATES_DIR).get_template("public_status.html")
     snapshot = ProductSnapshot.from_directory(fixtures_dir)
-    datasets = dataset_rows(snapshot)
-    return template.render(
-        datasets=datasets,
-        counts=health_counts(datasets),
-        total=len(datasets),
-        **_shell(snapshot, root="", active_nav="overview"),
-    )
+    shell = _shell(snapshot, root="", active_nav="overview")
+    shell["built_pages"] = built_pages
+    return template.render(**overview_context(snapshot, built_pages), **shell)
 
 
 def render_dataset(snapshot: ProductSnapshot, dataset_id: str) -> str:

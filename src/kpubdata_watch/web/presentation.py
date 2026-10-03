@@ -75,6 +75,18 @@ def kst_minute(moment: datetime) -> str:
     return moment.astimezone(KST).strftime("%Y-%m-%d %H:%M KST")
 
 
+def duration(start: datetime, end: datetime) -> str:
+    """`29m`, `1h 15m`, `1d 1h`: how long something has lasted, at a glance."""
+    minutes = max(0, int((end - start).total_seconds() // 60))
+    days, minutes = divmod(minutes, 24 * 60)
+    hours, minutes = divmod(minutes, 60)
+    if days:
+        return f"{days}d {hours}h"
+    if hours:
+        return f"{hours}h {minutes}m"
+    return f"{minutes}m"
+
+
 @pass_context
 def asset_url(context: Context, name: str) -> str:
     """A static asset's URL from the page being rendered.

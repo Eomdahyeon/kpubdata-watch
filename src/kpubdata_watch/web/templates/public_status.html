@@ -1,8 +1,22 @@
 {% extends "base.html" %}
 {% import "components/primitives.html" as ui with context %}
+{#-
+  Overview (#84): what is wrong right now, then what changed, then the datasets.
+  Context: `counts`, `total`, `active_issues` and `recent_changes` (newest first),
+  `datasets` (issues first), `preview` (true when the full catalog exists and this
+  page shows only part of the list).
+-#}
 
 {% block title %}Public Data Health — KPubData Watch{% endblock %}
-{% block description %}A fixture-based demo of the KPubData Watch Public Status page: per-dataset health, checked time and the reason behind any Degraded, Critical or Unknown verdict.{% endblock %}
+{% block description %}KPubData Watch overview: active issues, recent changes and the health of every monitored Korean public dataset.{% endblock %}
+
+{% macro dataset_link(dataset_id, name) -%}
+{%- if "dataset" in built_pages -%}
+<a class="issue-dataset" href="{{ page_url('dataset', dataset_id) }}">{{ name }}</a>
+{%- else -%}
+<span class="issue-dataset">{{ name }}</span>
+{%- endif -%}
+{%- endmacro %}
 
 {% block content %}
 <section class="status-header">
@@ -14,9 +28,52 @@
   {{ ui.health_summary(counts) }}
 </section>
 
+{% call ui.panel("Active Issues", "active-issues", active_issues | length) %}
+{%- if active_issues %}
+<ul class="issue-list">
+  {%- for issue in active_issues %}
+  <li class="issue-row severity-{{ issue.severity }}">
+    <div class="issue-head">
+      {{ ui.status_badge(issue.health, issue.check_label) }}
+      {{ dataset_link(issue.dataset_id, issue.dataset_name) }}
+    </div>
+    <p class="issue-text"><strong>{{ issue.title }}</strong> · {{ issue.summary }}</p>
+    <p class="issue-meta">First detected {{ issue.detected_at | kst_time }} · {{ issue.duration }}</p>
+  </li>
+  {%- endfor %}
+</ul>
+{%- else %}
+{{ ui.empty_state("현재 활성 문제가 없습니다.") }}
+{%- endif %}
+{% endcall %}
+
+{% call ui.panel("Recent Changes", "recent-changes", recent_changes | length) %}
+{%- if recent_changes %}
+<ul class="change-list">
+  {%- for change in recent_changes %}
+  <li class="change-row">
+    <div class="change-head">
+      {{ ui.change_badge(change.title) }}
+      {{ dataset_link(change.dataset_id, change.dataset_name) }}
+      {{ ui.timestamp(change.detected_at | kst_time, change.detected_at.isoformat()) }}
+    </div>
+    <p class="change-summary">{{ change.summary }}</p>
+  </li>
+  {%- endfor %}
+</ul>
+{%- else %}
+{{ ui.empty_state("최근 Change가 없습니다.") }}
+{%- endif %}
+{% endcall %}
+
+{% call ui.panel("Datasets", "datasets") %}
 <ul class="dataset-list">
   {% for d in datasets %}
   {{ ui.dataset_row(d) }}
   {% endfor %}
 </ul>
+{%- if preview %}
+<p class="panel-note"><a class="view-all" href="{{ page_url('datasets') }}">View all datasets</a></p>
+{%- endif %}
+{% endcall %}
 {% endblock %}

@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- The Overview leads with what is wrong now (#84): after the Health summary come Active Issues (Critical before Degraded, each with its check, summary, first-detected time and duration, linked to the dataset), then Recent Changes in a neutral style, then the datasets with issues first. Each panel has an empty state. Once the dataset catalog exists the Overview previews six datasets with a `View all datasets` link; until then it keeps the full list.
 - The demo is a product shell (#83): `lang="ko"`, a top navigation for Overview, Datasets, Changes and Incidents ahead of Docs and GitHub, with the current page marked (`aria-current`) and pages that are not built yet shown as plain text rather than broken links; a 1180px content width instead of 720px; and the warning-coloured demo banner replaced by neutral `Preview data` metadata with the snapshot time. `asset_url` and `page_url` (Jinja globals in `kpubdata_watch.web.presentation`) build URLs from any page depth.
 - The demo shows when each dataset was checked as a KST clock time (`Checked 21:12 KST`) instead of a stored relative label that went stale on a static page.
 - The repository moved from `yeongseon/kpubdata-watch` to `kpubdata-lab/kpubdata-watch`. Links, the documentation site (`https://kpubdata-lab.github.io/kpubdata-watch/`) and the shared GitHub Actions references now use the new owner.

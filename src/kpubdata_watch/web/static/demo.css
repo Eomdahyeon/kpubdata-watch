@@ -191,6 +191,78 @@ main {
   margin: 0;
 }
 
+/* ---- Overview (#84): issues first, then changes, then datasets. ---- */
+
+.panel-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.panel-count {
+  color: var(--muted-foreground);
+  font-size: var(--text-table);
+  line-height: var(--text-table--line-height);
+  font-weight: 600;
+}
+
+.issue-list,
+.change-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.issue-row,
+.change-row {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.issue-row:first-child,
+.change-row:first-child {
+  padding-top: 0;
+}
+
+.issue-row:last-child,
+.change-row:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.issue-head,
+.change-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.issue-dataset {
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.issue-text,
+.change-summary {
+  margin: 4px 0 0;
+}
+
+.issue-meta {
+  margin: 4px 0 0;
+  color: var(--muted-foreground);
+  font-size: var(--text-table);
+  line-height: var(--text-table--line-height);
+}
+
+.panel .dataset-list {
+  border-top: 0;
+}
+
+.view-all {
+  font-weight: 600;
+}
+
 /* ---- Detail pages (#86): a header, then main panels beside a metadata column. ---- */
 
 .page-header {
