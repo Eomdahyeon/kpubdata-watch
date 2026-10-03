@@ -165,6 +165,7 @@ src/kpubdata_watch/
 ├── storage/
 └── cli/             # operator commands
 ui-lab/              # disposable UI experiments on the same read model
+showcase/            # showcase project (placeholder)
 migrations/          # Alembic
 tests/               # unit, integration, fixtures, replay, live
 docs/                # PRD, ROADMAP, DOMAIN_MODEL, ARCHITECTURE, detectors, UI, decisions
