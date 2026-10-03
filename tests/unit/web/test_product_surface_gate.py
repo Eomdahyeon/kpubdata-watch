@@ -14,6 +14,7 @@ motion honoured) is checked by `scripts/check_product_surface.py` in CI.
 from __future__ import annotations
 
 import importlib.util
+import json
 import re
 import subprocess
 from html.parser import HTMLParser
@@ -25,6 +26,7 @@ import pytest
 REPO_ROOT = Path(__file__).resolve().parents[3]
 SCRIPT = REPO_ROOT / "scripts" / "build_demo.py"
 WEB = REPO_ROOT / "src" / "kpubdata_watch" / "web"
+FIXTURES = REPO_ROOT / "demo" / "fixtures"
 HEX_COLOR = re.compile(r"#[0-9a-fA-F]{3,8}\b")
 RELATIVE_TIME = re.compile(r"\b\d+\s*(?:s|m|h|d|min|mins|hours?|days?)\s+ago\b|분 전|시간 전|일 전")
 
@@ -134,9 +136,15 @@ def time_problems(html: str) -> list[str]:
 
 
 def test_the_gate_sees_every_page(pages: dict[str, str]) -> None:
-    # overview + history + (datasets index + 15 dataset details) + (incidents
-    # index + 7 incident details) + (changes index + 2 change details).
-    assert len(pages) == 1 + 1 + 1 + 15 + 1 + 7 + 1 + 2
+    # overview + history + (datasets index + one page per dataset) + (incidents
+    # index + one page per incident) + (changes index + one page per change);
+    # the per-entity counts come from the fixtures rather than from a number
+    # written into this file (issue 112).
+    datasets = json.loads((FIXTURES / "datasets.json").read_text(encoding="utf-8"))
+    incidents = json.loads((FIXTURES / "incidents.json").read_text(encoding="utf-8"))
+    changes = json.loads((FIXTURES / "changes.json").read_text(encoding="utf-8"))
+    expected = 1 + 1 + (1 + len(datasets)) + (1 + len(incidents)) + (1 + len(changes))
+    assert len(pages) == expected
 
 
 @pytest.mark.parametrize(
