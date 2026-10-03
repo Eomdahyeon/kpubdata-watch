@@ -1,0 +1,90 @@
+{#-
+  Brand v2 UI primitives for Watch (#73), styled by static/components.css.
+  Import with `{% import "components/primitives.html" as ui with context %}`.
+  `health_meta`, `health_order` and `change_icon` are environment globals from
+  kpubdata_watch.web.presentation. A status always shows an icon and a text label
+  together with its colour; a Change is informational and never a health colour.
+-#}
+
+{% macro status_badge(health, label=None) -%}
+<span class="status-badge status-{{ health }}"><span class="status-icon" aria-hidden="true">{{ health_meta[health].icon }}</span><span class="status-text">{{ label or health_meta[health].label }}</span></span>
+{%- endmacro %}
+
+{% macro change_badge(label="Changed") -%}
+<span class="change-badge"><span class="change-icon" aria-hidden="true">{{ change_icon }}</span><span class="change-text">{{ label }}</span></span>
+{%- endmacro %}
+
+{% macro health_summary(counts) -%}
+<ul class="summary-counts">
+  {%- for key in health_order %}
+  <li class="count count-{{ key }}">
+    <span class="count-icon" aria-hidden="true">{{ health_meta[key].icon }}</span>
+    <span class="count-value">{{ counts[key] }}</span>
+    <span class="count-label">{{ health_meta[key].label }}</span>
+  </li>
+  {%- endfor %}
+</ul>
+{%- endmacro %}
+
+{% macro panel(title, id) -%}
+<section class="panel" aria-labelledby="{{ id }}">
+  <h2 class="panel-title" id="{{ id }}">{{ title }}</h2>
+  {{ caller() }}
+</section>
+{%- endmacro %}
+
+{% macro timestamp(text, datetime=None, title=None) -%}
+{%- if datetime -%}
+<time class="timestamp" datetime="{{ datetime }}"{% if title %} title="{{ title }}"{% endif %}>{{ text }}</time>
+{%- else -%}
+<span class="timestamp"{% if title %} title="{{ title }}"{% endif %}>{{ text }}</span>
+{%- endif -%}
+{%- endmacro %}
+
+{% macro metadata(items) -%}
+<dl class="metadata">
+  {%- for label, value, technical in items %}
+  <dt>{{ label }}</dt>
+  <dd{% if technical %} class="technical-id"{% endif %}>{{ value }}</dd>
+  {%- endfor %}
+</dl>
+{%- endmacro %}
+
+{% macro contract_diff(added=(), removed=(), changed=()) -%}
+<ul class="contract-diff">
+  {%- for kind, sign, fields in (("added", "+", added), ("removed", "−", removed), ("changed", "~", changed)) %}
+  {%- for field in fields %}
+  <li class="diff-{{ kind }}"><span class="diff-sign" aria-hidden="true">{{ sign }}</span><span class="sr-only">{{ kind | capitalize }}: </span><code>{{ field }}</code></li>
+  {%- endfor %}
+  {%- endfor %}
+</ul>
+{%- endmacro %}
+
+{% macro empty_state(message) -%}
+<p class="empty-state">{{ message }}</p>
+{%- endmacro %}
+
+{% macro dataset_row(d) -%}
+<li class="dataset-row status-{{ d.health }}">
+  <div class="dataset-main">
+    <span class="dataset-name">{{ d.name }}</span>
+    <span class="dataset-provider">{{ d.provider }}</span>
+  </div>
+  <div class="dataset-status-line">
+    {{ status_badge(d.health) }}
+    {{ timestamp(d.checked_label, title=d.checked_exact) }}
+  </div>
+  {%- if d.issue %}
+  <p class="dataset-issue">
+    <span class="dataset-issue-icon" aria-hidden="true">{{ health_meta[d.health].icon }}</span>
+    {{ d.issue }}
+  </p>
+  {%- endif %}
+  {%- if d.change %}
+  <p class="dataset-change">
+    <span class="dataset-change-icon" aria-hidden="true">{{ change_icon }}</span>
+    {{ d.change }}
+  </p>
+  {%- endif %}
+</li>
+{%- endmacro %}

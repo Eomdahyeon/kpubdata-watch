@@ -1,0 +1,319 @@
+/*
+ * Brand v2 UI primitives for Watch (#73) -- the styles behind
+ * templates/components/primitives.html. Every page links this file after
+ * brand-v2.css, which owns every colour, size and radius used here: no hex value
+ * and no new token is written in this file.
+ *
+ * Status is an icon, a text label and a colour together, never colour alone.
+ * Unknown (--status-unknown, "?") is a different colour and icon from Critical
+ * (--status-failure, "✕"): an observation gap is not a dataset outage.
+ *
+ * Change badge decision (#73 open question): Studio has no informational status
+ * token, and none is invented here. A Change reuses the neutral surface tokens
+ * (--muted, --border, --muted-foreground) with the "ⓘ" glyph, so it can never be
+ * mistaken for a health state. A breaking change shows up through the Incident it
+ * opens, not through the Change's own colour.
+ */
+
+/* ---- HealthSummary: counts, not KPI cards. ---- */
+
+.summary-counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.count {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  background: var(--card);
+  font-size: var(--text-table);
+  line-height: var(--text-table--line-height);
+}
+
+.count-value {
+  font-weight: 700;
+}
+
+.count-healthy .count-icon,
+.count-healthy .count-value {
+  color: var(--status-success);
+}
+
+.count-degraded .count-icon,
+.count-degraded .count-value {
+  color: var(--status-warning);
+}
+
+.count-critical .count-icon,
+.count-critical .count-value {
+  color: var(--status-failure);
+}
+
+.count-unknown .count-icon,
+.count-unknown .count-value {
+  color: var(--status-unknown);
+}
+
+/* ---- Dataset rows: simple when Healthy, detailed only with an issue. ---- */
+
+.dataset-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--border);
+}
+
+.dataset-row {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  transition: background-color 0.15s ease;
+}
+
+.dataset-row:hover {
+  background: var(--muted);
+}
+
+.dataset-main {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.dataset-name {
+  font-weight: 600;
+}
+
+.dataset-provider {
+  color: var(--muted-foreground);
+  font-size: var(--text-table);
+  line-height: var(--text-table--line-height);
+}
+
+.dataset-status-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: var(--text-table);
+  line-height: var(--text-table--line-height);
+  font-weight: 600;
+  border: 1px solid transparent;
+}
+
+.status-badge.status-healthy {
+  color: var(--status-success);
+  background: var(--status-success-subtle);
+  border-color: var(--status-success-border);
+}
+
+.status-badge.status-degraded {
+  color: var(--status-warning);
+  background: var(--status-warning-subtle);
+  border-color: var(--status-warning-border);
+}
+
+.status-badge.status-critical {
+  color: var(--status-failure);
+  background: var(--status-failure-subtle);
+  border-color: var(--status-failure-border);
+}
+
+.status-badge.status-unknown {
+  color: var(--status-unknown);
+  background: var(--status-unknown-subtle);
+  border-color: var(--status-unknown-border);
+}
+
+.timestamp {
+  color: var(--muted-foreground);
+  font-size: var(--text-table);
+  line-height: var(--text-table--line-height);
+}
+
+.dataset-issue {
+  margin: 4px 0 0;
+  font-size: var(--text-table);
+  line-height: var(--text-table--line-height);
+}
+
+.dataset-row.status-degraded .dataset-issue {
+  color: var(--status-warning);
+}
+
+.dataset-row.status-critical .dataset-issue {
+  color: var(--status-failure);
+}
+
+.dataset-row.status-unknown .dataset-issue {
+  color: var(--status-unknown);
+}
+
+/* Change is informational and never a health colour (PRD §46, §53). */
+.dataset-change {
+  margin: 4px 0 0;
+  font-size: var(--text-table);
+  line-height: var(--text-table--line-height);
+  color: var(--muted-foreground);
+}
+
+/* ---- ChangeBadge: informational, never a health colour. ---- */
+
+.change-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--muted);
+  color: var(--muted-foreground);
+  font-size: var(--text-table);
+  line-height: var(--text-table--line-height);
+  font-weight: 600;
+}
+
+/* ---- Panel ---- */
+
+.panel {
+  margin: 0 0 24px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--card);
+  color: var(--card-foreground);
+  box-shadow: var(--shadow-card);
+}
+
+.panel-title {
+  margin: 0 0 var(--density-card-gap);
+  font-size: var(--text-section-title);
+  line-height: var(--text-section-title--line-height);
+  font-weight: var(--text-section-title--font-weight);
+}
+
+/* ---- Metadata ---- */
+
+.metadata {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 4px 16px;
+  margin: 0;
+  font-size: var(--text-body);
+  line-height: var(--text-body--line-height);
+}
+
+.metadata dt {
+  color: var(--muted-foreground);
+}
+
+.metadata dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.technical-id {
+  font-family: var(--font-mono);
+  font-size: var(--text-technical);
+  line-height: var(--text-technical--line-height);
+}
+
+/* ---- ContractDiff: the sign and a hidden word say what changed, not colour. ---- */
+
+.contract-diff {
+  list-style: none;
+  margin: 0;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--muted);
+  font-family: var(--font-mono);
+  font-size: var(--text-technical);
+  line-height: var(--text-technical--line-height);
+  overflow-x: auto;
+}
+
+.contract-diff code {
+  font-family: inherit;
+}
+
+.diff-sign {
+  display: inline-block;
+  width: 1.5ch;
+}
+
+/* An additive change is informational; it must not look like an outage. */
+.diff-added {
+  color: var(--muted-foreground);
+}
+
+.diff-removed {
+  color: var(--status-failure);
+}
+
+.diff-changed {
+  color: var(--status-warning);
+}
+
+/* ---- EmptyState ---- */
+
+.empty-state {
+  margin: 0;
+  padding: 16px;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  color: var(--muted-foreground);
+  text-align: center;
+  font-size: var(--text-body);
+  line-height: var(--text-body--line-height);
+}
+
+/* ---- Utilities ---- */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---- Accessibility ---- */
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* ---- No page-level horizontal scroll at 390px. ---- */
+
+@media (max-width: 390px) {
+  .dataset-name,
+  .dataset-provider {
+    word-break: keep-all;
+    overflow-wrap: anywhere;
+  }
+}

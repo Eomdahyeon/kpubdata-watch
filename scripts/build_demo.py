@@ -20,47 +20,36 @@ import shutil
 from pathlib import Path
 from typing import Any
 
-from jinja2 import Environment, FileSystemLoader, select_autoescape
+from kpubdata_watch.web.presentation import (
+    CHANGE_ICON,
+    HEALTH_META,
+    HEALTH_ORDER,
+    STATIC_DIR,
+    TEMPLATES_DIR,
+    environment,
+)
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-TEMPLATES_DIR = REPO_ROOT / "src" / "kpubdata_watch" / "web" / "templates"
-STATIC_DIR = REPO_ROOT / "src" / "kpubdata_watch" / "web" / "static"
 FIXTURES_PATH = REPO_ROOT / "demo" / "fixtures" / "datasets.json"
 DEFAULT_OUTPUT = REPO_ROOT / "_site"
 
-# Health -> (label, icon). Matches docs/UI.md PRD §53's visual cues: text and an
-# icon always travel with the colour, never colour alone.
-HEALTH_META: dict[str, dict[str, str]] = {
-    "healthy": {"label": "Healthy", "icon": "●"},  # ●
-    "degraded": {"label": "Degraded", "icon": "▲"},  # ▲
-    "critical": {"label": "Critical", "icon": "✕"},  # ✕
-    "unknown": {"label": "Unknown", "icon": "?"},
-}
-# An active issue reuses its row's health icon; a Change is always the neutral
-# "info" glyph, never a health colour (PRD §46, §53).
-CHANGE_ICON = "ⓘ"  # ⓘ
-HEALTH_ORDER = ("healthy", "degraded", "critical", "unknown")
+# The health vocabulary and the Jinja environment come from the package
+# (kpubdata_watch.web.presentation, #73); HEALTH_META, HEALTH_ORDER and
+# CHANGE_ICON are re-exported here for the tests and for readers of this script.
+__all__ = ["CHANGE_ICON", "HEALTH_META", "HEALTH_ORDER", "build", "render"]
 
 
 def load_datasets(path: Path = FIXTURES_PATH) -> list[dict[str, Any]]:
-    """Load fixture datasets and attach the display metadata the template reads."""
-    raw = json.loads(path.read_text(encoding="utf-8"))
-    enriched: list[dict[str, Any]] = []
-    for row in raw:
-        health = row["health"]
-        if health not in HEALTH_META:
-            raise ValueError(f"{row['dataset_id']}: unknown health {health!r}")
-        meta = HEALTH_META[health]
-        enriched.append(
-            {
-                **row,
-                "status_label": meta["label"],
-                "status_icon": meta["icon"],
-                "issue_icon": meta["icon"] if row.get("issue") else None,
-                "change_icon": CHANGE_ICON if row.get("change") else None,
-            }
-        )
-    return enriched
+    """Load the fixture datasets, rejecting a health state the page cannot show.
+
+    The icons and labels come from the template primitives, so a row needs no
+    display fields of its own.
+    """
+    rows: list[dict[str, Any]] = json.loads(path.read_text(encoding="utf-8"))
+    for row in rows:
+        if row["health"] not in HEALTH_META:
+            raise ValueError(f"{row['dataset_id']}: unknown health {row['health']!r}")
+    return rows
 
 
 def health_counts(datasets: list[dict[str, Any]]) -> dict[str, int]:
@@ -73,18 +62,12 @@ def health_counts(datasets: list[dict[str, Any]]) -> dict[str, int]:
 
 def render(fixtures_path: Path = FIXTURES_PATH) -> str:
     """Render the Public Status page to a single HTML string."""
-    env = Environment(
-        loader=FileSystemLoader(str(TEMPLATES_DIR)),
-        autoescape=select_autoescape(["html"]),
-    )
-    template = env.get_template("public_status.html")
+    template = environment(TEMPLATES_DIR).get_template("public_status.html")
     datasets = load_datasets(fixtures_path)
     return template.render(
         datasets=datasets,
         counts=health_counts(datasets),
         total=len(datasets),
-        health_order=HEALTH_ORDER,
-        health_meta=HEALTH_META,
     )
 
 

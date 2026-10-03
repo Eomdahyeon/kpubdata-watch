@@ -137,157 +137,6 @@ main {
   margin-bottom: 24px;
 }
 
-.summary-counts {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.count {
-  display: flex;
-  align-items: baseline;
-  gap: 4px;
-  padding: 4px 10px;
-  border-radius: 10px;
-  border: 1px solid var(--border);
-  background: var(--card);
-  font-size: 13px;
-}
-
-.count-value {
-  font-weight: 700;
-}
-
-.count-healthy .count-icon,
-.count-healthy .count-value {
-  color: var(--status-success);
-}
-
-.count-degraded .count-icon,
-.count-degraded .count-value {
-  color: var(--status-warning);
-}
-
-.count-critical .count-icon,
-.count-critical .count-value {
-  color: var(--status-failure);
-}
-
-.count-unknown .count-icon,
-.count-unknown .count-value {
-  color: var(--status-unknown);
-}
-
-/* ---- Dataset rows: simple when Healthy, detailed only with an issue. ---- */
-
-.dataset-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  border-top: 1px solid var(--border);
-}
-
-.dataset-row {
-  padding: 12px 0;
-  border-bottom: 1px solid var(--border);
-  transition: background-color 0.15s ease;
-}
-
-.dataset-row:hover {
-  background: var(--muted);
-}
-
-.dataset-main {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 8px;
-}
-
-.dataset-name {
-  font-weight: 600;
-}
-
-.dataset-provider {
-  color: var(--muted-foreground);
-  font-size: 13px;
-}
-
-.dataset-status-line {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-  margin-top: 4px;
-}
-
-.status-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 2px 8px;
-  border-radius: 999px;
-  font-size: 13px;
-  font-weight: 600;
-  border: 1px solid transparent;
-}
-
-.status-badge.status-healthy {
-  color: var(--status-success);
-  background: var(--status-success-subtle);
-  border-color: var(--status-success-border);
-}
-
-.status-badge.status-degraded {
-  color: var(--status-warning);
-  background: var(--status-warning-subtle);
-  border-color: var(--status-warning-border);
-}
-
-.status-badge.status-critical {
-  color: var(--status-failure);
-  background: var(--status-failure-subtle);
-  border-color: var(--status-failure-border);
-}
-
-.status-badge.status-unknown {
-  color: var(--status-unknown);
-  background: var(--status-unknown-subtle);
-  border-color: var(--status-unknown-border);
-}
-
-.checked-at {
-  color: var(--muted-foreground);
-  font-size: 13px;
-}
-
-.dataset-issue {
-  margin: 4px 0 0;
-  font-size: 13px;
-}
-
-.dataset-row.status-degraded .dataset-issue {
-  color: var(--status-warning);
-}
-
-.dataset-row.status-critical .dataset-issue {
-  color: var(--status-failure);
-}
-
-.dataset-row.status-unknown .dataset-issue {
-  color: var(--status-unknown);
-}
-
-/* Change is informational and never a health colour (PRD §46, §53). */
-.dataset-change {
-  margin: 4px 0 0;
-  font-size: 13px;
-  color: var(--muted-foreground);
-}
-
 .shell-footer {
   max-width: 720px;
   margin: 0 auto;
@@ -295,15 +144,6 @@ main {
   color: var(--muted-foreground);
   font-size: 13px;
   text-align: center;
-}
-
-/* ---- Accessibility ---- */
-
-@media (prefers-reduced-motion: reduce) {
-  * {
-    animation: none !important;
-    transition: none !important;
-  }
 }
 
 /* ---- No page-level horizontal scroll at 390px. ---- */
@@ -315,11 +155,5 @@ main {
 
   main {
     padding: 16px 12px 32px;
-  }
-
-  .dataset-name,
-  .dataset-provider {
-    word-break: keep-all;
-    overflow-wrap: anywhere;
   }
 }
