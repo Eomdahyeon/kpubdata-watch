@@ -38,7 +38,10 @@
       {{ dataset_link(issue.dataset_id, issue.dataset_name) }}
     </div>
     <p class="issue-text"><strong>{{ issue.title }}</strong> · {{ issue.summary }}</p>
-    <p class="issue-meta">First detected {{ issue.detected_at | kst_time }} · {{ issue.duration }}</p>
+    <p class="issue-meta">
+      First detected {{ issue.detected_at | kst_time }} · {{ issue.duration }}
+      {%- if "incident" in built_pages %} · <a href="{{ page_url('incident', issue.id) }}">View →</a>{% endif %}
+    </p>
   </li>
   {%- endfor %}
 </ul>
@@ -57,7 +60,10 @@
       {{ dataset_link(change.dataset_id, change.dataset_name) }}
       {{ ui.timestamp(change.detected_at | kst_time, change.detected_at.isoformat()) }}
     </div>
-    <p class="change-summary">{{ change.summary }}</p>
+    <p class="change-summary">
+      {{ change.summary }}
+      {%- if "change" in built_pages %} <a href="{{ page_url('change', change.id) }}">View →</a>{% endif %}
+    </p>
   </li>
   {%- endfor %}
 </ul>

@@ -4,8 +4,7 @@ The demo builder writes one page per dataset at `datasets/<id>/`. Each page
 shows the current Health with when it was last checked and last healthy, all
 four checks with a reason when they are not a plain pass, the active incident
 and its contract diff, 30 days of history, recent incidents and changes, and
-metadata. Unknown never reads as Critical. Pages that do not exist yet
-(incident and change detail) are not linked.
+metadata. Unknown never reads as Critical.
 """
 
 from __future__ import annotations
@@ -135,12 +134,6 @@ def test_the_overview_links_each_dataset_to_its_detail_page(site: Path) -> None:
     assert '<a class="dataset-name" href="datasets/datago.apt_rent/">' in overview
     for target in re.findall(r'href="(datasets/[^"]+)"', overview):
         assert (site / target / "index.html").exists(), target
-
-
-def test_incident_and_change_pages_are_not_linked_before_they_exist(site: Path) -> None:
-    html = page(site, "datago.apt_rent")
-    assert "incidents/" not in "".join(LINK_ATTR.findall(html))
-    assert "changes/" not in "".join(LINK_ATTR.findall(html))
 
 
 def test_the_detail_template_has_no_raw_hex() -> None:

@@ -17,6 +17,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import json
 import shutil
 from pathlib import Path
 from typing import Any
@@ -41,7 +42,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 FIXTURES_DIR = REPO_ROOT / "demo" / "fixtures"
 DEFAULT_OUTPUT = REPO_ROOT / "_site"
 # The product pages this demo builds; the navigation links only to these (#83).
-BUILT_PAGES = frozenset({"overview", "dataset"})
+BUILT_PAGES = frozenset({"overview", "dataset", "incident", "change"})
 # With a full catalog, the Overview previews this many datasets, issues first (#84).
 PREVIEW_SIZE = 6
 _HEALTH_RANK = {"critical": 0, "degraded": 1, "unknown": 2, "healthy": 3}
@@ -127,6 +128,7 @@ def overview_context(snapshot: ProductSnapshot, built_pages: frozenset[str]) -> 
     active.sort(key=lambda i: (_SEVERITY_RANK[i.severity], i.detected_at))
     issues = [
         {
+            "id": i.id,
             "dataset_id": i.dataset_id,
             "dataset_name": datasets[i.dataset_id].name,
             "health": datasets[i.dataset_id].health,
@@ -182,19 +184,73 @@ def render_dataset(snapshot: ProductSnapshot, dataset_id: str) -> str:
     )
 
 
+def render_incident(snapshot: ProductSnapshot, incident_id: str) -> str:
+    """Render one Incident Detail page (#87); it lives at `incidents/<id>/`."""
+    incident = snapshot.incident(incident_id)
+    end = incident.resolved_at or snapshot.generated_at
+    return (
+        environment(TEMPLATES_DIR)
+        .get_template("incident_detail.html")
+        .render(
+            incident=incident,
+            dataset=snapshot.dataset(incident.dataset_id),
+            change=snapshot.change(incident.related_change_id)
+            if incident.related_change_id
+            else None,
+            duration=duration(incident.started_at, end),
+            raw_evidence=json.dumps(
+                incident.evidence.model_dump(mode="json"), ensure_ascii=False, indent=2
+            ),
+            **_shell(snapshot, root="../../", active_nav="incidents"),
+        )
+    )
+
+
+def render_change(snapshot: ProductSnapshot, change_id: str) -> str:
+    """Render one Change Detail page (#87); it lives at `changes/<id>/`."""
+    change = snapshot.change(change_id)
+    return (
+        environment(TEMPLATES_DIR)
+        .get_template("change_detail.html")
+        .render(
+            change=change,
+            dataset=snapshot.dataset(change.dataset_id),
+            raw_diff=json.dumps(change.diff.model_dump(mode="json"), ensure_ascii=False, indent=2),
+            **_shell(snapshot, root="../../", active_nav="changes"),
+        )
+    )
+
+
+def _write_pages(output_dir: Path, kind: str, pages: dict[str, str]) -> None:
+    """Write `<output_dir>/<kind>/<id>/index.html` for each page, replacing old ones."""
+    directory = output_dir / kind
+    if directory.exists():
+        shutil.rmtree(directory)
+    for identifier, html in pages.items():
+        page = directory / identifier / "index.html"
+        page.parent.mkdir(parents=True)
+        page.write_text(html, encoding="utf-8")
+
+
 def build(output_dir: Path = DEFAULT_OUTPUT, fixtures_dir: Path = FIXTURES_DIR) -> Path:
     """Render the demo site into `output_dir`, including its static assets."""
     output_dir.mkdir(parents=True, exist_ok=True)
     (output_dir / "index.html").write_text(render(fixtures_dir), encoding="utf-8")
 
     snapshot = ProductSnapshot.from_directory(fixtures_dir)
-    datasets_out = output_dir / "datasets"
-    if datasets_out.exists():
-        shutil.rmtree(datasets_out)
-    for dataset in snapshot.datasets:
-        page = datasets_out / dataset.id / "index.html"
-        page.parent.mkdir(parents=True)
-        page.write_text(render_dataset(snapshot, dataset.id), encoding="utf-8")
+    _write_pages(
+        output_dir,
+        "datasets",
+        {d.id: render_dataset(snapshot, d.id) for d in snapshot.datasets},
+    )
+    _write_pages(
+        output_dir,
+        "incidents",
+        {i.id: render_incident(snapshot, i.id) for i in snapshot.incidents},
+    )
+    _write_pages(
+        output_dir, "changes", {c.id: render_change(snapshot, c.id) for c in snapshot.changes}
+    )
 
     static_out = output_dir / "static"
     if static_out.exists():

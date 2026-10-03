@@ -11,6 +11,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from pathlib import Path
+from typing import Any
 from zoneinfo import ZoneInfo
 
 from jinja2 import Environment, FileSystemLoader, pass_context, select_autoescape
@@ -41,6 +42,15 @@ CHECK_LABELS = {
     "freshness": "Freshness",
     "contract": "Contract",
     "quality": "Quality",
+}
+# Incident severity -> the health tone its badge uses; `info` stays neutral (#87).
+SEVERITY_TONE: dict[str, str | None] = {"critical": "critical", "warning": "degraded", "info": None}
+SEVERITY_LABELS = {"critical": "Critical", "warning": "Warning", "info": "Info"}
+INCIDENT_STATUS_LABELS = {
+    "open": "Open",
+    "ongoing": "Ongoing",
+    "resolved": "Resolved",
+    "false_positive": "False positive",
 }
 # A Change is informational: the neutral "info" glyph, never a health colour
 # (PRD §46, §53).
@@ -87,6 +97,25 @@ def duration(start: datetime, end: datetime) -> str:
     return f"{minutes}m"
 
 
+def evidence_value(value: Any) -> str:
+    """One evidence value as a reader sees it: timestamps in KST, lists joined.
+
+    Evidence (PRD §22) is free-form per detector, so this only makes the common
+    shapes readable; the raw JSON stays available on the page.
+    """
+    if isinstance(value, str):
+        try:
+            moment = datetime.fromisoformat(value)
+        except ValueError:
+            return value
+        return kst_datetime(moment) if moment.tzinfo is not None else value
+    if isinstance(value, list):
+        return ", ".join(evidence_value(item) for item in value)
+    if isinstance(value, dict):
+        return ", ".join(f"{key}: {evidence_value(item)}" for key, item in value.items())
+    return str(value)
+
+
 @pass_context
 def asset_url(context: Context, name: str) -> str:
     """A static asset's URL from the page being rendered.
@@ -116,10 +145,18 @@ def environment(templates_dir: Path = TEMPLATES_DIR) -> Environment:
         health_meta=HEALTH_META,
         change_icon=CHANGE_ICON,
         check_meta=CHECK_META,
+        severity_tone=SEVERITY_TONE,
+        severity_labels=SEVERITY_LABELS,
+        incident_status_labels=INCIDENT_STATUS_LABELS,
         check_labels=CHECK_LABELS,
         nav_items=NAV_ITEMS,
         asset_url=asset_url,
         page_url=page_url,
     )
-    env.filters.update(kst_time=kst_time, kst_minute=kst_minute, kst_datetime=kst_datetime)
+    env.filters.update(
+        kst_time=kst_time,
+        kst_minute=kst_minute,
+        kst_datetime=kst_datetime,
+        evidence_value=evidence_value,
+    )
     return env

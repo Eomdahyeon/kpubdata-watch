@@ -425,3 +425,51 @@ main {
     padding: 16px 0 32px;
   }
 }
+
+/* ---- Incident and Change detail (#87). ---- */
+
+.incident-status {
+  display: inline-flex;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  font-size: var(--text-table);
+  line-height: var(--text-table--line-height);
+  font-weight: 600;
+}
+
+.evidence-values {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.evidence-values code {
+  font-family: var(--font-mono);
+  font-size: var(--text-technical);
+  line-height: var(--text-technical--line-height);
+  overflow-wrap: anywhere;
+}
+
+.raw-evidence {
+  margin: 0 0 24px;
+  color: var(--muted-foreground);
+  font-size: var(--text-table);
+}
+
+.raw-evidence summary {
+  cursor: pointer;
+}
+
+.raw-evidence pre {
+  margin: 8px 0 0;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--muted);
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: var(--text-technical);
+  line-height: var(--text-technical--line-height);
+}
