@@ -162,5 +162,75 @@ def test_an_active_incident_must_belong_to_its_dataset() -> None:
         ProductSnapshot.model_validate(raw)
 
 
+def _incident(raw: dict[str, Any], incident_id: str) -> dict[str, Any]:
+    return next(row for row in raw["incidents"] if row["id"] == incident_id)
+
+
+@pytest.mark.parametrize("status", ["resolved", "false_positive"])
+def test_an_active_incident_id_must_name_an_open_or_ongoing_incident(status: str) -> None:
+    raw = _raw()
+    _incident(raw, "inc-availability-bike-001")["status"] = status
+    with pytest.raises(
+        ValidationError,
+        match=re.escape(
+            f"seoul.public_bike: incident inc-availability-bike-001 is {status}, not active"
+        ),
+    ):
+        ProductSnapshot.model_validate(raw)
+
+
+@pytest.mark.parametrize("status", ["open", "ongoing"])
+def test_an_open_or_ongoing_incident_must_be_listed_as_active(status: str) -> None:
+    raw = _raw()
+    _incident(raw, "inc-availability-bike-001")["status"] = status
+    bike = next(row for row in raw["datasets"] if row["id"] == "seoul.public_bike")
+    bike["active_incident_ids"].remove("inc-availability-bike-001")
+    with pytest.raises(
+        ValidationError,
+        match=re.escape(
+            f"seoul.public_bike: {status} incident inc-availability-bike-001 "
+            "is missing from active_incident_ids"
+        ),
+    ):
+        ProductSnapshot.model_validate(raw)
+
+
+@pytest.mark.parametrize(
+    ("change", "message"),
+    [
+        # The change points at another incident, or at none.
+        (
+            lambda raw: raw["changes"][0].update(related_incident_id="inc-availability-bike-001"),
+            "incident inc-contract-apt-rent-001: change chg-contract-apt-rent-001 "
+            "does not link back (its related_incident_id is inc-availability-bike-001)",
+        ),
+        (
+            lambda raw: raw["changes"][0].update(related_incident_id=None),
+            "incident inc-contract-apt-rent-001: change chg-contract-apt-rent-001 "
+            "does not link back (its related_incident_id is None)",
+        ),
+        # The incident points at another change, or at none.
+        (
+            lambda raw: _incident(raw, "inc-contract-apt-rent-001").update(
+                related_change_id="chg-contract-pps-001"
+            ),
+            "change chg-contract-apt-rent-001: incident inc-contract-apt-rent-001 "
+            "does not link back (its related_change_id is chg-contract-pps-001)",
+        ),
+        (
+            lambda raw: _incident(raw, "inc-contract-apt-rent-001").update(related_change_id=None),
+            "change chg-contract-apt-rent-001: incident inc-contract-apt-rent-001 "
+            "does not link back (its related_change_id is None)",
+        ),
+    ],
+)
+def test_a_related_incident_and_change_must_name_each_other(change: Any, message: str) -> None:
+    raw = _raw()
+    assert raw["changes"][0]["id"] == "chg-contract-apt-rent-001"
+    change(raw)
+    with pytest.raises(ValidationError, match=re.escape(message)):
+        ProductSnapshot.model_validate(raw)
+
+
 def test_history_dates_are_parsed_as_dates(snapshot: ProductSnapshot) -> None:
     assert isinstance(snapshot.history("datago.apt_rent").days[0].date, date)

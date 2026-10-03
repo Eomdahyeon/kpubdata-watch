@@ -304,7 +304,10 @@ The shapes above are defined once, as pydantic models in
 fixture demo stores one complete snapshot as five files in `demo/fixtures/`
 (`snapshot`, `datasets`, `incidents`, `changes`, `histories`);
 `ProductSnapshot` (`read_models/snapshot.py`) loads them and rejects any reference
-that does not resolve. Timestamps are stored, never relative times such as
+that does not resolve or that disagrees with what it points at: a dataset's
+`active_incident_ids` are exactly its `open` and `ongoing` incidents, and an
+incident's `related_change_id` and a change's `related_incident_id` name each
+other (#107). Timestamps are stored, never relative times such as
 "3m ago": a page computes what it shows from `generated_at`.
 
 ## Performance targets

@@ -33,6 +33,7 @@ from kpubdata_watch.api.read_models.public import (
 )
 
 FIXTURE_FILES = ("snapshot", "datasets", "incidents", "changes", "histories")
+ACTIVE_INCIDENT_STATUSES = frozenset({"open", "ongoing"})
 
 
 def _duplicates(ids: Iterable[str]) -> list[str]:
@@ -76,6 +77,7 @@ class ProductSnapshot(ReadModel):
             problems.extend(f"duplicate {kind} id {key}" for key in _duplicates(ids))
 
         datasets = {d.id for d in self.datasets}
+        active = {d.id: set(d.active_incident_ids) for d in self.datasets}
         incidents = {i.id: i for i in self.incidents}
         changes = {c.id: c for c in self.changes}
         for dataset in self.datasets:
@@ -86,6 +88,10 @@ class ProductSnapshot(ReadModel):
                 elif incident.dataset_id != dataset.id:
                     problems.append(
                         f"{dataset.id}: incident {incident_id} belongs to {incident.dataset_id}"
+                    )
+                elif incident.status not in ACTIVE_INCIDENT_STATUSES:
+                    problems.append(
+                        f"{dataset.id}: incident {incident_id} is {incident.status}, not active"
                     )
             for change_id in dataset.latest_change_ids:
                 change = changes.get(change_id)
@@ -98,17 +104,39 @@ class ProductSnapshot(ReadModel):
         for incident in self.incidents:
             if incident.dataset_id not in datasets:
                 problems.append(f"incident {incident.id}: unknown dataset {incident.dataset_id}")
-            if incident.related_change_id and incident.related_change_id not in changes:
+            elif (
+                incident.status in ACTIVE_INCIDENT_STATUSES
+                and incident.id not in active[incident.dataset_id]
+            ):
                 problems.append(
-                    f"incident {incident.id}: unknown change {incident.related_change_id}"
+                    f"{incident.dataset_id}: {incident.status} incident {incident.id} "
+                    "is missing from active_incident_ids"
                 )
+            if incident.related_change_id:
+                related_change = changes.get(incident.related_change_id)
+                if related_change is None:
+                    problems.append(
+                        f"incident {incident.id}: unknown change {incident.related_change_id}"
+                    )
+                elif related_change.related_incident_id != incident.id:
+                    problems.append(
+                        f"incident {incident.id}: change {related_change.id} does not link back "
+                        f"(its related_incident_id is {related_change.related_incident_id})"
+                    )
         for change in self.changes:
             if change.dataset_id not in datasets:
                 problems.append(f"change {change.id}: unknown dataset {change.dataset_id}")
-            if change.related_incident_id and change.related_incident_id not in incidents:
-                problems.append(
-                    f"change {change.id}: unknown incident {change.related_incident_id}"
-                )
+            if change.related_incident_id:
+                related_incident = incidents.get(change.related_incident_id)
+                if related_incident is None:
+                    problems.append(
+                        f"change {change.id}: unknown incident {change.related_incident_id}"
+                    )
+                elif related_incident.related_change_id != change.id:
+                    problems.append(
+                        f"change {change.id}: incident {related_incident.id} does not link back "
+                        f"(its related_change_id is {related_incident.related_change_id})"
+                    )
         with_history = {h.dataset_id for h in self.histories}
         for history in self.histories:
             if history.dataset_id not in datasets:
