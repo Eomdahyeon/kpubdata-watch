@@ -20,7 +20,7 @@ import pytest
 
 from kpubdata_watch.api.read_models.public import HISTORY_DAYS
 from kpubdata_watch.api.read_models.snapshot import ProductSnapshot
-from kpubdata_watch.web.presentation import NAV_ITEMS
+from kpubdata_watch.web.presentation import KST, NAV_ITEMS
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 SCRIPT = REPO_ROOT / "scripts" / "build_demo.py"
@@ -167,6 +167,52 @@ def test_timeline_links_to_incident_and_change_detail_pages(html: str) -> None:
     section = panel(html, "Incidents and Changes")
     assert 'href="../incidents/inc-freshness-bus-001/"' in section
     assert 'href="../changes/chg-contract-apt-rent-001/"' in section
+
+
+# ---- History/incident consistency (issue 112) ----
+
+
+def test_every_abnormal_history_day_has_an_overlapping_incident(snapshot: ProductSnapshot) -> None:
+    """A Degraded or Critical day must trace back to a real incident (issue 112).
+
+    Unknown is excluded on purpose: a Watch-side probe failure stays Unknown
+    rather than becoming an incident (D-009, docs/decisions/0002), so an
+    Unknown day can be legitimately unexplained.
+    """
+    for history in snapshot.histories:
+        incidents = [i for i in snapshot.incidents if i.dataset_id == history.dataset_id]
+        for day in history.days:
+            if day.health not in {"degraded", "critical"}:
+                continue
+            covering = [
+                incident
+                for incident in incidents
+                if incident.started_at.astimezone(KST).date() <= day.date
+                and (
+                    incident.resolved_at is None
+                    or incident.resolved_at.astimezone(KST).date() >= day.date
+                )
+            ]
+            assert covering, (
+                f"{history.dataset_id} {day.date} ({day.health}): no incident covers this day"
+            )
+
+
+def test_every_resolved_incidents_span_shows_up_as_abnormal_days(
+    snapshot: ProductSnapshot,
+) -> None:
+    """The reverse check: a resolved incident's days should not read Healthy."""
+    for incident in snapshot.incidents:
+        if incident.status != "resolved" or incident.resolved_at is None:
+            continue
+        history = snapshot.history(incident.dataset_id)
+        start = incident.started_at.astimezone(KST).date()
+        end = incident.resolved_at.astimezone(KST).date()
+        for day in history.days:
+            if start <= day.date <= end:
+                assert day.health != "healthy", (
+                    f"{incident.id}: {day.date} is within the incident's span but Healthy"
+                )
 
 
 # ---- Build & broken links ----

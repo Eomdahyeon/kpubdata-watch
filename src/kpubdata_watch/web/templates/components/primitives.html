@@ -182,6 +182,64 @@
 </ul>
 {%- endmacro %}
 
+{% macro evidence_chart(view) -%}
+{#-
+  Evidence visualisation (issue 111, ADR 0013 (b)): expected vs observed for one
+  detection, drawn only from values `evidence_view` found in the incident's own
+  evidence. Every coordinate already comes computed from presentation.py on the
+  shared 0-300 canvas; this macro only places them. `view` is `None` whenever the
+  evidence did not match a known shape or was missing/malformed for one, and the
+  caller keeps its existing Expected/Observed/Difference/Rule table either way --
+  this chart sits above that table, never instead of it.
+-#}
+{%- if view %}
+<div class="evidence-chart">
+  {%- if view.kind == "quality_volume" %}
+  <svg viewBox="0 0 300 60" class="evidence-svg" preserveAspectRatio="none" role="img" aria-label="{{ view.summary }}">
+    <title>{{ view.summary }}</title>
+    <line x1="10" y1="44" x2="290" y2="44" class="evidence-axis" />
+    <rect x="{{ view.band_x }}" y="28" width="{{ view.band_width }}" height="16" class="evidence-band" />
+    <circle cx="{{ view.dot_x }}" cy="36" r="6" class="evidence-mark tone-{{ view.dot_tone }}" />
+    <text x="{{ view.dot_x }}" y="18" text-anchor="middle" class="evidence-text tone-{{ view.dot_tone }}">{{ view.percent_label }}</text>
+  </svg>
+  {%- elif view.kind == "freshness_window" %}
+  <svg viewBox="0 0 300 64" class="evidence-svg" preserveAspectRatio="none" role="img" aria-label="{{ view.summary }}">
+    <title>{{ view.summary }}</title>
+    <line x1="10" y1="48" x2="290" y2="48" class="evidence-axis" />
+    <rect x="{{ view.window_x }}" y="34" width="{{ view.window_width }}" height="14" class="evidence-band" />
+    {%- if view.delay_width %}
+    <rect x="{{ view.delay_x }}" y="50" width="{{ view.delay_width }}" height="6" class="evidence-mark tone-{{ view.tone }}" />
+    {%- endif %}
+    <line x1="{{ view.latest_x }}" y1="20" x2="{{ view.latest_x }}" y2="56" class="evidence-mark tone-{{ view.tone }}" stroke-width="3" />
+    <line x1="{{ view.snapshot_x }}" y1="14" x2="{{ view.snapshot_x }}" y2="56" class="evidence-now" />
+  </svg>
+  <p class="evidence-caption">{{ view.caption }}</p>
+  {%- elif view.kind == "freshness_age" %}
+  <svg viewBox="0 0 300 60" class="evidence-svg" preserveAspectRatio="none" role="img" aria-label="{{ view.summary }}">
+    <title>{{ view.summary }}</title>
+    <rect x="10" y="14" width="{{ view.allowed_width }}" height="14" class="evidence-band" />
+    <rect x="10" y="34" width="{{ view.current_width }}" height="14" class="evidence-mark tone-{{ 'healthy' if not view.over else view.tone }}" />
+    <line x1="{{ view.boundary_x }}" y1="8" x2="{{ view.boundary_x }}" y2="52" class="evidence-now" />
+  </svg>
+  <p class="evidence-caption">{{ view.caption }}</p>
+  {%- elif view.kind == "availability" %}
+  <svg viewBox="0 0 300 50" class="evidence-svg" preserveAspectRatio="none" role="img" aria-label="{{ view.summary }}">
+    <title>{{ view.summary }}</title>
+    {%- for x in view.bars %}
+    <rect x="{{ x }}" y="14" width="{{ view.bar_width }}" height="22" class="evidence-mark tone-{{ view.tone }}" />
+    {%- endfor %}
+  </svg>
+  {%- if view.last_success_label %}
+  <p class="evidence-caption">Last success {{ view.last_success_label }}</p>
+  {%- endif %}
+  {%- elif view.kind == "contract" %}
+  <p class="sr-only">{{ view.summary }}</p>
+  {{ contract_diff(view.added, view.removed) }}
+  {%- endif %}
+</div>
+{%- endif %}
+{%- endmacro %}
+
 {% macro empty_state(message) -%}
 <p class="empty-state">{{ message }}</p>
 {%- endmacro %}

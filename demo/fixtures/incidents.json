@@ -308,5 +308,438 @@
       }
     ],
     "related_change_id": null
+  },
+  {
+    "id": "inc-volume-apt-trade-001",
+    "dataset_id": "datago.apt_trade",
+    "check": "quality",
+    "severity": "warning",
+    "status": "resolved",
+    "title": "Volume anomaly",
+    "summary": "레코드 수가 예상 범위보다 33% 적은 상태가 이틀간 지속됐다가 복구됐습니다.",
+    "started_at": "2026-09-10T10:00:00+09:00",
+    "detected_at": "2026-09-10T10:00:00+09:00",
+    "confirmed_at": "2026-09-10T10:02:00+09:00",
+    "resolved_at": "2026-09-11T18:30:00+09:00",
+    "evidence": {
+      "expected": {
+        "record_count_min": 10000,
+        "record_count_max": 10800
+      },
+      "observed": {
+        "record_count": 6700
+      },
+      "difference": {
+        "below_minimum_percent": 33
+      },
+      "rule": {
+        "id": "quality.volume.range",
+        "description": "Record count outside the expected range"
+      },
+      "first_seen_at": "2026-09-10T10:00:00+09:00",
+      "confirmed_at": "2026-09-10T10:02:00+09:00"
+    },
+    "timeline": [
+      {
+        "at": "2026-09-10T10:00:00+09:00",
+        "summary": "레코드 수 감소 처음 관측"
+      },
+      {
+        "at": "2026-09-10T10:02:00+09:00",
+        "summary": "재관측으로 이상 확인 (Degraded)"
+      },
+      {
+        "at": "2026-09-11T18:30:00+09:00",
+        "summary": "레코드 수 정상 범위로 복구 (Healthy)"
+      }
+    ],
+    "related_change_id": null
+  },
+  {
+    "id": "inc-availability-apt-basic-001",
+    "dataset_id": "datago.apt_basic_info",
+    "check": "availability",
+    "severity": "warning",
+    "status": "resolved",
+    "title": "API errors",
+    "summary": "HTTP 503 응답이 2회 연속 관측됐다가 당일 복구됐습니다.",
+    "started_at": "2026-09-17T09:15:00+09:00",
+    "detected_at": "2026-09-17T09:17:00+09:00",
+    "confirmed_at": "2026-09-17T09:19:00+09:00",
+    "resolved_at": "2026-09-17T11:40:00+09:00",
+    "evidence": {
+      "expected": {
+        "http_status": 200
+      },
+      "observed": {
+        "http_status": 503,
+        "consecutive_failures": 2
+      },
+      "difference": {
+        "consecutive_failures": 2
+      },
+      "rule": {
+        "id": "availability.consecutive_failures",
+        "description": "Two consecutive failed probes"
+      },
+      "first_seen_at": "2026-09-17T09:17:00+09:00",
+      "confirmed_at": "2026-09-17T09:19:00+09:00"
+    },
+    "timeline": [
+      {
+        "at": "2026-09-17T09:13:00+09:00",
+        "summary": "마지막 성공 관측"
+      },
+      {
+        "at": "2026-09-17T09:17:00+09:00",
+        "summary": "HTTP 503 처음 관측"
+      },
+      {
+        "at": "2026-09-17T09:19:00+09:00",
+        "summary": "2회 연속 실패로 장애 확인 (Degraded)"
+      },
+      {
+        "at": "2026-09-17T11:40:00+09:00",
+        "summary": "복구, 정상 응답 관측 (Healthy)"
+      }
+    ],
+    "related_change_id": null
+  },
+  {
+    "id": "inc-freshness-restaurant-001",
+    "dataset_id": "localdata.general_restaurant",
+    "check": "freshness",
+    "severity": "warning",
+    "status": "resolved",
+    "title": "Freshness delayed",
+    "summary": "주말 동안 예상 갱신 시각(06:00 ± 60분)이 지났는데 새 데이터가 없다가 복구됐습니다.",
+    "started_at": "2026-09-19T06:00:00+09:00",
+    "detected_at": "2026-09-19T07:05:00+09:00",
+    "confirmed_at": "2026-09-19T07:10:00+09:00",
+    "resolved_at": "2026-09-20T22:15:00+09:00",
+    "evidence": {
+      "expected": {
+        "update_at": "2026-09-19T06:00:00+09:00",
+        "tolerance_minutes": 60
+      },
+      "observed": {
+        "latest_data_at": "2026-09-18T23:40:00+09:00"
+      },
+      "difference": {
+        "delay_minutes": 380
+      },
+      "rule": {
+        "id": "freshness.expected_window",
+        "description": "Expected update window exceeded"
+      },
+      "first_seen_at": "2026-09-19T07:05:00+09:00",
+      "confirmed_at": "2026-09-19T07:10:00+09:00"
+    },
+    "timeline": [
+      {
+        "at": "2026-09-19T07:05:00+09:00",
+        "summary": "갱신 지연 처음 관측"
+      },
+      {
+        "at": "2026-09-19T07:10:00+09:00",
+        "summary": "재관측으로 지연 확인 (Degraded)"
+      },
+      {
+        "at": "2026-09-20T22:15:00+09:00",
+        "summary": "새 데이터 관측, 복구 (Healthy)"
+      }
+    ],
+    "related_change_id": null
+  },
+  {
+    "id": "inc-freshness-social-enterprise-001",
+    "dataset_id": "datago.social_enterprise",
+    "check": "freshness",
+    "severity": "warning",
+    "status": "resolved",
+    "title": "Freshness delayed",
+    "summary": "허용 나이(24시간)를 초과한 상태가 주말 내내 지속됐다가 복구됐습니다.",
+    "started_at": "2026-09-26T08:00:00+09:00",
+    "detected_at": "2026-09-26T09:05:00+09:00",
+    "confirmed_at": "2026-09-26T09:07:00+09:00",
+    "resolved_at": "2026-09-27T20:00:00+09:00",
+    "evidence": {
+      "expected": {
+        "max_age_minutes": 1440
+      },
+      "observed": {
+        "latest_data_at": "2026-09-24T20:00:00+09:00"
+      },
+      "difference": {
+        "delay_minutes": 785
+      },
+      "rule": {
+        "id": "freshness.max_age",
+        "description": "Data older than the allowed age"
+      },
+      "first_seen_at": "2026-09-26T09:05:00+09:00",
+      "confirmed_at": "2026-09-26T09:07:00+09:00"
+    },
+    "timeline": [
+      {
+        "at": "2026-09-26T09:05:00+09:00",
+        "summary": "갱신 지연 처음 관측"
+      },
+      {
+        "at": "2026-09-26T09:07:00+09:00",
+        "summary": "재관측으로 지연 확인 (Degraded)"
+      },
+      {
+        "at": "2026-09-27T20:00:00+09:00",
+        "summary": "새 데이터 관측, 복구 (Healthy)"
+      }
+    ],
+    "related_change_id": null
+  },
+  {
+    "id": "inc-availability-product-list-001",
+    "dataset_id": "pps.product_list",
+    "check": "availability",
+    "severity": "critical",
+    "status": "resolved",
+    "title": "API unavailable",
+    "summary": "HTTP 500 응답이 3회 연속 관측됐다가 당일 복구됐습니다.",
+    "started_at": "2026-09-14T13:05:00+09:00",
+    "detected_at": "2026-09-14T13:10:00+09:00",
+    "confirmed_at": "2026-09-14T13:14:00+09:00",
+    "resolved_at": "2026-09-14T15:45:00+09:00",
+    "evidence": {
+      "expected": {
+        "http_status": 200
+      },
+      "observed": {
+        "http_status": 500,
+        "consecutive_failures": 3
+      },
+      "difference": {
+        "consecutive_failures": 3
+      },
+      "rule": {
+        "id": "availability.consecutive_failures",
+        "description": "Three consecutive failed probes"
+      },
+      "first_seen_at": "2026-09-14T13:10:00+09:00",
+      "confirmed_at": "2026-09-14T13:14:00+09:00"
+    },
+    "timeline": [
+      {
+        "at": "2026-09-14T13:05:00+09:00",
+        "summary": "마지막 성공 관측"
+      },
+      {
+        "at": "2026-09-14T13:10:00+09:00",
+        "summary": "HTTP 500 처음 관측"
+      },
+      {
+        "at": "2026-09-14T13:14:00+09:00",
+        "summary": "3회 연속 실패로 장애 확인 (Critical)"
+      },
+      {
+        "at": "2026-09-14T15:45:00+09:00",
+        "summary": "복구, 정상 응답 관측 (Healthy)"
+      }
+    ],
+    "related_change_id": null
+  },
+  {
+    "id": "inc-availability-air-quality-001",
+    "dataset_id": "datago.air_quality",
+    "check": "availability",
+    "severity": "warning",
+    "status": "resolved",
+    "title": "API errors",
+    "summary": "HTTP 502 응답이 2회 연속 관측됐다가 당일 복구됐습니다.",
+    "started_at": "2026-09-08T09:58:00+09:00",
+    "detected_at": "2026-09-08T10:04:00+09:00",
+    "confirmed_at": "2026-09-08T10:06:00+09:00",
+    "resolved_at": "2026-09-08T12:30:00+09:00",
+    "evidence": {
+      "expected": {
+        "http_status": 200
+      },
+      "observed": {
+        "http_status": 502,
+        "consecutive_failures": 2
+      },
+      "difference": {
+        "consecutive_failures": 2
+      },
+      "rule": {
+        "id": "availability.consecutive_failures",
+        "description": "Two consecutive failed probes"
+      },
+      "first_seen_at": "2026-09-08T10:04:00+09:00",
+      "confirmed_at": "2026-09-08T10:06:00+09:00"
+    },
+    "timeline": [
+      {
+        "at": "2026-09-08T09:58:00+09:00",
+        "summary": "마지막 성공 관측"
+      },
+      {
+        "at": "2026-09-08T10:04:00+09:00",
+        "summary": "HTTP 502 처음 관측"
+      },
+      {
+        "at": "2026-09-08T10:06:00+09:00",
+        "summary": "2회 연속 실패로 장애 확인 (Degraded)"
+      },
+      {
+        "at": "2026-09-08T12:30:00+09:00",
+        "summary": "복구, 정상 응답 관측 (Healthy)"
+      }
+    ],
+    "related_change_id": null
+  },
+  {
+    "id": "inc-availability-air-quality-002",
+    "dataset_id": "datago.air_quality",
+    "check": "availability",
+    "severity": "warning",
+    "status": "resolved",
+    "title": "API errors",
+    "summary": "HTTP 502 응답이 다시 2회 연속 관측됐다가 복구됐습니다 (이번 달 두 번째).",
+    "started_at": "2026-09-16T13:54:00+09:00",
+    "detected_at": "2026-09-16T14:04:00+09:00",
+    "confirmed_at": "2026-09-16T14:06:00+09:00",
+    "resolved_at": "2026-09-16T15:20:00+09:00",
+    "evidence": {
+      "expected": {
+        "http_status": 200
+      },
+      "observed": {
+        "http_status": 502,
+        "consecutive_failures": 2
+      },
+      "difference": {
+        "consecutive_failures": 2
+      },
+      "rule": {
+        "id": "availability.consecutive_failures",
+        "description": "Two consecutive failed probes"
+      },
+      "first_seen_at": "2026-09-16T14:04:00+09:00",
+      "confirmed_at": "2026-09-16T14:06:00+09:00"
+    },
+    "timeline": [
+      {
+        "at": "2026-09-16T13:54:00+09:00",
+        "summary": "마지막 성공 관측"
+      },
+      {
+        "at": "2026-09-16T14:04:00+09:00",
+        "summary": "HTTP 502 처음 관측"
+      },
+      {
+        "at": "2026-09-16T14:06:00+09:00",
+        "summary": "2회 연속 실패로 장애 확인 (Degraded)"
+      },
+      {
+        "at": "2026-09-16T15:20:00+09:00",
+        "summary": "복구, 정상 응답 관측 (Healthy)"
+      }
+    ],
+    "related_change_id": null
+  },
+  {
+    "id": "inc-availability-air-quality-003",
+    "dataset_id": "datago.air_quality",
+    "check": "availability",
+    "severity": "warning",
+    "status": "resolved",
+    "title": "API errors",
+    "summary": "HTTP 502 응답이 다시 2회 연속 관측됐다가 복구됐습니다 (이번 달 세 번째).",
+    "started_at": "2026-09-29T09:34:00+09:00",
+    "detected_at": "2026-09-29T09:44:00+09:00",
+    "confirmed_at": "2026-09-29T09:46:00+09:00",
+    "resolved_at": "2026-09-29T11:05:00+09:00",
+    "evidence": {
+      "expected": {
+        "http_status": 200
+      },
+      "observed": {
+        "http_status": 502,
+        "consecutive_failures": 2
+      },
+      "difference": {
+        "consecutive_failures": 2
+      },
+      "rule": {
+        "id": "availability.consecutive_failures",
+        "description": "Two consecutive failed probes"
+      },
+      "first_seen_at": "2026-09-29T09:44:00+09:00",
+      "confirmed_at": "2026-09-29T09:46:00+09:00"
+    },
+    "timeline": [
+      {
+        "at": "2026-09-29T09:34:00+09:00",
+        "summary": "마지막 성공 관측"
+      },
+      {
+        "at": "2026-09-29T09:44:00+09:00",
+        "summary": "HTTP 502 처음 관측"
+      },
+      {
+        "at": "2026-09-29T09:46:00+09:00",
+        "summary": "2회 연속 실패로 장애 확인 (Degraded)"
+      },
+      {
+        "at": "2026-09-29T11:05:00+09:00",
+        "summary": "복구, 정상 응답 관측 (Healthy)"
+      }
+    ],
+    "related_change_id": null
+  },
+  {
+    "id": "inc-freshness-underground-000",
+    "dataset_id": "datago.underground_safety",
+    "check": "freshness",
+    "severity": "warning",
+    "status": "resolved",
+    "title": "Freshness delayed",
+    "summary": "예상 갱신 시각이 지났는데 새 데이터가 없는 상태가 이틀간 지속됐다가 복구됐습니다.",
+    "started_at": "2026-09-22T08:00:00+09:00",
+    "detected_at": "2026-09-22T08:31:00+09:00",
+    "confirmed_at": "2026-09-22T08:33:00+09:00",
+    "resolved_at": "2026-09-23T19:40:00+09:00",
+    "evidence": {
+      "expected": {
+        "update_at": "2026-09-22T08:00:00+09:00",
+        "tolerance_minutes": 30
+      },
+      "observed": {
+        "latest_data_at": "2026-09-21T23:10:00+09:00"
+      },
+      "difference": {
+        "delay_minutes": 530
+      },
+      "rule": {
+        "id": "freshness.expected_window",
+        "description": "Expected update window exceeded"
+      },
+      "first_seen_at": "2026-09-22T08:31:00+09:00",
+      "confirmed_at": "2026-09-22T08:33:00+09:00"
+    },
+    "timeline": [
+      {
+        "at": "2026-09-22T08:31:00+09:00",
+        "summary": "갱신 지연 처음 관측"
+      },
+      {
+        "at": "2026-09-22T08:33:00+09:00",
+        "summary": "재관측으로 지연 확인 (Degraded)"
+      },
+      {
+        "at": "2026-09-23T19:40:00+09:00",
+        "summary": "새 데이터 관측, 복구 (Healthy)"
+      }
+    ],
+    "related_change_id": null
   }
 ]
