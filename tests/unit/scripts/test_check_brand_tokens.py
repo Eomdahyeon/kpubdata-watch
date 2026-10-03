@@ -70,6 +70,60 @@ def studio(tmp_path: Path) -> Path:
     return _studio_copy(tmp_path)
 
 
+# Studio's real `@theme inline` / `@theme` values (src/globals.css) for the tokens Watch
+# mirrors in its trailing type-scale `:root` block (issue 93). Matches brand-v2.css today.
+_RADIUS_LG = "0.625rem"
+_RADIUS_XL = "0.875rem"
+_RADIUS_2XL = "1.125rem"
+_PAGE_TITLE = "1.25rem"
+_META = "0.75rem"
+
+
+def _studio_theme_blocks(
+    *,
+    radius_lg: str = _RADIUS_LG,
+    radius_xl: str = _RADIUS_XL,
+    radius_2xl: str = _RADIUS_2XL,
+    page_title: str = _PAGE_TITLE,
+    meta: str = _META,
+    omit_radius_lg: bool = False,
+) -> str:
+    """Studio's actual shape for the mirrored tokens: Tailwind `@theme` blocks, never a
+    plain `:root` selector -- proves the comparison reads Studio's real syntax (issue 93).
+    """
+    radius = "" if omit_radius_lg else f"  --radius-lg: {radius_lg};\n"
+    return (
+        "@theme inline {\n"
+        '  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,\n'
+        '    "Helvetica Neue", Arial, "Noto Sans KR", sans-serif;\n'
+        '  --font-mono: ui-monospace, "SFMono-Regular", "SF Mono", Consolas,\n'
+        '    "Liberation Mono", Menlo, monospace;\n'
+        f"{radius}"
+        f"  --radius-xl: {radius_xl};\n"
+        f"  --radius-2xl: {radius_2xl};\n"
+        "}\n"
+        "@theme {\n"
+        f"  --text-page-title: {page_title};\n"
+        "  --text-page-title--line-height: 1.75rem;\n"
+        "  --text-page-title--font-weight: 600;\n"
+        f"  --text-meta: {meta};\n"
+        "  --text-meta--line-height: 1rem;\n"
+        "}\n"
+    )
+
+
+def _realistic_studio(tmp_path: Path, theme: str, name: str = "studio-realistic.css") -> Path:
+    """A Studio stand-in shaped like the real `src/globals.css`: the colour blocks Watch
+    copies verbatim, plus `theme` -- real `@theme` blocks, not a `:root` -- for the
+    type-scale tokens (issue 93).
+    """
+    css = (REPO_ROOT / TOKEN_FILE).read_text(encoding="utf-8")
+    color_blocks = css.split("\n/*\n * Type scale", 1)[0]
+    studio = tmp_path / name
+    studio.write_text('@import "tailwindcss";\n\n' + color_blocks + "\n" + theme, encoding="utf-8")
+    return studio
+
+
 def test_this_repository_passes(studio: Path) -> None:
     """The case the gate must not break: Watch as it is today."""
     result = _run(REPO_ROOT, studio)
@@ -279,6 +333,99 @@ def test_a_missing_token_file_fails_rather_than_passing_empty(tmp_path: Path, st
     result = _run(root, studio)
     assert result.returncode == 1
     assert "nothing was checked" in result.stderr
+
+
+# --- type-scale tokens mirrored from Studio's `@theme` blocks (issue 93) --------------
+
+
+def test_a_realistic_studio_with_matching_theme_blocks_passes(tmp_path: Path) -> None:
+    """Sanity check: Studio's real shape (`@theme`, not `:root`) is read correctly."""
+    root = _repo(tmp_path)
+    studio_file = _realistic_studio(tmp_path, _studio_theme_blocks())
+
+    result = _run(root, studio_file)
+
+    assert result.returncode == 0, result.stderr
+
+
+def test_deleting_radius_lg_is_caught_as_studio_drift(tmp_path: Path, studio: Path) -> None:
+    """The mutation from issue 93: deleting `--radius-lg` must now fail the gate."""
+    root = _repo(tmp_path)
+    _edit(root / TOKEN_FILE, "  --radius-lg: 0.625rem;\n", "")
+
+    result = _run(root, studio)
+
+    assert result.returncode == 1
+    assert "drift from Studio: type-scale: --radius-lg is None here, '0.625rem' in Studio" in (
+        result.stderr
+    )
+
+
+def test_changing_radius_xl_value_is_caught_as_studio_drift(tmp_path: Path, studio: Path) -> None:
+    """The second mutation from issue 93: changing `--radius-xl`'s value must also fail."""
+    root = _repo(tmp_path)
+    _edit(root / TOKEN_FILE, "--radius-xl: 0.875rem;", "--radius-xl: 0.9rem;")
+
+    result = _run(root, studio)
+
+    assert result.returncode == 1
+    assert (
+        "drift from Studio: type-scale: --radius-xl is '0.9rem' here, '0.875rem' in Studio"
+        in result.stderr
+    )
+
+
+def test_a_missing_radius_lg_against_a_realistic_studio_is_drift(tmp_path: Path) -> None:
+    """Same deletion, compared against Studio's real `@theme` shape rather than a copy."""
+    root = _repo(tmp_path)
+    _edit(root / TOKEN_FILE, "  --radius-lg: 0.625rem;\n", "")
+    studio_file = _realistic_studio(tmp_path, _studio_theme_blocks())
+
+    result = _run(root, studio_file)
+
+    assert result.returncode == 1
+    assert "drift from Studio: type-scale: --radius-lg is None here, '0.625rem' in Studio" in (
+        result.stderr
+    )
+
+
+def test_studio_moving_radius_xl_is_drift_watch_did_not_follow(tmp_path: Path) -> None:
+    """Studio changed `--radius-xl` in its `@theme inline` block; Watch's copy is stale."""
+    root = _repo(tmp_path)
+    studio_file = _realistic_studio(tmp_path, _studio_theme_blocks(radius_xl="1rem"))
+
+    result = _run(root, studio_file)
+
+    assert result.returncode == 1
+    assert (
+        "drift from Studio: type-scale: --radius-xl is '0.875rem' here, '1rem' in Studio"
+        in result.stderr
+    )
+
+
+def test_studio_moving_text_meta_is_drift(tmp_path: Path) -> None:
+    """`--text-meta` lives in Studio's second, plain `@theme` block, not `@theme inline`."""
+    root = _repo(tmp_path)
+    studio_file = _realistic_studio(tmp_path, _studio_theme_blocks(meta="0.8125rem"))
+
+    result = _run(root, studio_file)
+
+    assert result.returncode == 1
+    assert (
+        "drift from Studio: type-scale: --text-meta is '0.75rem' here, '0.8125rem' in Studio"
+        in result.stderr
+    )
+
+
+def test_watch_own_density_tokens_are_not_compared_to_studio(tmp_path: Path) -> None:
+    """`--density-table-row` etc. are Watch's own scale (#70) -- never checked against Studio."""
+    root = _repo(tmp_path)
+    _edit(root / TOKEN_FILE, "--density-table-row: 2.25rem;", "--density-table-row: 3rem;")
+    studio_file = _realistic_studio(tmp_path, _studio_theme_blocks())
+
+    result = _run(root, studio_file)
+
+    assert result.returncode == 0, result.stderr
 
 
 # --- Health table -------------------------------------------------------------------

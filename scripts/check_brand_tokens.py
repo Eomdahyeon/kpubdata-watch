@@ -82,6 +82,27 @@ BLOCKS = {
     ),
 }
 
+# Watch's trailing type-scale block: a bare `:root {`, never the compound light selector
+# or a bracketed one, so this never matches `light`, `dark` or `os-dark` above (issue 93).
+TYPE_SCALE_SELECTOR = re.compile(r":root\s*\{")
+
+# The tokens Studio keeps in its Tailwind `@theme` blocks (`src/globals.css`) that plain
+# CSS cannot read, so Watch repeats them verbatim in its trailing `:root` block (issue 93).
+# Watch's own type-scale, radius and density tokens there (`--radius`, `--text-section-title`,
+# `--density-*`, ...) have no Studio counterpart and stay out of this comparison.
+MIRRORED_THEME_TOKENS = (
+    "--font-sans",
+    "--font-mono",
+    "--radius-lg",
+    "--radius-xl",
+    "--radius-2xl",
+    "--text-page-title",
+    "--text-page-title--line-height",
+    "--text-page-title--font-weight",
+    "--text-meta",
+    "--text-meta--line-height",
+)
+
 _COMMENT = re.compile(r"/\*.*?\*/", re.DOTALL)
 _DECLARATION = re.compile(r"(--[\w-]+)\s*:\s*([^;]+);")
 _VAR = re.compile(r"^var\((--[\w-]+)\)$")
@@ -105,6 +126,16 @@ def parse_blocks(css: str) -> dict[str, Tokens]:
             key: " ".join(value.split()).lower() for key, value in _DECLARATION.findall(body)
         }
     return blocks
+
+
+def type_scale_tokens(css: str) -> Tokens:
+    """The custom properties of Watch's trailing, bare `:root {` block (issue 93)."""
+    text = _COMMENT.sub("", css)
+    match = TYPE_SCALE_SELECTOR.search(text)
+    if match is None:
+        return {}
+    body = text[match.end() : text.index("}", match.end())]
+    return {key: " ".join(value.split()).lower() for key, value in _DECLARATION.findall(body)}
 
 
 def resolve(tokens: Tokens, name: str) -> str:
@@ -303,6 +334,27 @@ def fork_problems(root: Path, names: set[str]) -> list[str]:
     return found
 
 
+def _token_value(text: str, name: str) -> str | None:
+    """The first value `name` is declared with anywhere in `text`, comments removed."""
+    match = re.search(rf"{re.escape(name)}\s*:\s*([^;]+);", _COMMENT.sub("", text))
+    return " ".join(match.group(1).split()).lower() if match else None
+
+
+def type_scale_drift_problems(ours: Tokens, studio_css: str) -> list[str]:
+    """Drift between Watch's type-scale block and the Studio tokens it mirrors (issue 93).
+
+    Studio keeps these in Tailwind `@theme` blocks rather than a `:root` selector, so this
+    looks up each mirrored name by declaration rather than reusing `drift_problems`'s
+    block-selector matching, which would otherwise find no Studio counterpart at all.
+    """
+    found: list[str] = []
+    for name in MIRRORED_THEME_TOKENS:
+        mine, theirs = ours.get(name), _token_value(studio_css, name)
+        if mine != theirs:
+            found.append(f"type-scale: {name} is {mine!r} here, {theirs!r} in Studio")
+    return found
+
+
 def drift_problems(ours: dict[str, Tokens], studio: dict[str, Tokens]) -> list[str]:
     """Every difference between the token file's blocks and Studio's."""
     found: list[str] = []
@@ -358,7 +410,10 @@ def main(argv: list[str] | None = None) -> int:
         parser.error("--studio is required (pass --contrast instead to only print the table)")
 
     doc = doc_file.read_text(encoding="utf-8")
+    type_scale = type_scale_tokens(css)
     problems = [f"{TOKEN_FILE}: no {name} block" for name in BLOCKS if name not in blocks]
+    if not type_scale:
+        problems.append(f"{TOKEN_FILE}: no type-scale block")
     light, dark = blocks.get("light", {}), blocks.get("dark", {})
     if "os-dark" in blocks and blocks["os-dark"] != dark:
         problems.append(f"{TOKEN_FILE}: the OS-dark block differs from the dark block")
@@ -375,9 +430,13 @@ def main(argv: list[str] | None = None) -> int:
         problems.append(f"{studio_css} does not exist, so Studio was not compared")
         compared = ""
     else:
-        studio_blocks = parse_blocks(studio_css.read_text(encoding="utf-8"))
+        studio_text = studio_css.read_text(encoding="utf-8")
+        studio_blocks = parse_blocks(studio_text)
         drift = drift_problems(blocks, studio_blocks)
         problems.extend(f"drift from Studio: {p}" for p in drift)
+        problems.extend(
+            f"drift from Studio: {p}" for p in type_scale_drift_problems(type_scale, studio_text)
+        )
         compared = f", and they match {studio_css}"
 
     if problems:
