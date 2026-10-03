@@ -10,6 +10,7 @@ and never takes a health colour; and the stylesheet uses tokens only.
 from __future__ import annotations
 
 import re
+from datetime import datetime
 from pathlib import Path
 
 import pytest
@@ -132,21 +133,43 @@ def test_change_badge_is_informational_and_never_a_health_colour() -> None:
     assert "--status-" not in _css_rule(".dataset-change")
 
 
-def test_dataset_row_shows_name_provider_status_issue_and_change() -> None:
-    row = {
+def _dataset_row() -> dict[str, str]:
+    """The shape `scripts/build_demo.py::dataset_rows` actually produces (issue 96):
+    `checked_label` (visible text), `checked_at` (the ISO-8601 instant) and
+    `checked_exact` (the KST-formatted string, for a title only).
+    """
+    return {
         "name": "아파트 전월세 실거래가",
         "provider": "국토교통부",
         "health": "critical",
-        "checked_label": "21:14 KST",
-        "checked_exact": "2026-10-02T21:14:40+09:00",
+        "checked_label": "Checked 21:14 KST",
+        "checked_at": "2026-10-02T21:14:40+09:00",
+        "checked_exact": "2026-10-02 21:14:40 KST",
         "issue": "Breaking contract change",
         "change": "Contract changed",
     }
+
+
+def test_dataset_row_shows_name_provider_status_issue_and_change() -> None:
+    row = _dataset_row()
     html = render("{{ ui.dataset_row(row) }}", row=row)
     assert 'class="dataset-row status-critical"' in html
     for text in (row["name"], row["provider"], row["issue"], row["change"], "Critical"):
         assert text in html
     assert CHANGE_ICON in html
+
+
+def test_dataset_row_wires_the_exact_checked_time_into_a_machine_readable_time() -> None:
+    """issue 96: `checked_at`, the exact instant, must land in `datetime=`, not `title=`."""
+    row = _dataset_row()
+    html = render("{{ ui.dataset_row(row) }}", row=row)
+    assert (
+        '<time class="timestamp" datetime="2026-10-02T21:14:40+09:00" '
+        'title="2026-10-02 21:14:40 KST">Checked 21:14 KST</time>'
+    ) in html
+    match = re.search(r'<time class="timestamp" datetime="([^"]+)"', html)
+    assert match is not None, "dataset_row did not render a <time datetime=...> element"
+    assert datetime.fromisoformat(match.group(1)) == datetime.fromisoformat(row["checked_at"])
 
 
 def test_timestamp_carries_a_machine_readable_time() -> None:

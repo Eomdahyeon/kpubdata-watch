@@ -13,7 +13,7 @@ from __future__ import annotations
 import importlib.util
 import json
 import re
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from pathlib import Path
 from types import ModuleType
 from typing import Any
@@ -76,6 +76,18 @@ def test_the_catalog_has_a_checks_column_reusing_the_matrix_cell(catalog: str) -
     blocks = catalog.split('<tr class="catalog-row"')[1:]
     rent = next(block for block in blocks if 'data-id="datago.apt_rent"' in block)
     assert 'class="check-cell check-cell-fail"' in rent
+
+
+def test_the_last_checked_column_is_a_machine_readable_time(catalog: str) -> None:
+    """issue 96: the catalog's "Last checked" cell already used `datetime=`, and
+    stays that way; this guards the real built page, not just the macro."""
+    datasets = json.loads((FIXTURES / "datasets.json").read_text(encoding="utf-8"))
+    rent = next(d for d in datasets if d["id"] == "datago.apt_rent")
+    blocks = catalog.split('<tr class="catalog-row"')[1:]
+    row = next(block for block in blocks if 'data-id="datago.apt_rent"' in block)
+    match = re.search(r'<time class="timestamp" datetime="([^"]+)"', row)
+    assert match is not None, "Last checked cell has no <time datetime=...>"
+    assert datetime.fromisoformat(match.group(1)) == datetime.fromisoformat(rent["last_checked_at"])
 
 
 def test_each_row_carries_what_the_filters_need(catalog: str) -> None:

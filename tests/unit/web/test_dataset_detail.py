@@ -10,7 +10,9 @@ metadata. Unknown never reads as Critical.
 from __future__ import annotations
 
 import importlib.util
+import json
 import re
+from datetime import datetime
 from pathlib import Path
 from types import ModuleType
 
@@ -20,6 +22,7 @@ from kpubdata_watch.web.presentation import CHECK_META, TEMPLATES_DIR
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 SCRIPT = REPO_ROOT / "scripts" / "build_demo.py"
+FIXTURES = REPO_ROOT / "demo" / "fixtures"
 LINK_ATTR = re.compile(r'(?:href|src)="([^"]+)"')
 HEX_COLOR = re.compile(r"#[0-9a-fA-F]{3,8}\b")
 
@@ -67,6 +70,21 @@ def test_last_checked_and_last_healthy_are_shown(site: Path) -> None:
     html = page(site, "datago.apt_rent")
     assert "<dt>Last checked</dt>" in html and "2026-10-02 21:14:40 KST" in html
     assert "<dt>Last healthy</dt>" in html and "2026-10-02 20:42:00 KST" in html
+
+
+def test_last_checked_is_a_machine_readable_time(site: Path) -> None:
+    """issue 96: the page header's "Checked" time must be `<time datetime=...>`,
+    not only the KST string in `title`, and it must match the fixture's
+    `last_checked_at`.
+    """
+    datasets = json.loads((FIXTURES / "datasets.json").read_text(encoding="utf-8"))
+    rent = next(d for d in datasets if d["id"] == "datago.apt_rent")
+    html = page(site, "datago.apt_rent")
+    status = html[html.index('<div class="page-status">') :]
+    status = status[: status.index("</div>")]
+    match = re.search(r'<time class="timestamp" datetime="([^"]+)"', status)
+    assert match is not None, "the page header's Checked time has no <time datetime=...>"
+    assert datetime.fromisoformat(match.group(1)) == datetime.fromisoformat(rent["last_checked_at"])
 
 
 def test_all_four_checks_show_a_status_and_the_reason(site: Path) -> None:

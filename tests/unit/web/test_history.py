@@ -12,6 +12,7 @@ from __future__ import annotations
 import importlib.util
 import json
 import re
+from datetime import datetime
 from itertools import groupby
 from pathlib import Path
 from types import ModuleType
@@ -167,6 +168,23 @@ def test_timeline_links_to_incident_and_change_detail_pages(html: str) -> None:
     section = panel(html, "Incidents and Changes")
     assert 'href="../incidents/inc-freshness-bus-001/"' in section
     assert 'href="../changes/chg-contract-apt-rent-001/"' in section
+
+
+def test_timeline_events_carry_a_machine_readable_time(html: str) -> None:
+    """issue 96: every timeline event's detected time must be `<time datetime=...>`
+    and at least one must match a known fixture instant exactly.
+    """
+    incidents = json.loads((FIXTURES / "incidents.json").read_text(encoding="utf-8"))
+    rent = next(i for i in incidents if i["id"] == "inc-contract-apt-rent-001")
+    section = panel(html, "Incidents and Changes")
+    values = re.findall(r'<time class="timestamp" datetime="([^"]+)"', section)
+    assert values, "the timeline has no <time datetime=...> at all"
+    for value in values:
+        datetime.fromisoformat(value)  # every value must be a parseable instant
+    assert any(
+        datetime.fromisoformat(value) == datetime.fromisoformat(rent["detected_at"])
+        for value in values
+    )
 
 
 # ---- History/incident consistency (issue 112) ----

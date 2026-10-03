@@ -256,7 +256,10 @@
   </div>
   <div class="dataset-status-line">
     {{ status_badge(d.health) }}
-    {{ timestamp(d.checked_label, d.checked_at, d.checked_exact) }}
+    {# issue 96: the exact check instant goes to datetime= (machine-readable),
+       never title= (hover-only); keyword arguments keep the two from being
+       swapped the way positional ones were before. #}
+    {{ timestamp(d.checked_label, datetime=d.checked_at, title=d.checked_exact) }}
   </div>
   {%- if d.issue %}
   <p class="dataset-issue">

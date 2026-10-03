@@ -15,6 +15,7 @@ from __future__ import annotations
 import importlib.util
 import json
 import re
+from datetime import datetime
 from pathlib import Path
 from types import ModuleType
 
@@ -188,6 +189,18 @@ def test_changes_look_different_from_incidents(html: str) -> None:
     assert 'class="change-badge"' in changes
     assert "status-badge" not in changes
     assert "물품목록정보" in changes and "productEngName" in changes
+
+
+def test_a_recent_change_detected_time_is_a_machine_readable_time(html: str) -> None:
+    """issue 96: Recent Changes' detected time must carry `<time datetime=...>`
+    matching the exact fixture instant, not only a KST clock time as text.
+    """
+    changes = json.loads((FIXTURES / "changes.json").read_text(encoding="utf-8"))
+    newest = max(changes, key=lambda c: c["detected_at"])
+    section = panel(html, "Recent Changes")
+    match = re.search(r'<time class="timestamp" datetime="([^"]+)"', section)
+    assert match is not None, "Recent Changes has no <time datetime=...>"
+    assert datetime.fromisoformat(match.group(1)) == datetime.fromisoformat(newest["detected_at"])
 
 
 def test_without_a_catalog_the_overview_keeps_every_dataset(build_demo: ModuleType) -> None:
