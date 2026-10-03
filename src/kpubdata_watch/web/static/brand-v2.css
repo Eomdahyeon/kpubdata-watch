@@ -5,7 +5,9 @@
  * 1fbf57e41a32b3ef9cd353666beb1fcd0d6b97e9 (the light, dark and OS-dark custom-property
  * blocks); Studio's src/globals.css has not changed those blocks since. Studio Brand v2 is
  * canonical: do not edit a colour value here. To follow a Studio change, copy the blocks
- * again and update the commit above. This path is the canonical Watch token file (#70).
+ * again and update the commit above; `python scripts/check_brand_tokens.py --studio PATH`
+ * (run in CI against Studio main, #72) fails until they match. This path is the canonical
+ * Watch token file (#70).
  * Public Status (web/static) and every UI Lab prototype link this file; neither defines
  * these properties itself. The last block, after Studio's, holds the type scale, radius and
  * density, which Studio keeps in Tailwind `@theme` blocks that plain CSS cannot read.

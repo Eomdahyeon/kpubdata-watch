@@ -58,6 +58,23 @@ jobs:
       - name: Independence (no Builder or Studio dependency)
         run: uv run python scripts/check_independence.py
 
+      # #72: brand-v2.css must match Studio's real token source, so read Studio's
+      # src/globals.css from its main branch. This is a text comparison of a checked-out
+      # file, not a package dependency or an import, which is all check_independence.py
+      # (PRD D-016) forbids.
+      - name: Check out KPubData Studio tokens
+        uses: actions/checkout@v7
+        with:
+          repository: kpubdata-lab/kpubdata-studio
+          ref: main
+          path: .studio
+          sparse-checkout: src/globals.css
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+
+      - name: Brand v2 tokens match Studio
+        run: uv run python scripts/check_brand_tokens.py --studio .studio/src/globals.css
+
       # #3: issue templates keep asking for a Required Verification level, and the
       # PR title gate in titles.yml stays wired.
       - name: Governance gates stay wired
