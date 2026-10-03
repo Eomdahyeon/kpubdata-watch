@@ -7,6 +7,9 @@ repo_name: kpubdata-lab/kpubdata-watch
 theme:
   name: material
   language: ko
+  # The KPubData symbol, byte-identical to the demo's (#71, tests/unit/test_brand_assets.py).
+  logo: assets/kpubdata-symbol.svg
+  favicon: assets/kpubdata-symbol.svg
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: default

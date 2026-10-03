@@ -68,12 +68,23 @@ jobs:
           repository: kpubdata-lab/kpubdata-studio
           ref: main
           path: .studio
-          sparse-checkout: src/globals.css
+          sparse-checkout: |
+            src/globals.css
+            assets/logo/kpubdata-brand-assets/svg/symbol_light.svg
+            assets/logo/kpubdata-brand-assets/svg/favicon.svg
           sparse-checkout-cone-mode: false
           persist-credentials: false
 
       - name: Brand v2 tokens match Studio
         run: uv run python scripts/check_brand_tokens.py --studio .studio/src/globals.css
+
+      # #71: the K symbol and favicon are Studio's approved files, unchanged.
+      - name: Brand symbol matches Studio
+        run: |
+          studio=.studio/assets/logo/kpubdata-brand-assets/svg
+          static=src/kpubdata_watch/web/static
+          cmp "$studio/symbol_light.svg" "$static/kpubdata-symbol.svg"
+          cmp "$studio/favicon.svg" "$static/favicon.svg"
 
       # #3: issue templates keep asking for a Required Verification level, and the
       # PR title gate in titles.yml stays wired.
