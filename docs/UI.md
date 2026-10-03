@@ -58,8 +58,8 @@ PRD §33 은 "색상 세부 규칙" 도 고정하지 않는 쪽에 두었다. #6
 | 접근성 · 대비 기준 | Dataset 목록 밀도 |
 
 Canonical 기준은 Studio 의
-[docs/brand/VISUAL_IDENTITY.md](https://github.com/kpubdata-lab/kpubdata-studio/blob/1fbf57e41a32b3ef9cd353666beb1fcd0d6b97e9/docs/brand/VISUAL_IDENTITY.md)
-와 [src/globals.css](https://github.com/kpubdata-lab/kpubdata-studio/blob/1fbf57e41a32b3ef9cd353666beb1fcd0d6b97e9/src/globals.css) 다 (commit
+[docs/brand/VISUAL_IDENTITY.md](https://github.com/kpubdata-lab/kpubdata-studio/blob/fe8f808a6567ffe061daf6d9d6163ac7c5fdcda4/docs/brand/VISUAL_IDENTITY.md)
+와 [src/globals.css](https://github.com/kpubdata-lab/kpubdata-studio/blob/fe8f808a6567ffe061daf6d9d6163ac7c5fdcda4/src/globals.css) 다 (commit
 고정). Watch 에 적용하는 규칙은 [시각 정체성](VISUAL_IDENTITY.md) 에 있고, 아래 §52 · §53 은 그 문서가
 우선한다. Watch 는 새 로고 · 팔레트 · 상태색을 만들지 않는다.
 

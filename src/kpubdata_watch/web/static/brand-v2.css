@@ -1,8 +1,8 @@
 /*
  * KPubData Studio Brand v2 design tokens — the single token source for KPubData Watch (#68).
  *
- * Copied verbatim from kpubdata-lab/kpubdata-studio src/globals.css lines 19-178 at commit
- * 1fbf57e41a32b3ef9cd353666beb1fcd0d6b97e9 (the light, dark and OS-dark custom-property
+ * Copied verbatim from kpubdata-lab/kpubdata-studio src/globals.css lines 19-193 at commit
+ * fe8f808a6567ffe061daf6d9d6163ac7c5fdcda4 (the light, dark and OS-dark custom-property
  * blocks); Studio's src/globals.css has not changed those blocks since. Studio Brand v2 is
  * canonical: do not edit a colour value here. To follow a Studio change, copy the blocks
  * again, update the commit above and the token table in docs/VISUAL_IDENTITY.md; `python
@@ -11,7 +11,7 @@
  * Public Status (web/static) and every UI Lab prototype link this file; neither defines
  * these properties itself. The last block, after Studio's, holds the type scale, radius and
  * density, which Studio keeps in Tailwind `@theme` blocks that plain CSS cannot read.
- * The references to #628, #631, #667 and __tests__/ in the comments below are Studio's.
+ * The references to #628, #631, #667, #676 and __tests__/ in the comments below are Studio's.
  */
 
 /*
@@ -42,6 +42,13 @@
   /* Fresh Mint — secondary brand/data accent. Never success. */
   --brand-secondary: #14b8a6;
   --brand-secondary-strong: #0d9488;
+  /* Assistant (#676) — marks AI-written content: provenance badges and Assistant panels.
+     Data Cyan's hue, never a new one; the text value is the darker cyan that reaches
+     4.5:1 on the tint, the card and the page. Never interaction, never a status. */
+  --assistant-accent: var(--data-accent-strong);
+  --assistant-accent-text: #0e7490;
+  --assistant-accent-subtle: #e9f7fa;
+  --assistant-accent-border: #c9e3e8;
 
   /* Neutral surfaces. */
   --background: #f7f8f3;
@@ -93,6 +100,10 @@
   --data-accent-strong: #06b6d4;
   --brand-secondary: #14b8a6;
   --brand-secondary-strong: #14b8a6;
+  --assistant-accent: var(--data-accent-strong);
+  --assistant-accent-text: #06b6d4;
+  --assistant-accent-subtle: #1a2a2e;
+  --assistant-accent-border: #2a4046;
   --background: #15171a;
   --foreground: #e8eaed;
   --card: #1c1f23;
@@ -140,6 +151,10 @@
     --data-accent-strong: #06b6d4;
     --brand-secondary: #14b8a6;
     --brand-secondary-strong: #14b8a6;
+    --assistant-accent: var(--data-accent-strong);
+    --assistant-accent-text: #06b6d4;
+    --assistant-accent-subtle: #1a2a2e;
+    --assistant-accent-border: #2a4046;
     --background: #15171a;
     --foreground: #e8eaed;
     --card: #1c1f23;

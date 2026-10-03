@@ -26,7 +26,7 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 SCRIPT = REPO_ROOT / "scripts" / "check_brand_tokens.py"
 TOKEN_FILE = Path("src") / "kpubdata_watch" / "web" / "static" / "brand-v2.css"
 DOC = Path("docs") / "VISUAL_IDENTITY.md"
-PINNED_SHA = "1fbf57e41a32b3ef9cd353666beb1fcd0d6b97e9"
+PINNED_SHA = "fe8f808a6567ffe061daf6d9d6163ac7c5fdcda4"
 
 
 def _run(root: Path, studio: Path | None, *args: str) -> subprocess.CompletedProcess[str]:
@@ -128,7 +128,7 @@ def test_this_repository_passes(studio: Path) -> None:
     """The case the gate must not break: Watch as it is today."""
     result = _run(REPO_ROOT, studio)
     assert result.returncode == 0, result.stderr
-    assert "40 light and 40 dark tokens" in result.stdout
+    assert "44 light and 44 dark tokens" in result.stdout
     assert "24 pairs at or above 4.5:1" in result.stdout
     assert (
         "lowest light Degraded #b45309 on --status-warning-subtle #fef3c7 = 4.51:1" in result.stdout

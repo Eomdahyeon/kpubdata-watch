@@ -9,14 +9,14 @@
 ## 1. Canonical source
 
 Studio 가 기준이고 Watch 는 따라간다. 아래 링크는 Watch 토큰을 복사한 Studio commit
-`1fbf57e41a32b3ef9cd353666beb1fcd0d6b97e9` 에 고정돼 있다.
+`fe8f808a6567ffe061daf6d9d6163ac7c5fdcda4` 에 고정돼 있다.
 
 | 무엇 | Studio 문서 |
 |---|---|
-| 규칙 (색 값 · token · 크기 · 금지 사항) | [docs/brand/VISUAL_IDENTITY.md](https://github.com/kpubdata-lab/kpubdata-studio/blob/1fbf57e41a32b3ef9cd353666beb1fcd0d6b97e9/docs/brand/VISUAL_IDENTITY.md) |
-| 의도 (왜 이렇게 생겼나) | [docs/brand/DESIGN_CONCEPT.md](https://github.com/kpubdata-lab/kpubdata-studio/blob/1fbf57e41a32b3ef9cd353666beb1fcd0d6b97e9/docs/brand/DESIGN_CONCEPT.md) |
-| 토큰 값 | [src/globals.css](https://github.com/kpubdata-lab/kpubdata-studio/blob/1fbf57e41a32b3ef9cd353666beb1fcd0d6b97e9/src/globals.css) |
-| 로고 자산 | [assets/logo/kpubdata-brand-assets/](https://github.com/kpubdata-lab/kpubdata-studio/blob/1fbf57e41a32b3ef9cd353666beb1fcd0d6b97e9/assets/logo/kpubdata-brand-assets/README.md) |
+| 규칙 (색 값 · token · 크기 · 금지 사항) | [docs/brand/VISUAL_IDENTITY.md](https://github.com/kpubdata-lab/kpubdata-studio/blob/fe8f808a6567ffe061daf6d9d6163ac7c5fdcda4/docs/brand/VISUAL_IDENTITY.md) |
+| 의도 (왜 이렇게 생겼나) | [docs/brand/DESIGN_CONCEPT.md](https://github.com/kpubdata-lab/kpubdata-studio/blob/fe8f808a6567ffe061daf6d9d6163ac7c5fdcda4/docs/brand/DESIGN_CONCEPT.md) |
+| 토큰 값 | [src/globals.css](https://github.com/kpubdata-lab/kpubdata-studio/blob/fe8f808a6567ffe061daf6d9d6163ac7c5fdcda4/src/globals.css) |
+| 로고 자산 | [assets/logo/kpubdata-brand-assets/](https://github.com/kpubdata-lab/kpubdata-studio/blob/fe8f808a6567ffe061daf6d9d6163ac7c5fdcda4/assets/logo/kpubdata-brand-assets/README.md) |
 
 Watch 쪽에서 이 값을 담는 곳은 **한 파일**이다.
 
@@ -97,6 +97,10 @@ UI Lab 의 세 layout 은 **같은 토큰 파일과 같은 규칙**을 쓴다. �
 | `--data-accent-strong` | `#0891b2` | `#06b6d4` |
 | `--brand-secondary` | `#14b8a6` | `#14b8a6` |
 | `--brand-secondary-strong` | `#0d9488` | `#14b8a6` |
+| `--assistant-accent` | `var(--data-accent-strong)` | `var(--data-accent-strong)` |
+| `--assistant-accent-text` | `#0e7490` | `#06b6d4` |
+| `--assistant-accent-subtle` | `#e9f7fa` | `#1a2a2e` |
+| `--assistant-accent-border` | `#c9e3e8` | `#2a4046` |
 | `--background` | `#f7f8f3` | `#15171a` |
 | `--foreground` | `#172033` | `#e8eaed` |
 | `--card` | `#ffffff` | `#1c1f23` |
@@ -132,7 +136,8 @@ UI Lab 의 세 layout 은 **같은 토큰 파일과 같은 규칙**을 쓴다. �
 <!-- brand-v2-tokens:end -->
 
 `--sidebar-*` 는 Studio 의 사이드바 영역 이름이다. Watch 에 사이드바가 없어도 값은 그대로 둔다 —
-고르지 않고 통째로 복사해야 drift 비교가 단순하다.
+고르지 않고 통째로 복사해야 drift 비교가 단순하다. `--assistant-accent*` (kpubdata-studio#676) 도 같다:
+Studio 가 AI 가 쓴 내용을 표시하는 데 쓰는 토큰이고, Watch 에는 그런 화면이 없어 **쓰지 않는다**.
 
 ### 4.3 브랜드 색과 상태 색은 다른 체계다
 
