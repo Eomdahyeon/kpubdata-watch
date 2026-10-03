@@ -33,6 +33,11 @@ Evidence-based.**
   `kpubdata_studio` (PRD D-016); `scripts/check_independence.py` enforces it.
 - **UI layout is not fixed; the read model is.** UIs consume the read API, never
   database tables ([docs/UI.md](docs/UI.md)).
+- **The visual identity is fixed: KPubData Studio Brand v2.** Every UI links the one
+  token file, `src/kpubdata_watch/web/static/brand-v2.css`, copied verbatim from
+  Studio; never edit a value there, define tokens elsewhere, or paint a status in a
+  brand colour ([docs/VISUAL_IDENTITY.md](docs/VISUAL_IDENTITY.md));
+  `scripts/check_brand_tokens.py` enforces it.
 
 When a feature's place is unclear, ask the PRD's boundary question: *without it,
 can Public Status still discover a real anomaly in public data and explain why?*
@@ -112,7 +117,8 @@ who may do what lives in POLICY 14.
 
 ## Build order
 
-The PRD's recommended implementation order ([docs/ROADMAP.md](docs/ROADMAP.md)):
+The PRD's recommended implementation order ([docs/ROADMAP.md](docs/ROADMAP.md)), with
+step 12 added by #68 ([ADR 0014](docs/decisions/0014-brand-v2-visual-identity.md)):
 
 1. Repository / CI
 2. Dataset registry
@@ -125,12 +131,13 @@ The PRD's recommended implementation order ([docs/ROADMAP.md](docs/ROADMAP.md)):
 9. Detection / change / incident
 10. Health aggregation
 11. Read API
-12. Minimal public status
-13. UI Lab (10 / 50 / 150 datasets)
-14. 10 real datasets
-15. History accumulation
-16. Real incident / change replay
-17. Production hardening
+12. Public UI Foundation (Brand v2 tokens, Logo/lockup, status components, theme — landed via #90–#94, #97–#104)
+13. Minimal public status
+14. UI Lab (10 / 50 / 150 datasets)
+15. 10 real datasets
+16. History accumulation
+17. Real incident / change replay
+18. Production hardening
 
 Do not stop the observation engine waiting for UI decisions, and do not invent UI
 data shapes because the backend came first: the connection point is

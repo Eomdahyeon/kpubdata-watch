@@ -38,6 +38,7 @@ uv run python scripts/check_english_comments.py src tests scripts
 uv run python scripts/check_readme_parity.py
 uv run python scripts/check_independence.py
 uv run python scripts/check_governance.py
+uv run python scripts/check_brand_tokens.py   # also run by pytest; add --studio <path> to compare with Studio
 ```
 
 Live tests call real public APIs and need credentials in the environment. They are

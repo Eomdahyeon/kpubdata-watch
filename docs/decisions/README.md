@@ -19,12 +19,13 @@ KPubData Watch 의 설계 결정. 형식은 KPubData 시리즈의 ADR 과 같다
 | [0011](0011-notice-entity-manual-linking.md) | 공지는 독립 엔티티이고 Incident·Change 에 N:N 수동 링크된다 (#35) |
 | [0012](0012-pages-hosts-a-fixture-demo-not-the-service.md) | GitHub Pages 는 고정 Fixture 기반 Public Status 데모와 문서만 호스팅한다 — 운영 서비스는 FastAPI + Worker + PostgreSQL 그대로다 (#78) |
 | [0013](0013-overview-now-and-history-views.md) | Overview 는 현재 스냅샷, History 는 최근 30일로 나눈다 — 허용 시각화는 상태 이력과 Evidence 두 가지뿐이다 (#108) |
+| [0014](0014-brand-v2-visual-identity.md) | Visual identity 는 KPubData Studio Brand v2 로 고정하고, UI Lab 은 layout 만 실험한다 (#68) |
 
 ## PRD 결정 로그 대응표
 
 <small>PRD §104 Decision Log</small>
 
-PRD v1.0 Draft 가 확정한 결정 D-001~D-020 이 어느 ADR 에 기록됐는지.
+PRD v1.0 Draft 가 확정한 결정 D-001~D-020 과, 그 뒤 이슈에서 이어 붙인 결정(D-021~D-024, #68)이 어느 ADR 에 기록됐는지.
 
 | 결정 | 내용 | ADR |
 |---|---|---|
@@ -48,6 +49,10 @@ PRD v1.0 Draft 가 확정한 결정 D-001~D-020 이 어느 ADR 에 기록됐는�
 | D-018 | Official Notice 자동 Crawling은 MVP P0가 아니다. | [ADR 0001](0001-mvp-scope-public-status.md) |
 | D-019 | Latency는 기본적으로 Metric이며 Health Dimension이 아니다. | [ADR 0002](0002-one-health-many-checks.md) |
 | D-020 | Provider / Category / Health / Check 기준 Filter 확장을 고려한다. | [ADR 0005](0005-ui-lab-and-single-repository.md) |
+| D-021 | KPubData Watch는 KPubData Studio Brand v2와 동일한 visual identity를 사용한다. | [ADR 0014](0014-brand-v2-visual-identity.md) |
+| D-022 | UI Lab에서 실험하는 것은 information architecture와 layout이며, brand palette / logo / typography / status semantics는 실험하지 않는다. | [ADR 0014](0014-brand-v2-visual-identity.md) |
+| D-023 | Light theme를 canonical visual baseline으로 사용한다. Dark mode는 alternative user theme다. | [ADR 0014](0014-brand-v2-visual-identity.md) |
+| D-024 | Brand color와 status color를 분리한다. Fresh Mint를 Healthy 표현에 사용하지 않는다. | [ADR 0014](0014-brand-v2-visual-identity.md) |
 
 ## 새 결정을 추가할 때
 

@@ -1,0 +1,23 @@
+/*
+ * KPubData Studio Brand v2 on the Watch docs site (#68, docs/VISUAL_IDENTITY.md section 7).
+ *
+ * Light is canonical: a white header, as on Studio's docs site, so the brand colour never
+ * fills a wide area; Brand Blue only for links and the accent. Dark is the alternative
+ * theme: a charcoal header (Studio's --card), never pure black, with Studio's dark blue
+ * text. Material sets its palette variables on <body> by attribute, so these selectors
+ * carry the same attributes to outrank it. Values are Studio's (brand-v2.css).
+ */
+[data-md-color-scheme="default"][data-md-color-primary][data-md-color-accent] {
+  --md-accent-fg-color: #2563eb;
+  --md-typeset-a-color: #2563eb;
+}
+
+[data-md-color-scheme="slate"][data-md-color-primary][data-md-color-accent] {
+  --md-primary-fg-color: #1c1f23;
+  --md-primary-fg-color--light: #23272c;
+  --md-primary-fg-color--dark: #15171a;
+  --md-primary-bg-color: #e8eaed;
+  --md-primary-bg-color--light: #9aa3ae;
+  --md-accent-fg-color: #60a5fa;
+  --md-typeset-a-color: #60a5fa;
+}

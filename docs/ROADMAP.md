@@ -149,21 +149,25 @@ Automatic seasonality modeling
         ↓
 11. Read API
         ↓
-12. Minimal Public Status
+12. Public UI Foundation (Brand v2 tokens, Logo/lockup, status components, theme — landed via #90–#94, #97–#104)
         ↓
-13. UI Lab
+13. Minimal Public Status
+        ↓
+14. UI Lab
     ├─ 10 datasets
     ├─ 50 datasets
     └─ 150 datasets
         ↓
-14. 10 Real Datasets
+15. 10 Real Datasets
         ↓
-15. History Accumulation
+16. History Accumulation
         ↓
-16. Real Incident / Change Replay
+17. Real Incident / Change Replay
         ↓
-17. Production Hardening
+18. Production Hardening
 ```
+
+12 단계(Public UI Foundation)는 PRD 원문에 없고 #68 ([ADR 0014](decisions/0014-brand-v2-visual-identity.md)) 에서 추가했다. Minimal Public Status 와 UI Lab 이 같은 Brand v2 토큰 · lockup · 상태 컴포넌트 · theme 위에서 시작하게 하기 위해서다. 그 뒤 단계 번호는 하나씩 밀렸다. 토큰 · 로고/lockup · 상태 컴포넌트는 #90–#94, 데모 제품 화면은 #97–#104 로 이미 구현됐다.
 
 UI 디자인 결정을 기다리느라 Observation Engine 개발을 멈추지 않는다.
 
@@ -195,11 +199,12 @@ Experimental UI
 | 8 | Quality (Volume · Completeness) | #11 |
 | 9–10 | Detection / Change / Incident · Health Aggregation | #36 |
 | 11 | Read API | #38 |
-| 12 | Minimal Public Status | #41 |
-| 13 | UI Lab (10 / 50 / 150) | #40 |
-| 14 | 10 Real Datasets | #42 |
-| 15–16 | History Accumulation · Real Incident / Change Replay | #43 |
-| 17 | Production Hardening | #44 |
+| 12 | Public UI Foundation (Brand v2 tokens, Logo/lockup, status components, theme — landed via #90–#94, #97–#104) | #68 |
+| 13 | Minimal Public Status | #41 |
+| 14 | UI Lab (10 / 50 / 150) | #40 |
+| 15 | 10 Real Datasets | #42 |
+| 16–17 | History Accumulation · Real Incident / Change Replay | #43 |
+| 18 | Production Hardening | #44 |
 
 ## Definition of Done — MVP
 

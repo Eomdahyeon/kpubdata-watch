@@ -144,7 +144,7 @@ Live API 결과 자체 때문에 PR CI가 불안정해지지 않게 한다.
 | 잡 | 내용 |
 |---|---|
 | Lint & Type Check | ruff check · ruff format --check · 한국어 주석 게이트 · mypy strict · README parity · independence (Builder/Studio 의존 금지) |
-| Test | pytest, Python 3.12 · 3.13 (`live` 마커 제외) |
+| Test | pytest, Python 3.12 · 3.13 (`live` 마커 제외). `tests/unit/scripts/test_check_brand_tokens.py` 가 Brand v2 토큰 게이트(`scripts/check_brand_tokens.py`, [시각 정체성](VISUAL_IDENTITY.md) §8)를 이 저장소에 대해 실행한다 |
 | Coverage Gate | `fail_under = 90` (`pyproject.toml`) |
 | Build Package · Base install | sdist/wheel 빌드, extras 없이 설치 후 import·CLI |
 | Docs Build | `mkdocs build --strict` |
